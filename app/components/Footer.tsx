@@ -16,7 +16,7 @@ export default function Footer() {
           <div>
             <div className="mb-4">
               <Image
-                src="/logo-estoque-brasil.svg"
+                src="/images/logo_eb.png"
                 alt="Estoque Brasil - Soluções em Gestão de Estoque"
                 width={240}
                 height={65}

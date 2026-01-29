@@ -3,6 +3,8 @@ import Hero from "./components/Hero";
 import Problem from "./components/Problem";
 import WhyChooseUs from "./components/WhyChooseUs";
 import Authority from "./components/Authority";
+import FeedGallery from "./components/FeedGallery";
+import VideoGallery from "./components/VideoGallery";
 import Testimonials from "./components/Testimonials";
 import Clients from "./components/Clients";
 import FAQ from "./components/FAQ";
@@ -21,6 +23,8 @@ export default function Home() {
         <WhyChooseUs />
         <Testimonials />
         <Authority />
+        <FeedGallery />
+        <VideoGallery />
         <Clients />
         <FAQ />
         <Regions />

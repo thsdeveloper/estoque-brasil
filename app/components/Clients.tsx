@@ -98,38 +98,59 @@ export default function Clients() {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16 pt-12 border-t-2 border-gray-200">
-          <div className="text-center group">
-            <div className="text-5xl font-black bg-gradient-to-r from-[#f84704] to-[#ff6b35] bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
-              500+
+      </div>
+
+      {/* Stats Section - Orange Background */}
+      <div className="mt-16 bg-gradient-to-r from-[#f84704] via-[#ff5a1f] to-[#f84704] relative overflow-hidden">
+        {/* Background Line Effects */}
+        <div className="absolute inset-0 opacity-10">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 20px,
+                rgba(255,255,255,0.3) 20px,
+                rgba(255,255,255,0.3) 22px
+              )`,
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center group">
+              <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                500+
+              </div>
+              <div className="text-sm text-white/90 font-semibold uppercase tracking-wide">
+                Clientes Atendidos
+              </div>
             </div>
-            <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-              Clientes Atendidos
+            <div className="text-center group">
+              <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                15M+
+              </div>
+              <div className="text-sm text-white/90 font-semibold uppercase tracking-wide">
+                Produtos Inventariados
+              </div>
             </div>
-          </div>
-          <div className="text-center group">
-            <div className="text-5xl font-black bg-gradient-to-r from-[#f84704] to-[#ff6b35] bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
-              15M+
+            <div className="text-center group">
+              <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                98%
+              </div>
+              <div className="text-sm text-white/90 font-semibold uppercase tracking-wide">
+                Satisfação dos Clientes
+              </div>
             </div>
-            <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-              Produtos Inventariados
-            </div>
-          </div>
-          <div className="text-center group">
-            <div className="text-5xl font-black bg-gradient-to-r from-[#f84704] to-[#ff6b35] bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
-              98%
-            </div>
-            <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-              Satisfação dos Clientes
-            </div>
-          </div>
-          <div className="text-center group">
-            <div className="text-5xl font-black bg-gradient-to-r from-[#f84704] to-[#ff6b35] bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
-              6
-            </div>
-            <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-              Estados Atendidos
+            <div className="text-center group">
+              <div className="text-5xl font-black text-white mb-2 group-hover:scale-110 transition-transform duration-300">
+                6
+              </div>
+              <div className="text-sm text-white/90 font-semibold uppercase tracking-wide">
+                Estados Atendidos
+              </div>
             </div>
           </div>
         </div>

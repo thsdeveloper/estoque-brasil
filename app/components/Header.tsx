@@ -66,7 +66,7 @@ export default function Header() {
           <div className="flex-shrink-0">
             <a href="#home" onClick={(e) => handleMenuClick(e, "#home")} className="block">
               <Image
-                src="/logo-estoque-brasil.svg"
+                src="/images/logo_eb.png"
                 alt="Estoque Brasil - Soluções em Gestão de Estoque"
                 width={260}
                 height={65}
