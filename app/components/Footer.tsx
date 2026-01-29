@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { HiLocationMarker } from "react-icons/hi";
 
 export default function Footer() {
@@ -11,13 +12,13 @@ export default function Footer() {
     <footer className="bg-[#343434] text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Main Footer Content */}
-        <div className="grid md:grid-cols-3 gap-12 mb-8">
+        <div className="grid md:grid-cols-4 gap-12 mb-8">
           {/* Brand Column */}
           <div>
             <div className="mb-4">
               <Image
                 src="/images/logo_eb.png"
-                alt="Estoque Brasil - Soluções em Gestão de Estoque"
+                alt="Estoque Brasil Inventários - Inventário Especializado para Farmácias em Brasília, Goiânia e Centro-Oeste"
                 width={240}
                 height={65}
                 className="h-auto w-52"
@@ -29,6 +30,43 @@ export default function Footer() {
             <p className="text-sm text-gray-500">
               Mais de 500 farmácias confiam no nosso trabalho para recuperar o controle do estoque e aumentar a lucratividade.
             </p>
+          </div>
+
+          {/* Navigation Column */}
+          <div>
+            <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-[#f84704]" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+              Navegação
+            </h4>
+            <ul className="space-y-2 text-gray-400">
+              <li>
+                <Link href="/" className="hover:text-[#f84704] transition-colors">
+                  Início
+                </Link>
+              </li>
+              <li>
+                <Link href="/servicos" className="hover:text-[#f84704] transition-colors">
+                  Serviços
+                </Link>
+              </li>
+              <li>
+                <Link href="/como-funciona" className="hover:text-[#f84704] transition-colors">
+                  Como Funciona
+                </Link>
+              </li>
+              <li>
+                <Link href="/#diferenciais" className="hover:text-[#f84704] transition-colors">
+                  Diferenciais
+                </Link>
+              </li>
+              <li>
+                <Link href="/#regioes" className="hover:text-[#f84704] transition-colors">
+                  Regiões Atendidas
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Regions Column */}

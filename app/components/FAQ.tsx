@@ -13,11 +13,15 @@ import {
   HiChatAlt2,
   HiQuestionMarkCircle
 } from "react-icons/hi";
+import { IconType } from "react-icons";
 
-export default function FAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+export interface FAQItem {
+  question: string;
+  answer: string;
+  icon: IconType;
+}
 
-  const faqs = [
+export const faqData: FAQItem[] = [
     {
       question: "Vocês vão bagunçar minha farmácia? Tenho medo de virar aquela zona...",
       answer: "Relaxa! A gente entende perfeitamente esse medo (e já ouvimos isso umas 500 vezes). Nossa equipe trabalha de forma super organizada - movimentamos apenas o necessário, recolocamos tudo no lugar, e você nem vai perceber que estivemos lá (a não ser pelo relatório incrível que vai receber!). Ah, e nossa equipe é uniformizada e identificada, então você sabe exatamente quem está cuidando do seu negócio.",
@@ -58,7 +62,10 @@ export default function FAQ() {
       answer: "Olha, em 500+ clientes, isso nunca aconteceu. Mas se você não ficar satisfeito, a gente REFAZ. Sem mimimi, sem desculpa. Nossa reputação depende da sua satisfação, então vamos fazer de tudo pra você ficar feliz com o resultado. E antes de finalizar, você valida tudo com a gente - transparência total!",
       icon: HiBadgeCheck
     },
-  ];
+];
+
+export default function FAQ() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -85,7 +92,7 @@ export default function FAQ() {
 
         {/* FAQ Accordion */}
         <div className="space-y-4">
-          {faqs.map((faq, index) => (
+          {faqData.map((faq, index) => (
             <div
               key={index}
               className="bg-white rounded-2xl border-2 border-gray-200 hover:border-[#f84704] transition-all duration-300 overflow-hidden shadow-sm hover:shadow-lg"

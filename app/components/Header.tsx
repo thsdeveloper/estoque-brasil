@@ -67,7 +67,7 @@ export default function Header() {
             <a href="#home" onClick={(e) => handleMenuClick(e, "#home")} className="block">
               <Image
                 src="/images/logo_eb.png"
-                alt="Estoque Brasil - Soluções em Gestão de Estoque"
+                alt="Estoque Brasil Inventários - Inventário Especializado para Farmácias em Brasília, Goiânia e Centro-Oeste"
                 width={260}
                 height={65}
                 priority

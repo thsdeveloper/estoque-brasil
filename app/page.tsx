@@ -12,10 +12,18 @@ import Regions from "./components/Regions";
 import FinalCTA from "./components/FinalCTA";
 import Footer from "./components/Footer";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
+import OrganizationSchema from "./components/schemas/OrganizationSchema";
+import LocalBusinessSchema from "./components/schemas/LocalBusinessSchema";
+import ServiceSchema from "./components/schemas/ServiceSchema";
+import FAQSchema from "./components/schemas/FAQSchema";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
+      <OrganizationSchema />
+      <LocalBusinessSchema />
+      <ServiceSchema />
+      <FAQSchema />
       <Header />
       <main>
         <Hero />
