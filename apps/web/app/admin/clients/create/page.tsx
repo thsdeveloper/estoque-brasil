@@ -1,0 +1,24 @@
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
+import { Button } from "@/shared/components/ui/button"
+import { ClientForm } from "@/features/clients"
+
+export default function CreateClientPage() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" asChild>
+          <Link href="/admin/clients">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Novo Cliente</h1>
+          <p className="text-gray-light">Preencha os dados para cadastrar um novo cliente</p>
+        </div>
+      </div>
+
+      <ClientForm mode="create" />
+    </div>
+  )
+}
