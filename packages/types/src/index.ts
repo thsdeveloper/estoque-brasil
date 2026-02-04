@@ -1,4 +1,11 @@
+// ============================================
+// Entidades do Sistema de Inventário (tb_*)
+// ============================================
+export * from './entities';
+
+// ============================================
 // API Response Types
+// ============================================
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;

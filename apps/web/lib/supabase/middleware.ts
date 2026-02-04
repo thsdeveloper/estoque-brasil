@@ -32,14 +32,22 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Use getUser() for secure server-side validation
-  const { data: { user } } = await supabase.auth.getUser();
-
   const pathname = request.nextUrl.pathname;
 
   // Skip auth check for public routes
   if (publicRoutes.some(route => pathname.startsWith(route))) {
     return supabaseResponse;
+  }
+
+  // Use getUser() for secure server-side validation
+  // Wrap in try-catch to handle network errors gracefully
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error) {
+    // Log error but don't break the application
+    console.error('Middleware: Failed to get user session:', error);
   }
 
   // Protect /admin/* routes

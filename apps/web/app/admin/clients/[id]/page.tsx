@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Pencil, ExternalLink } from "lucide-react"
+import { ArrowLeft, Pencil, ExternalLink, Store, ChevronRight } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Badge } from "@/shared/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Separator } from "@/shared/components/ui/separator"
-import { clientsApi, DeleteClientButton } from "@/features/clients"
+import { DeleteClientButton } from "@/features/clients"
+import { clientsServerApi } from "@/features/clients/api/clients-api.server"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -16,7 +17,7 @@ export default async function ViewClientPage({ params }: PageProps) {
 
   let client
   try {
-    client = await clientsApi.get(id)
+    client = await clientsServerApi.get(id)
   } catch {
     notFound()
   }
@@ -141,6 +142,27 @@ export default async function ViewClientPage({ params }: PageProps) {
               </div>
             )}
           </CardContent>
+        </Card>
+
+        {/* Lojas */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Store className="h-5 w-5" />
+                Lojas
+              </CardTitle>
+              <CardDescription>
+                Gerencie as lojas deste cliente
+              </CardDescription>
+            </div>
+            <Button asChild>
+              <Link href={`/admin/clients/${id}/lojas`}>
+                Ver Lojas
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardHeader>
         </Card>
 
         {/* Divergências */}

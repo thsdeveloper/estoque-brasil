@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { ForgotPasswordForm } from '@/features/auth';
+import { ForgotPasswordForm, AuthLayout } from '@/features/auth';
 
 export default async function ForgotPasswordPage() {
   const supabase = await createClient();
@@ -11,8 +11,8 @@ export default async function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral p-4">
+    <AuthLayout>
       <ForgotPasswordForm />
-    </div>
+    </AuthLayout>
   );
 }

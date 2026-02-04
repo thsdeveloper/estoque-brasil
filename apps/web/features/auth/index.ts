@@ -6,6 +6,7 @@ export { ForgotPasswordForm } from "./components/ForgotPasswordForm"
 export { ResetPasswordForm } from "./components/ResetPasswordForm"
 export { UpdatePasswordForm } from "./components/UpdatePasswordForm"
 export { AuthCard } from "./components/AuthCard"
+export { AuthLayout } from "./components/AuthLayout"
 export { PasswordInput } from "./components/PasswordInput"
 export { AuthLinks } from "./components/AuthLinks"
 

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AuthCard } from '@/features/auth/components/AuthCard';
+import { AuthCard, AuthLayout } from '@/features/auth';
 import { Button } from '@/shared/components/ui/button';
 import { Mail } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
   const email = params.email;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral p-4">
+    <AuthLayout>
       <AuthCard
         title="Verifique seu email"
         description="Enviamos um link de verificacao para ativar sua conta."
@@ -39,6 +39,6 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
           </div>
         </div>
       </AuthCard>
-    </div>
+    </AuthLayout>
   );
 }

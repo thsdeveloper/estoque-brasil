@@ -3,6 +3,28 @@
     "supabase": {
       "type": "http",
       "url": "https://mcp.supabase.com/mcp?project_ref=fqmthagybphrgoavixuw"
+    },
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "127.0.0.1",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "root",
+        "MYSQL_PASS": "qsesbs2006",
+        "MYSQL_DB": "estoquebrasil_desenvolvimento"
+      }
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--executablePath",
+        "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+        "--headless",
+        "--isolated"
+      ]
     }
   }
 }

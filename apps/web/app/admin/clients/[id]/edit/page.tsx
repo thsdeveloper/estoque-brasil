@@ -2,7 +2,8 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { ClientForm, clientsApi } from "@/features/clients"
+import { ClientForm } from "@/features/clients"
+import { clientsServerApi } from "@/features/clients/api/clients-api.server"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -13,7 +14,7 @@ export default async function EditClientPage({ params }: PageProps) {
 
   let client
   try {
-    client = await clientsApi.get(id)
+    client = await clientsServerApi.get(id)
   } catch {
     notFound()
   }

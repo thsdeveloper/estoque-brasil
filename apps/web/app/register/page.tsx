@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { RegisterForm } from '@/features/auth';
+import { RegisterForm, AuthLayout } from '@/features/auth';
 
 export default async function RegisterPage() {
   const supabase = await createClient();
@@ -11,8 +11,8 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral p-4">
+    <AuthLayout>
       <RegisterForm />
-    </div>
+    </AuthLayout>
   );
 }

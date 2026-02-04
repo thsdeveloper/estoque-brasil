@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { LoginForm } from '@/features/auth';
+import { LoginForm, AuthLayout } from '@/features/auth';
 
 interface LoginPageProps {
   searchParams: Promise<{ redirectTo?: string }>;
@@ -21,10 +21,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral p-4">
-      <Suspense fallback={<div className="w-full max-w-md mx-auto animate-pulse bg-gray-100 h-96 rounded-xl" />}>
+    <AuthLayout>
+      <Suspense fallback={<div className="w-full animate-pulse bg-gray-100 h-96 rounded-xl" />}>
         <LoginFormWrapper redirectTo={params.redirectTo} />
       </Suspense>
-    </div>
+    </AuthLayout>
   );
 }

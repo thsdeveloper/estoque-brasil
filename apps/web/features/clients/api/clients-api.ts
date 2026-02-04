@@ -40,13 +40,18 @@ class ApiClient {
     const url = `${this.baseUrl}${endpoint}`
     const authHeaders = await this.getAuthHeader()
 
+    // Only set Content-Type when there's a body
+    const headers: Record<string, string> = {
+      ...authHeaders,
+      ...(options.headers as Record<string, string>),
+    }
+    if (options.body) {
+      headers["Content-Type"] = "application/json"
+    }
+
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders,
-        ...options.headers,
-      },
+      headers,
     })
 
     if (!response.ok) {
