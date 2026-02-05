@@ -1,0 +1,20 @@
+{
+  "name": "@estoque-brasil/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "main": "./index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./next": "./next.mjs",
+    "./node": "./node.mjs"
+  },
+  "files": [
+    "*.mjs"
+  ],
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.0.3",
+    "typescript": "^5"
+  }
+}

@@ -3,25 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.0.10",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-icons": "^5.5.0"
+    "dev": "turbo dev",
+    "dev:web": "turbo dev --filter=@estoque-brasil/web",
+    "dev:api": "turbo dev --filter=@estoque-brasil/api",
+    "dev:mobile": "pnpm --filter @estoque-brasil/mobile start",
+    "mobile:android": "pnpm --filter @estoque-brasil/mobile android",
+    "mobile:ios": "pnpm --filter @estoque-brasil/mobile ios",
+    "build": "turbo build",
+    "build:web": "turbo build --filter=@estoque-brasil/web",
+    "build:api": "turbo build --filter=@estoque-brasil/api",
+    "start": "turbo start",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean && rm -rf node_modules"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.3",
-    "tailwindcss": "^4",
+    "turbo": "^2.3.0",
     "typescript": "^5"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=18"
   }
 }

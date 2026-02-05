@@ -1,0 +1,231 @@
+import { FastifyInstance } from 'fastify';
+import { ProdutoController } from '../../interface-adapters/controllers/ProdutoController.js';
+import { SupabaseInventarioProdutoRepository } from '../../infrastructure/database/supabase/repositories/SupabaseInventarioProdutoRepository.js';
+import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
+import { requireAuth } from '../../plugins/auth.js';
+
+const produtoResponseSchema = {
+  type: 'object',
+  properties: {
+    id: { type: 'integer' },
+    idInventario: { type: 'integer' },
+    codigoBarras: { type: ['string', 'null'] },
+    codigoInterno: { type: ['string', 'null'] },
+    descricao: { type: 'string' },
+    lote: { type: ['string', 'null'] },
+    validade: { type: ['string', 'null'], format: 'date' },
+    saldo: { type: 'number' },
+    custo: { type: 'number' },
+    divergente: { type: 'boolean' },
+  },
+};
+
+const paginatedResponseSchema = {
+  type: 'object',
+  properties: {
+    data: { type: 'array', items: produtoResponseSchema },
+    total: { type: 'number' },
+    page: { type: 'number' },
+    limit: { type: 'number' },
+    totalPages: { type: 'number' },
+  },
+};
+
+const errorResponseSchema = {
+  type: 'object',
+  properties: {
+    code: { type: 'string' },
+    message: { type: 'string' },
+  },
+};
+
+const validationErrorResponseSchema = {
+  type: 'object',
+  properties: {
+    code: { type: 'string' },
+    message: { type: 'string' },
+    errors: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          field: { type: 'string' },
+          message: { type: 'string' },
+        },
+      },
+    },
+  },
+};
+
+const createProdutoBodySchema = {
+  type: 'object',
+  required: ['idInventario', 'descricao'],
+  properties: {
+    idInventario: { type: 'integer' },
+    codigoBarras: { type: ['string', 'null'], maxLength: 50 },
+    codigoInterno: { type: ['string', 'null'], maxLength: 50 },
+    descricao: { type: 'string', minLength: 1, maxLength: 500 },
+    lote: { type: ['string', 'null'], maxLength: 50 },
+    validade: { type: ['string', 'null'], format: 'date' },
+    saldo: { type: 'number', minimum: 0, default: 0 },
+    custo: { type: 'number', minimum: 0, default: 0 },
+    divergente: { type: 'boolean', default: false },
+  },
+};
+
+const updateProdutoBodySchema = {
+  type: 'object',
+  properties: {
+    codigoBarras: { type: ['string', 'null'], maxLength: 50 },
+    codigoInterno: { type: ['string', 'null'], maxLength: 50 },
+    descricao: { type: 'string', minLength: 1, maxLength: 500 },
+    lote: { type: ['string', 'null'], maxLength: 50 },
+    validade: { type: ['string', 'null'], format: 'date' },
+    saldo: { type: 'number', minimum: 0 },
+    custo: { type: 'number', minimum: 0 },
+    divergente: { type: 'boolean' },
+  },
+};
+
+export default async function produtoRoutes(fastify: FastifyInstance) {
+  const supabase = getSupabaseAdminClient();
+  const produtoRepository = new SupabaseInventarioProdutoRepository(supabase);
+  const controller = new ProdutoController(produtoRepository);
+
+  fastify.get(
+    '/produtos',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Listar produtos',
+        description: 'Retorna uma lista paginada de produtos de um inventário',
+        security: [{ bearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          required: ['idInventario'],
+          properties: {
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
+            idInventario: { type: 'integer', description: 'ID do inventário (obrigatório)' },
+            search: { type: 'string', description: 'Busca por descrição' },
+            divergente: { type: 'boolean', description: 'Filtrar por divergentes' },
+            codigoBarras: { type: 'string', description: 'Filtrar por código de barras' },
+            codigoInterno: { type: 'string', description: 'Filtrar por código interno' },
+          },
+        },
+        response: {
+          200: paginatedResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.list(request as any, reply)
+  );
+
+  fastify.get(
+    '/produtos/:id',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Buscar produto por ID',
+        description: 'Retorna os dados de um produto específico',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        response: {
+          200: produtoResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.getById(request as any, reply)
+  );
+
+  fastify.post(
+    '/produtos',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Criar novo produto',
+        description: 'Cria um novo produto para um inventário',
+        security: [{ bearerAuth: [] }],
+        body: createProdutoBodySchema,
+        response: {
+          201: produtoResponseSchema,
+          400: validationErrorResponseSchema,
+          401: errorResponseSchema,
+          409: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.create(request, reply)
+  );
+
+  fastify.put(
+    '/produtos/:id',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Atualizar produto',
+        description: 'Atualiza os dados de um produto existente',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        body: updateProdutoBodySchema,
+        response: {
+          200: produtoResponseSchema,
+          400: validationErrorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.update(request as any, reply)
+  );
+
+  fastify.delete(
+    '/produtos/:id',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Excluir produto',
+        description: 'Remove um produto do sistema',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        response: {
+          204: { type: 'null', description: 'Produto excluído com sucesso' },
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.delete(request as any, reply)
+  );
+}
