@@ -6,3 +6,5 @@ export * from './ISetorRepository.js';
 export * from './IInventarioProdutoRepository.js';
 export * from './IInventarioContagemRepository.js';
 export * from './ITemplateImportacaoRepository.js';
+export * from './IUserRepository.js';
+export * from './IRoleRepository.js';

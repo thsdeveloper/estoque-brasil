@@ -1,4 +1,4 @@
-import { getSupabaseClient, SupabaseClient } from '../database/supabase/client.js';
+import { getSupabaseClient, getSupabaseAdminClient, SupabaseClient } from '../database/supabase/client.js';
 import { env } from '../../config/env.js';
 import {
   UserAlreadyExistsError,
@@ -28,9 +28,11 @@ export interface AuthSession {
 
 export class SupabaseAuthService {
   private supabase: SupabaseClient;
+  private adminClient: SupabaseClient;
 
   constructor() {
     this.supabase = getSupabaseClient();
+    this.adminClient = getSupabaseAdminClient();
   }
 
   async signUp(email: string, password: string): Promise<{ email: string }> {
@@ -76,8 +78,8 @@ export class SupabaseAuthService {
   }
 
   async signOut(accessToken: string): Promise<void> {
-    // Set the session to sign out
-    const { error } = await this.supabase.auth.admin.signOut(accessToken, 'global');
+    // Set the session to sign out using admin client
+    const { error } = await this.adminClient.auth.admin.signOut(accessToken, 'global');
 
     // If admin signOut fails, try regular signOut
     if (error) {
@@ -126,8 +128,8 @@ export class SupabaseAuthService {
       throw new SessionNotFoundError();
     }
 
-    // Update the password
-    const { error } = await this.supabase.auth.admin.updateUserById(userData.user.id, {
+    // Update the password using admin client
+    const { error } = await this.adminClient.auth.admin.updateUserById(userData.user.id, {
       password: newPassword,
     });
 
@@ -161,6 +163,38 @@ export class SupabaseAuthService {
       expiresAt: data.session.expires_at!,
       user: this.mapUser(data.user),
     };
+  }
+
+  /**
+   * Admin method to create a new user (bypasses email confirmation)
+   */
+  async createUser(email: string, password: string): Promise<string> {
+    const { data, error } = await this.adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true, // Auto-confirm email for admin-created users
+    });
+
+    if (error) {
+      this.handleAuthError(error);
+    }
+
+    if (!data.user) {
+      throw new Error('Failed to create auth user: No user returned');
+    }
+
+    return data.user.id;
+  }
+
+  /**
+   * Admin method to delete a user
+   */
+  async deleteUser(userId: string): Promise<void> {
+    const { error } = await this.adminClient.auth.admin.deleteUser(userId);
+
+    if (error) {
+      throw new Error(`Failed to delete auth user: ${error.message}`);
+    }
   }
 
   private mapUser(user: { id: string; email?: string; email_confirmed_at?: string | null; created_at?: string; updated_at?: string }): AuthUser {

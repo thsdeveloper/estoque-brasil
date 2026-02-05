@@ -13,6 +13,8 @@ import inventarioRoutes from './routes/inventarios/index.js';
 import setorRoutes from './routes/setores/index.js';
 import produtoRoutes from './routes/produtos/index.js';
 import contagemRoutes from './routes/contagens/index.js';
+import userRoutes from './routes/users/index.js';
+import rolesRoutes from './routes/roles/index.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -44,6 +46,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(setorRoutes, { prefix: '/api' });
   await app.register(produtoRoutes, { prefix: '/api' });
   await app.register(contagemRoutes, { prefix: '/api' });
+  await app.register(userRoutes, { prefix: '/api' });
+  await app.register(rolesRoutes, { prefix: '/api/roles' });
 
   return app;
 }

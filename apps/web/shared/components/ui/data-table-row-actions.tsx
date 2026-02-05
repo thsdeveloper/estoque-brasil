@@ -20,13 +20,14 @@ export function DataTableRowActions({ children }: DataTableRowActionsProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="flex h-8 w-8 p-0 data-[state=open]:bg-neutral"
+          size="sm"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground data-[state=open]:bg-muted"
         >
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">Abrir menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[160px]">
+      <DropdownMenuContent align="end" className="w-40">
         {children}
       </DropdownMenuContent>
     </DropdownMenu>

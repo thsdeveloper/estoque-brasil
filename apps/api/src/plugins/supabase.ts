@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 import type { FastifyInstance } from 'fastify';
-import { getSupabaseClient, SupabaseClient } from '../infrastructure/database/supabase/client.js';
+import { getSupabaseAdminClient, SupabaseClient } from '../infrastructure/database/supabase/client.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -9,7 +9,8 @@ declare module 'fastify' {
 }
 
 async function supabasePlugin(fastify: FastifyInstance) {
-  const supabase = getSupabaseClient();
+  // Use admin client (service role) to bypass RLS - authorization is handled at application layer
+  const supabase = getSupabaseAdminClient();
 
   fastify.decorate('supabase', supabase);
 

@@ -20,3 +20,6 @@ export * from './configuracao';
 // Logs e histórico
 export * from './log';
 export * from './historico';
+
+// RBAC - Role-Based Access Control
+export * from './rbac';

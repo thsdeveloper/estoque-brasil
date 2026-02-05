@@ -31,7 +31,7 @@ export const inventarioFormSchema = z.object({
   lote: z.boolean(),
   validade: z.boolean(),
   ativo: z.boolean(),
-  lider: z.string().nullable().optional(),
+  lider: z.string().uuid("Selecione um lider").nullable().optional(),
   receberDadosOffline: z.boolean(),
 })
 

@@ -177,7 +177,7 @@ export default async function ViewClientPage({ params }: PageProps) {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
               <div className="text-center p-4 bg-neutral rounded-lg">
                 <p className="text-sm text-gray-light mb-1">% Divergência</p>
-                <p className="text-2xl font-bold">
+                <div className="text-2xl font-bold">
                   {client.percentualDivergencia !== null ? (
                     <Badge
                       variant={
@@ -194,7 +194,7 @@ export default async function ViewClientPage({ params }: PageProps) {
                   ) : (
                     "-"
                   )}
-                </p>
+                </div>
               </div>
               <div className="text-center p-4 bg-neutral rounded-lg">
                 <p className="text-sm text-gray-light mb-1">Qtde (+)</p>

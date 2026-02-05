@@ -1,5 +1,16 @@
 "use client"
 
+import dynamic from "next/dynamic"
+import {
+  Info,
+  LayoutGrid,
+  Package,
+  Users,
+  RefreshCw,
+  ClipboardList,
+  Calculator,
+  UserCheck,
+} from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import {
   Tabs,
@@ -7,14 +18,74 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs"
-import { InventarioForm } from "./InventarioForm"
-import { SetoresTab } from "./setores/SetoresTab"
-import { ProdutosTab } from "./produtos/ProdutosTab"
-import { OperadoresTab } from "./operadores/OperadoresTab"
-import { RecontagemTab } from "./recontagem/RecontagemTab"
-import { ContagemSetoresTab } from "./contagem/ContagemSetoresTab"
-import { ContagemTab } from "./contagem/ContagemTab"
-import { ContagemOperadorTab } from "./contagem/ContagemOperadorTab"
+import { Skeleton } from "@/shared/components/ui/skeleton"
+
+// Loading skeleton for tab content
+function TabContentSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-9 w-32" />
+      </div>
+      <Skeleton className="h-64 w-full rounded-lg" />
+    </div>
+  )
+}
+
+// Dynamic imports for tabs (bundle-dynamic-imports)
+// Only loads the tab component when user switches to that tab
+const InventarioDetails = dynamic(
+  () => import("./InventarioDetails").then((mod) => ({ default: mod.InventarioDetails })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const SetoresTab = dynamic(
+  () => import("./setores/SetoresTab").then((mod) => ({ default: mod.SetoresTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const ProdutosTab = dynamic(
+  () => import("./produtos/ProdutosTab").then((mod) => ({ default: mod.ProdutosTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const OperadoresTab = dynamic(
+  () => import("./operadores/OperadoresTab").then((mod) => ({ default: mod.OperadoresTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const RecontagemTab = dynamic(
+  () => import("./recontagem/RecontagemTab").then((mod) => ({ default: mod.RecontagemTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const ContagemSetoresTab = dynamic(
+  () => import("./contagem/ContagemSetoresTab").then((mod) => ({ default: mod.ContagemSetoresTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const ContagemTab = dynamic(
+  () => import("./contagem/ContagemTab").then((mod) => ({ default: mod.ContagemTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+const ContagemOperadorTab = dynamic(
+  () => import("./contagem/ContagemOperadorTab").then((mod) => ({ default: mod.ContagemOperadorTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
+// Tab configuration with icons
+const tabs = [
+  { value: "cadastro", label: "Detalhes", icon: Info },
+  { value: "setores", label: "Setores", icon: LayoutGrid },
+  { value: "produtos", label: "Produtos", icon: Package },
+  { value: "operador", label: "Operadores", icon: Users },
+  { value: "recontagem", label: "Recontagem", icon: RefreshCw },
+  { value: "contagem-setores", label: "Contagem Setores", icon: ClipboardList },
+  { value: "contagem", label: "Contagem", icon: Calculator },
+  { value: "contagem-operador", label: "Contagem Operador", icon: UserCheck },
+] as const
 
 interface InventarioTabsProps {
   inventario: Inventario
@@ -22,20 +93,21 @@ interface InventarioTabsProps {
 
 export function InventarioTabs({ inventario }: InventarioTabsProps) {
   return (
-    <Tabs defaultValue="cadastro" className="space-y-4">
-      <TabsList className="flex flex-wrap h-auto gap-1">
-        <TabsTrigger value="cadastro">Cadastro</TabsTrigger>
-        <TabsTrigger value="setores">Setores</TabsTrigger>
-        <TabsTrigger value="produtos">Produtos</TabsTrigger>
-        <TabsTrigger value="operador">Operador</TabsTrigger>
-        <TabsTrigger value="recontagem">Recontagem</TabsTrigger>
-        <TabsTrigger value="contagem-setores">Contagem - Setores</TabsTrigger>
-        <TabsTrigger value="contagem">Contagem</TabsTrigger>
-        <TabsTrigger value="contagem-operador">Contagem Operador</TabsTrigger>
+    <Tabs defaultValue="cadastro" className="space-y-6">
+      <TabsList className="flex flex-wrap h-auto w-full justify-start">
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          return (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              <Icon />
+              <span>{tab.label}</span>
+            </TabsTrigger>
+          )
+        })}
       </TabsList>
 
       <TabsContent value="cadastro">
-        <InventarioForm inventario={inventario} mode="edit" />
+        <InventarioDetails inventario={inventario} />
       </TabsContent>
 
       <TabsContent value="setores">

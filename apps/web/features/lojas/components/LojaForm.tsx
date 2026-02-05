@@ -42,7 +42,7 @@ export function LojaForm({ loja, clientId, clientName, mode }: LojaFormProps) {
   const form = useForm<LojaFormData>({
     resolver: zodResolver(lojaFormSchema),
     defaultValues: {
-      idCliente: loja?.idCliente || clientId,
+      idCliente: loja?.idCliente?.toString() || clientId,
       nome: loja?.nome || "",
       cnpj: loja?.cnpj || "",
     },

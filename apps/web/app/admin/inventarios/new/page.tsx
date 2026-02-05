@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { InventarioForm } from "@/features/inventarios"
+// Direct import instead of barrel file (bundle-barrel-imports)
+import { InventarioForm } from "@/features/inventarios/components/InventarioForm"
 
 export default function NewInventarioPage() {
   return (
@@ -14,7 +15,7 @@ export default function NewInventarioPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-foreground">Novo Inventario</h1>
-          <p className="text-gray-light">Cadastre um novo inventario de estoque</p>
+          <p className="text-muted-foreground">Cadastre um novo inventario de estoque</p>
         </div>
       </div>
 

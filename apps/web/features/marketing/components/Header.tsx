@@ -92,9 +92,8 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Desktop User Menu & CTA Button */}
+          {/* Desktop CTA Button & User Menu */}
           <div className="hidden lg:flex items-center gap-4">
-            <UserMenu />
             <a
               href={whatsappUrl}
               target="_blank"
@@ -111,6 +110,7 @@ export default function Header() {
               </svg>
               <span>Solicitar Orçamento</span>
             </a>
+            <UserMenu />
           </div>
 
           {/* Mobile Menu Button */}
@@ -145,9 +145,6 @@ export default function Header() {
                   {item.label}
                 </a>
               ))}
-              <div className="py-2 border-t border-white/10">
-                <UserMenu />
-              </div>
               <a
                 href={whatsappUrl}
                 target="_blank"
@@ -163,6 +160,9 @@ export default function Header() {
                 </svg>
                 Orçamento Grátis
               </a>
+              <div className="py-2 border-t border-white/10">
+                <UserMenu />
+              </div>
             </nav>
           </div>
         )}

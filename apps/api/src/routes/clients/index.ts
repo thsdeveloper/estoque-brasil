@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { ClientController } from '../../interface-adapters/controllers/ClientController.js';
 import { SupabaseClientRepository } from '../../infrastructure/database/supabase/repositories/SupabaseClientRepository.js';
-import { getSupabaseClient } from '../../infrastructure/database/supabase/client.js';
+import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
 
 const clientResponseSchema = {
@@ -103,7 +103,7 @@ const updateClientBodySchema = {
 };
 
 export default async function clientRoutes(fastify: FastifyInstance) {
-  const supabase = getSupabaseClient();
+  const supabase = getSupabaseAdminClient();
   const clientRepository = new SupabaseClientRepository(supabase);
   const controller = new ClientController(clientRepository);
 
