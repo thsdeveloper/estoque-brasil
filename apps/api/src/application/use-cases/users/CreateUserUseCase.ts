@@ -5,7 +5,7 @@ import { UserAlreadyExistsError, RoleNotFoundError } from '../../../domain/error
 import { CreateUserDTO } from '../../dtos/users/CreateUserDTO.js';
 import { UserResponseDTO, toUserResponseDTO } from '../../dtos/users/UserResponseDTO.js';
 
-export interface IAuthService {
+export interface ICreateUserAuthService {
   createUser(email: string, password: string): Promise<string>;
 }
 
@@ -13,7 +13,7 @@ export class CreateUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly roleRepository: IRoleRepository,
-    private readonly authService: IAuthService
+    private readonly authService: ICreateUserAuthService
   ) {}
 
   async execute(data: CreateUserDTO, assignedBy?: string): Promise<UserResponseDTO> {

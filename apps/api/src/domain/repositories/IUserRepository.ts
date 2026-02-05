@@ -1,4 +1,5 @@
 import { User } from '../entities/User.js';
+import { PaginatedResult } from './IClientRepository.js';
 
 export interface UserPaginationParams {
   page: number;
@@ -6,14 +7,6 @@ export interface UserPaginationParams {
   search?: string;
   isActive?: boolean;
   roleId?: string;
-}
-
-export interface PaginatedResult<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 export interface IUserRepository {

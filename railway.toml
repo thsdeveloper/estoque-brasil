@@ -1,0 +1,5 @@
+[build]
+buildCommand = "pnpm turbo build --filter=@estoque-brasil/api"
+
+[deploy]
+startCommand = "node apps/api/dist/index.js"

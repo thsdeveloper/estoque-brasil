@@ -3,8 +3,8 @@ import { User } from '../../../../domain/entities/User.js';
 import {
   IUserRepository,
   UserPaginationParams,
-  PaginatedResult,
 } from '../../../../domain/repositories/IUserRepository.js';
+import { PaginatedResult } from '../../../../domain/repositories/IClientRepository.js';
 import {
   UserMapper,
   UserProfileDbRow,

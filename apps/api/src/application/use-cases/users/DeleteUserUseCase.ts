@@ -5,14 +5,14 @@ import {
   CannotRemoveLastAdminError,
 } from '../../../domain/errors/UserErrors.js';
 
-export interface IAuthService {
+export interface IDeleteUserAuthService {
   deleteUser(userId: string): Promise<void>;
 }
 
 export class DeleteUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
-    private readonly authService: IAuthService
+    private readonly authService: IDeleteUserAuthService
   ) {}
 
   async execute(id: string, currentUserId?: string): Promise<void> {

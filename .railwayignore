@@ -1,0 +1,11 @@
+**/node_modules
+**/.next
+**/dist
+**/tsconfig.tsbuildinfo
+skills
+.vercel
+.git
+.env
+.env.*
+apps/web
+apps/mobile

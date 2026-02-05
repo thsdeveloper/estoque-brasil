@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { RoleController } from '../../interface-adapters/controllers/RoleController.js';
 import { requireAuth } from '../../plugins/auth.js';
 import { requirePermission } from '../../plugins/authorization.js';
+import type { CreateRoleDTO, UpdateRoleDTO, UpdateRolePermissionsDTO } from '../../application/dtos/roles/RoleDTO.js';
 
 const permissionSchema = {
   type: 'object',
@@ -122,7 +123,7 @@ const permissionsGroupedSchema = {
 
 export async function rolesRoutes(fastify: FastifyInstance) {
   // GET /roles - List all roles
-  fastify.get(
+  fastify.get<{ Querystring: { includePermissions?: string } }>(
     '/',
     {
       preHandler: [requireAuth, requirePermission('usuarios', 'read')],
@@ -182,7 +183,7 @@ export async function rolesRoutes(fastify: FastifyInstance) {
   );
 
   // POST /roles - Create new role
-  fastify.post(
+  fastify.post<{ Body: CreateRoleDTO }>(
     '/',
     {
       preHandler: [requireAuth, requirePermission('usuarios', 'create')],
@@ -206,7 +207,7 @@ export async function rolesRoutes(fastify: FastifyInstance) {
   );
 
   // PUT /roles/:id - Update role
-  fastify.put<{ Params: { id: string } }>(
+  fastify.put<{ Params: { id: string }; Body: UpdateRoleDTO }>(
     '/:id',
     {
       preHandler: [requireAuth, requirePermission('usuarios', 'update')],
@@ -267,7 +268,7 @@ export async function rolesRoutes(fastify: FastifyInstance) {
   );
 
   // PUT /roles/:id/permissions - Update role permissions
-  fastify.put<{ Params: { id: string } }>(
+  fastify.put<{ Params: { id: string }; Body: UpdateRolePermissionsDTO }>(
     '/:id/permissions',
     {
       preHandler: [requireAuth, requirePermission('usuarios', 'update')],
