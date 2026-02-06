@@ -178,6 +178,7 @@ export const inventariosApi = {
       ativo: params.ativo,
       dataInicio: params.dataInicio,
       dataTermino: params.dataTermino,
+      search: params.search,
     })
     return apiClient.get<PaginatedResponse<Inventario>>(`/api/inventarios${query}`)
   },

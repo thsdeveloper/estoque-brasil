@@ -14,6 +14,14 @@ export interface InventarioDbRow {
   ativo: boolean;
   created_at: string;
   updated_at: string;
+  // Enriched nested data from joins
+  lojas?: {
+    nome: string | null;
+    cnpj: string | null;
+    clients: {
+      nome: string | null;
+    } | null;
+  } | null;
 }
 
 export interface InventarioInsertRow {
@@ -43,6 +51,9 @@ export class InventarioMapper {
       lote: row.lote,
       validade: row.validade,
       ativo: row.ativo,
+      nomeLoja: row.lojas?.nome ?? null,
+      cnpjLoja: row.lojas?.cnpj ?? null,
+      nomeCliente: row.lojas?.clients?.nome ?? null,
     });
   }
 

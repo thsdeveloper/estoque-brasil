@@ -92,13 +92,33 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
   }
 
   async findAll(params: InventarioPaginationParams): Promise<PaginatedResult<Inventario>> {
-    const { page, limit, idLoja, idEmpresa, ativo, dataInicio, dataTermino } = params;
+    const { page, limit, idLoja, idEmpresa, ativo, dataInicio, dataTermino, search } = params;
     const offset = (page - 1) * limit;
+
+    // When searching by client name, we need to find matching loja IDs first
+    let searchLojaIds: number[] | undefined;
+    if (search) {
+      const { data: matchingLojas } = await this.supabase
+        .from('lojas')
+        .select('id, clients!inner(nome)')
+        .ilike('clients.nome', `%${search}%`);
+
+      searchLojaIds = matchingLojas?.map((l: { id: number }) => l.id) ?? [];
+      if (searchLojaIds.length === 0) {
+        return { data: [], total: 0, page, limit, totalPages: 0 };
+      }
+    }
+
+    // Select with joined loja and client data
+    const selectStr = '*, lojas(nome, cnpj, clients(nome))';
 
     let countQuery = this.supabase
       .from(TABLE_NAME)
-      .select('*', { count: 'exact', head: true });
+      .select(selectStr, { count: 'exact', head: true });
 
+    if (searchLojaIds) {
+      countQuery = countQuery.in('id_loja', searchLojaIds);
+    }
     if (idLoja) {
       countQuery = countQuery.eq('id_loja', idLoja);
     }
@@ -123,8 +143,11 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
 
     const total = count ?? 0;
 
-    let dataQuery = this.supabase.from(TABLE_NAME).select('*');
+    let dataQuery = this.supabase.from(TABLE_NAME).select(selectStr);
 
+    if (searchLojaIds) {
+      dataQuery = dataQuery.in('id_loja', searchLojaIds);
+    }
     if (idLoja) {
       dataQuery = dataQuery.eq('id_loja', idLoja);
     }

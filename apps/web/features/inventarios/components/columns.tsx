@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
-import { Eye, Pencil, Trash2, Circle, Calendar, Building2, Store } from "lucide-react"
+import { Eye, Pencil, Trash2, Circle, Calendar, Store, User } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import { Badge } from "@/shared/components/ui/badge"
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/shared/components/ui/dropdown-menu"
@@ -40,39 +40,59 @@ export function getColumns({ onDelete }: ColumnsProps): ColumnDef<Inventario>[] 
       },
     },
     {
-      accessorKey: "idLoja",
+      accessorKey: "nomeCliente",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Cliente" />
+      ),
+      cell: ({ row }) => {
+        const nomeCliente = row.getValue("nomeCliente") as string | null
+        return (
+          <div className="flex items-center gap-2 text-sm">
+            <User className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="font-medium truncate max-w-[200px]">
+              {nomeCliente || "-"}
+            </span>
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "nomeLoja",
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Loja" />
       ),
       cell: ({ row }) => {
-        const idLoja = row.getValue("idLoja") as number
+        const nomeLoja = row.getValue("nomeLoja") as string | null
+        const idLoja = row.original.idLoja
         return (
           <div className="flex items-center gap-2 text-sm">
-            <Store className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-medium tabular-nums">{idLoja}</span>
+            <Store className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <span className="font-medium truncate max-w-[180px]">
+              {nomeLoja || `#${idLoja}`}
+            </span>
           </div>
         )
       },
     },
     {
-      accessorKey: "idEmpresa",
+      accessorKey: "cnpjLoja",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Empresa" />
+        <DataTableColumnHeader column={column} title="CNPJ" />
       ),
       cell: ({ row }) => {
-        const idEmpresa = row.getValue("idEmpresa") as number
+        const cnpj = row.getValue("cnpjLoja") as string | null
         return (
-          <div className="flex items-center gap-2 text-sm">
-            <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-medium tabular-nums">{idEmpresa}</span>
-          </div>
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {cnpj || "-"}
+          </span>
         )
       },
+      enableHiding: true,
     },
     {
       accessorKey: "dataInicio",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Periodo" />
+        <DataTableColumnHeader column={column} title="Data" />
       ),
       cell: ({ row }) => {
         const dataInicio = formatDate(row.getValue("dataInicio"))

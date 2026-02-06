@@ -12,6 +12,10 @@ export interface InventarioProps {
   lote?: boolean;
   validade?: boolean;
   ativo?: boolean;
+  // Enriched fields (from joins)
+  nomeLoja?: string | null;
+  cnpjLoja?: string | null;
+  nomeCliente?: string | null;
 }
 
 export class Inventario {
@@ -26,6 +30,9 @@ export class Inventario {
   private _lote: boolean;
   private _validade: boolean;
   private _ativo: boolean;
+  private _nomeLoja: string | null;
+  private _cnpjLoja: string | null;
+  private _nomeCliente: string | null;
 
   private constructor(props: InventarioProps) {
     this._id = props.id;
@@ -39,6 +46,9 @@ export class Inventario {
     this._lote = props.lote ?? false;
     this._validade = props.validade ?? false;
     this._ativo = props.ativo ?? true;
+    this._nomeLoja = props.nomeLoja ?? null;
+    this._cnpjLoja = props.cnpjLoja ?? null;
+    this._nomeCliente = props.nomeCliente ?? null;
   }
 
   static create(props: InventarioProps): Inventario {
@@ -172,5 +182,17 @@ export class Inventario {
 
   get ativo(): boolean {
     return this._ativo;
+  }
+
+  get nomeLoja(): string | null {
+    return this._nomeLoja;
+  }
+
+  get cnpjLoja(): string | null {
+    return this._cnpjLoja;
+  }
+
+  get nomeCliente(): string | null {
+    return this._nomeCliente;
   }
 }

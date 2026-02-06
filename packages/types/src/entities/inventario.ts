@@ -11,6 +11,10 @@ export interface Inventario {
   lote: boolean;
   validade: boolean;
   ativo: boolean;
+  // Enriched fields (populated in list queries)
+  nomeLoja?: string | null;
+  cnpjLoja?: string | null;
+  nomeCliente?: string | null;
 }
 
 export type CreateInventarioInput = Omit<Inventario, 'id'>;
@@ -24,6 +28,7 @@ export interface InventarioQueryParams {
   ativo?: boolean;
   dataInicio?: string;
   dataTermino?: string;
+  search?: string;
 }
 
 // tb_setor - Setor do Inventário

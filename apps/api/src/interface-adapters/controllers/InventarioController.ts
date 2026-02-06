@@ -78,12 +78,12 @@ export class InventarioController {
   }
 
   async list(
-    request: FastifyRequest<{ Querystring: { page?: number; limit?: number; idLoja?: number; idEmpresa?: number; ativo?: boolean } }>,
+    request: FastifyRequest<{ Querystring: { page?: number; limit?: number; idLoja?: number; idEmpresa?: number; ativo?: boolean; search?: string } }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
-      const { page, limit, idLoja, idEmpresa, ativo } = request.query;
-      const result = await this.listInventariosUseCase.execute({ page, limit, idLoja, idEmpresa, ativo });
+      const { page, limit, idLoja, idEmpresa, ativo, search } = request.query;
+      const result = await this.listInventariosUseCase.execute({ page, limit, idLoja, idEmpresa, ativo, search });
       reply.send(result);
     } catch (error) {
       this.handleError(error, reply);

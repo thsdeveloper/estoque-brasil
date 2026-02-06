@@ -18,6 +18,9 @@ const inventarioResponseSchema = {
     lote: { type: 'boolean' },
     validade: { type: 'boolean' },
     ativo: { type: 'boolean' },
+    nomeLoja: { type: ['string', 'null'] },
+    cnpjLoja: { type: ['string', 'null'] },
+    nomeCliente: { type: ['string', 'null'] },
   },
 };
 
@@ -95,6 +98,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
             idLoja: { type: 'integer', description: 'Filtrar por loja' },
             idEmpresa: { type: 'integer', description: 'Filtrar por empresa' },
             ativo: { type: 'boolean', description: 'Filtrar por status ativo' },
+            search: { type: 'string', description: 'Buscar por nome do cliente' },
           },
         },
         response: {

@@ -16,6 +16,7 @@ interface InventariosTableProps {
   idLoja?: number
   idEmpresa?: number
   ativo?: boolean
+  search?: string
 }
 
 export function InventariosTable({
@@ -23,6 +24,7 @@ export function InventariosTable({
   idLoja,
   idEmpresa,
   ativo,
+  search,
 }: InventariosTableProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -46,6 +48,7 @@ export function InventariosTable({
     idLoja,
     idEmpresa,
     ativo,
+    search,
   })
 
   // Stable callback using useCallback (rerender-functional-setstate)

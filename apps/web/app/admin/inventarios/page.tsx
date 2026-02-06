@@ -11,6 +11,7 @@ interface PageProps {
   searchParams: Promise<{
     page?: string
     ativo?: string
+    search?: string
   }>
 }
 
@@ -18,6 +19,7 @@ export default async function InventariosPage({ searchParams }: PageProps) {
   const params = await searchParams
   const page = Number(params.page) || 1
   const ativo = params.ativo === "true" ? true : params.ativo === "false" ? false : undefined
+  const search = params.search || undefined
 
   return (
     <div className="space-y-8">
@@ -41,13 +43,14 @@ export default async function InventariosPage({ searchParams }: PageProps) {
 
       {/* Filters + Table Container */}
       <div className="space-y-4">
-        <InventarioSearchFilters currentFilter={params.ativo} />
+        <InventarioSearchFilters currentFilter={params.ativo} currentSearch={params.search} />
 
         {/* Suspense boundary for streaming (async-suspense-boundaries) */}
         <Suspense fallback={<InventariosTableSkeleton />}>
           <InventariosTable
             page={page}
             ativo={ativo}
+            search={search}
           />
         </Suspense>
       </div>

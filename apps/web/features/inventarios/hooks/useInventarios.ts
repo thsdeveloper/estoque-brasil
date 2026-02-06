@@ -9,10 +9,10 @@ import { inventariosApi, type PaginatedResponse } from "../api/inventarios-api"
  * Follows: client-swr-dedup - Use SWR for automatic request deduplication
  */
 export function useInventarios(params: InventarioQueryParams = {}) {
-  const { page = 1, limit = 10, idLoja, idEmpresa, ativo } = params
+  const { page = 1, limit = 10, idLoja, idEmpresa, ativo, search } = params
 
   // Create a stable cache key based on params
-  const key = ["inventarios", page, limit, idLoja, idEmpresa, ativo].filter(
+  const key = ["inventarios", page, limit, idLoja, idEmpresa, ativo, search].filter(
     (v) => v !== undefined
   )
 
@@ -25,6 +25,7 @@ export function useInventarios(params: InventarioQueryParams = {}) {
         idLoja,
         idEmpresa,
         ativo,
+        search,
       }),
     {
       // Revalidate on focus for fresh data

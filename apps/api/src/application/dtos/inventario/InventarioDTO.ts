@@ -101,6 +101,9 @@ export interface InventarioResponseDTO {
   lote: boolean;
   validade: boolean;
   ativo: boolean;
+  nomeLoja: string | null;
+  cnpjLoja: string | null;
+  nomeCliente: string | null;
 }
 
 export interface PaginatedInventarioResponseDTO {
@@ -124,5 +127,8 @@ export function toInventarioResponseDTO(inventario: Inventario): InventarioRespo
     lote: inventario.lote,
     validade: inventario.validade,
     ativo: inventario.ativo,
+    nomeLoja: inventario.nomeLoja,
+    cnpjLoja: inventario.cnpjLoja,
+    nomeCliente: inventario.nomeCliente,
   };
 }

@@ -9,6 +9,7 @@ export interface InventarioPaginationParams {
   ativo?: boolean;
   dataInicio?: Date;
   dataTermino?: Date;
+  search?: string;
 }
 
 export interface IInventarioRepository {
