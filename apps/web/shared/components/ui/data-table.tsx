@@ -60,6 +60,7 @@ interface DataTableProps<TData, TValue> {
   showColumnVisibility?: boolean
   showPagination?: boolean
   showPageSizeSelector?: boolean
+  pageSizeOptions?: number[]
   // Custom empty state
   emptyMessage?: string
   // Loading state
@@ -77,6 +78,7 @@ export function DataTable<TData, TValue>({
   showColumnVisibility = true,
   showPagination = true,
   showPageSizeSelector = true,
+  pageSizeOptions = [10, 20, 30, 50],
   emptyMessage = "Nenhum resultado encontrado.",
   loading = false,
 }: DataTableProps<TData, TValue>) {
@@ -285,7 +287,7 @@ export function DataTable<TData, TValue>({
                     <SelectValue placeholder={currentPageSize} />
                   </SelectTrigger>
                   <SelectContent side="top">
-                    {[10, 20, 30, 50].map((size) => (
+                    {pageSizeOptions.map((size) => (
                       <SelectItem key={size} value={String(size)}>
                         {size}
                       </SelectItem>

@@ -1,8 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Loader2, Upload, Download, Search } from "lucide-react"
-import type { InventarioProduto } from "@estoque-brasil/types"
+import { useState, useMemo, useCallback, useRef } from "react"
+import { Upload, Download, Search, RefreshCw, AlertCircle, Package } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import {
@@ -12,60 +11,60 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/components/ui/table"
-import { Badge } from "@/shared/components/ui/badge"
-import { inventariosApi, type PaginatedResponse } from "../../api/inventarios-api"
+import { DataTable } from "@/shared/components/ui/data-table"
+import { useProdutos } from "../../hooks/useProdutos"
+import { getColumns } from "./produtos-columns"
 
 interface ProdutosTabProps {
   inventarioId: number
 }
 
 export function ProdutosTab({ inventarioId }: ProdutosTabProps) {
-  const [produtos, setProdutos] = useState<PaginatedResponse<InventarioProduto> | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState("")
-  const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(20)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const fetchProdutos = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const result = await inventariosApi.listProdutos({
-        idInventario: inventarioId,
-        page,
-        limit: pageSize,
-        search: search || undefined,
-      })
-      setProdutos(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao carregar produtos")
-    } finally {
-      setLoading(false)
-    }
-  }, [inventarioId, page, search])
+  const {
+    data,
+    totalPages,
+    isLoading,
+    isError,
+    error,
+    mutate,
+  } = useProdutos({
+    idInventario: inventarioId,
+    page: page + 1,
+    limit: pageSize,
+    search: debouncedSearch || undefined,
+  })
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchProdutos()
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [fetchProdutos])
+  const columns = useMemo(() => getColumns(), [])
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value)
-  }
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearch(value)
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        setDebouncedSearch(value)
+        setPage(0)
+      }, 300)
+    },
+    []
+  )
+
+  const handlePaginationChange = useCallback(
+    (newPageIndex: number, newPageSize: number) => {
+      if (newPageSize !== pageSize) {
+        setPageSize(newPageSize)
+        setPage(0)
+      } else {
+        setPage(newPageIndex)
+      }
+    },
+    [pageSize]
+  )
 
   return (
     <Card>
@@ -90,118 +89,74 @@ export function ProdutosTab({ inventarioId }: ProdutosTabProps) {
       <CardContent className="space-y-4">
         {/* Search */}
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-light" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Buscar por codigo ou descricao..."
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setPage(1)
-            }}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"
           />
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-light" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-8">
-            <p className="text-red-500 mb-4">{error}</p>
-            <Button onClick={fetchProdutos} variant="outline">
+        {isError ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 mb-4">
+              <AlertCircle className="h-6 w-6 text-destructive" />
+            </div>
+            <h3 className="text-sm font-medium text-foreground mb-1">
+              Erro ao carregar dados
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
+              {error}
+            </p>
+            <Button
+              onClick={() => mutate()}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
               Tentar novamente
             </Button>
           </div>
-        ) : !produtos || produtos.data.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-light mb-4">
-              {search
+        ) : !isLoading && data.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 rounded-lg border border-dashed border-border bg-muted/20">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
+              <Package className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="text-sm font-medium text-foreground mb-1">
+              {debouncedSearch ? "Nenhum resultado" : "Nenhum produto"}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
+              {debouncedSearch
                 ? "Nenhum produto encontrado com a busca"
                 : "Nenhum produto importado neste inventario"}
             </p>
-            {!search && (
-              <Button variant="outline">
-                <Upload className="mr-2 h-4 w-4" />
+            {!debouncedSearch && (
+              <Button variant="outline" size="sm" className="gap-2">
+                <Upload className="h-4 w-4" />
                 Importar produtos
               </Button>
             )}
           </div>
         ) : (
-          <>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Cod. Barras</TableHead>
-                    <TableHead>Cod. Interno</TableHead>
-                    <TableHead>Descricao</TableHead>
-                    <TableHead className="text-right">Saldo</TableHead>
-                    <TableHead className="text-right">Custo</TableHead>
-                    <TableHead>Lote</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {produtos.data.map((produto) => (
-                    <TableRow key={produto.id}>
-                      <TableCell className="font-mono text-sm">
-                        {produto.codigoBarras || "-"}
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {produto.codigoInterno || "-"}
-                      </TableCell>
-                      <TableCell className="max-w-[300px] truncate">
-                        {produto.descricao}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {produto.saldo}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(produto.custo)}
-                      </TableCell>
-                      <TableCell>{produto.lote || "-"}</TableCell>
-                      <TableCell>
-                        {produto.divergente ? (
-                          <Badge variant="destructive">Divergente</Badge>
-                        ) : (
-                          <Badge variant="success">OK</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-light">
-                Mostrando {(page - 1) * pageSize + 1} a{" "}
-                {Math.min(page * pageSize, produtos.total)} de {produtos.total}{" "}
-                produtos
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= produtos.totalPages}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Proximo
-                </Button>
-              </div>
-            </div>
-          </>
+          <DataTable
+            columns={columns}
+            data={data}
+            pageCount={totalPages}
+            pageIndex={page}
+            pageSize={pageSize}
+            onPaginationChange={handlePaginationChange}
+            loading={isLoading}
+            showColumnVisibility={true}
+            pageSizeOptions={[10, 20, 50, 100]}
+            emptyMessage={
+              debouncedSearch
+                ? "Nenhum produto encontrado com a busca"
+                : "Nenhum produto importado neste inventario"
+            }
+          />
         )}
       </CardContent>
     </Card>
