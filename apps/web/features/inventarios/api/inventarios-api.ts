@@ -14,6 +14,13 @@ import type {
   CreateInventarioContagemInput,
   UpdateInventarioContagemInput,
   InventarioContagemQueryParams,
+  InventarioOperador,
+  CreateInventarioOperadorInput,
+  BatchAddOperadoresInput,
+  BatchAddOperadoresResult,
+  BatchRemoveOperadoresInput,
+  BatchRemoveOperadoresResult,
+  OperadorQueryParams,
 } from "@estoque-brasil/types"
 import { createClient } from "@/lib/supabase/client"
 
@@ -296,5 +303,31 @@ export const inventariosApi = {
 
   deleteContagem: (id: number | string): Promise<void> => {
     return apiClient.delete<void>(`/api/contagens/${id}`)
+  },
+
+  // ====== OPERADORES ======
+  listOperadores: (params: OperadorQueryParams): Promise<PaginatedResponse<InventarioOperador>> => {
+    const query = buildQueryString({
+      page: params.page,
+      limit: params.limit,
+      search: params.search,
+    })
+    return apiClient.get<PaginatedResponse<InventarioOperador>>(`/api/inventarios/${params.idInventario}/operadores${query}`)
+  },
+
+  addOperador: (idInventario: number, data: CreateInventarioOperadorInput): Promise<InventarioOperador> => {
+    return apiClient.post<InventarioOperador>(`/api/inventarios/${idInventario}/operadores`, data)
+  },
+
+  addOperadoresBatch: (idInventario: number, data: BatchAddOperadoresInput): Promise<BatchAddOperadoresResult> => {
+    return apiClient.post<BatchAddOperadoresResult>(`/api/inventarios/${idInventario}/operadores/batch`, data)
+  },
+
+  removeOperador: (idInventario: number, userId: string): Promise<void> => {
+    return apiClient.delete<void>(`/api/inventarios/${idInventario}/operadores/${userId}`)
+  },
+
+  removeOperadoresBatch: (idInventario: number, data: BatchRemoveOperadoresInput): Promise<BatchRemoveOperadoresResult> => {
+    return apiClient.post<BatchRemoveOperadoresResult>(`/api/inventarios/${idInventario}/operadores/batch-remove`, data)
   },
 }

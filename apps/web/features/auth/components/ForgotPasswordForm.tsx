@@ -63,7 +63,7 @@ export function ForgotPasswordForm() {
         footer={<AuthLinks type="forgot-password" />}
       >
         <div className="p-4 text-sm text-green-700 bg-green-50 rounded-md text-center">
-          Enviamos um link de recuperacao para o email informado. Verifique tambem a pasta de spam.
+          Enviamos um link de recuperação para o email informado. Verifique também a pasta de spam.
         </div>
       </AuthCard>
     );
@@ -72,7 +72,7 @@ export function ForgotPasswordForm() {
   return (
     <AuthCard
       title="Esqueceu sua senha?"
-      description="Informe seu email para receber um link de recuperacao."
+      description="Informe seu email para receber um link de recuperação."
       footer={<AuthLinks type="forgot-password" />}
     >
       <Form {...form}>
@@ -101,7 +101,7 @@ export function ForgotPasswordForm() {
             </div>
           )}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Enviando...' : 'Enviar link de recuperacao'}
+            {loading ? 'Enviando...' : 'Enviar link de recuperação'}
           </Button>
         </form>
       </Form>

@@ -1,27 +1,43 @@
-// tb_inventario_operador - Operador do Inventário
+// inventarios_operadores - Operador do Inventário
 export interface InventarioOperador {
   idInventario: number;
-  usrCodigo: number;
+  userId: string;        // UUID do auth.users
   multiplo: boolean;
   auditoria: boolean;
+  createdAt?: string;
+  // Campos populados via join (para exibição)
+  fullName?: string;
+  email?: string;
 }
 
-export type CreateInventarioOperadorInput = InventarioOperador;
-export type UpdateInventarioOperadorInput = Partial<Omit<InventarioOperador, 'idInventario' | 'usrCodigo'>>;
+export type CreateInventarioOperadorInput = {
+  userId: string;
+  multiplo?: boolean;
+  auditoria?: boolean;
+};
 
-// tb_inventario_operador_setor - Setor do Operador
-export interface InventarioOperadorSetor {
-  id: number;
-  idInventario: number;
-  usrCodigo: number;
-  idInventarioNumeracao: number;
-  inclusaoPainel: boolean;
-}
+export type UpdateInventarioOperadorInput = Partial<Omit<CreateInventarioOperadorInput, 'userId'>>;
 
-export type CreateInventarioOperadorSetorInput = Omit<InventarioOperadorSetor, 'id'>;
-export type UpdateInventarioOperadorSetorInput = Partial<CreateInventarioOperadorSetorInput>;
+export type BatchAddOperadoresInput = {
+  operadores: CreateInventarioOperadorInput[];
+};
+
+export type BatchAddOperadoresResult = {
+  added: number;
+};
+
+export type BatchRemoveOperadoresInput = {
+  userIds: string[];
+};
+
+export type BatchRemoveOperadoresResult = {
+  removed: number;
+};
 
 export interface OperadorQueryParams {
   idInventario: number;
-  usrCodigo?: number;
+  userId?: string;
+  page?: number;
+  limit?: number;
+  search?: string;
 }

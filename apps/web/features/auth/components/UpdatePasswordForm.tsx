@@ -76,7 +76,7 @@ export function UpdatePasswordForm() {
                   <FormLabel>Nova senha</FormLabel>
                   <FormControl>
                     <PasswordInput
-                      placeholder="Minimo 8 caracteres"
+                      placeholder="Mínimo 8 caracteres"
                       disabled={loading}
                       {...field}
                     />

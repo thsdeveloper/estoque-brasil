@@ -9,23 +9,23 @@ interface AuthLayoutProps {
 const features = [
   {
     icon: CheckCircle,
-    title: "Precisao Garantida",
-    description: "99,9% de acuracia em todos os inventarios realizados",
+    title: "Precisão Garantida",
+    description: "99,9% de acurácia em todos os inventários realizados",
   },
   {
     icon: BarChart3,
-    title: "Relatorios Detalhados",
-    description: "Dashboards e relatorios completos em tempo real",
+    title: "Relatórios Detalhados",
+    description: "Dashboards e relatórios completos em tempo real",
   },
   {
     icon: Shield,
-    title: "Seguranca Total",
-    description: "Dados protegidos e processos auditaveis",
+    title: "Segurança Total",
+    description: "Dados protegidos e processos auditáveis",
   },
   {
     icon: Clock,
     title: "Agilidade",
-    description: "Inventarios realizados em tempo recorde",
+    description: "Inventários realizados em tempo recorde",
   },
 ];
 
@@ -45,29 +45,27 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#f84704]/20 to-transparent" />
 
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
-          {/* Logo */}
-          <div>
-            <Link href="/" className="inline-block">
-              <Image
-                src="/images/logo_eb.png"
-                alt="Estoque Brasil Inventarios"
-                width={220}
-                height={55}
-                priority
-                className="h-auto w-48"
-              />
-            </Link>
-          </div>
-
           {/* Main content */}
           <div className="flex-1 flex flex-col justify-center max-w-lg">
-            <h1 className="text-4xl font-bold text-white mb-4">
-              Gestao de Inventario{" "}
+            {/* Logo */}
+            <Link href="/" className="block mb-8 text-center">
+              <Image
+                src="/images/logo-estoque.png"
+                alt="Estoque Brasil Inventários"
+                width={300}
+                height={75}
+                priority
+                className="h-auto w-64 mx-auto"
+              />
+            </Link>
+
+            <h1 className="text-4xl font-bold text-white mb-4 text-center">
+              Gestão de Inventário{" "}
               <span className="text-[#f84704]">Profissional</span>
             </h1>
-            <p className="text-gray-400 text-lg mb-10">
-              Somos especialistas em inventario de estoque para farmacias,
-              drogarias e empresas do varejo farmaceutico em todo o Centro-Oeste.
+            <p className="text-gray-400 text-lg mb-10 text-center">
+              Somos especialistas em inventário de estoque para farmácias,
+              drogarias e empresas do varejo farmacêutico em todo o Centro-Oeste.
             </p>
 
             {/* Features list */}
@@ -88,7 +86,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           {/* Footer */}
           <div className="text-gray-500 text-sm">
-            <p>&copy; {new Date().getFullYear()} Estoque Brasil Inventarios.</p>
+            <p>&copy; {new Date().getFullYear()} Estoque Brasil Inventários.</p>
             <p>Todos os direitos reservados.</p>
           </div>
         </div>
@@ -100,8 +98,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="lg:hidden bg-[#343434] p-4">
           <Link href="/" className="inline-block">
             <Image
-              src="/images/logo_eb.png"
-              alt="Estoque Brasil Inventarios"
+              src="/images/logo-estoque.png"
+              alt="Estoque Brasil Inventários"
               width={180}
               height={45}
               priority
@@ -119,7 +117,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
         {/* Mobile footer */}
         <div className="lg:hidden bg-neutral border-t border-border p-4 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Estoque Brasil Inventarios</p>
+          <p>&copy; {new Date().getFullYear()} Estoque Brasil Inventários</p>
         </div>
       </div>
     </div>

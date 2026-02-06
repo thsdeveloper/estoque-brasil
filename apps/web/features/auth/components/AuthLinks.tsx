@@ -12,7 +12,7 @@ export function AuthLinks({ type }: AuthLinksProps) {
       {type === 'login' && (
         <>
           <p>
-            Nao tem uma conta?{' '}
+            Não tem uma conta?{' '}
             <Link href="/register" className="text-brand-orange hover:underline font-medium">
               Criar conta
             </Link>
@@ -26,7 +26,7 @@ export function AuthLinks({ type }: AuthLinksProps) {
       )}
       {type === 'register' && (
         <p>
-          Ja tem uma conta?{' '}
+          Já tem uma conta?{' '}
           <Link href="/login" className="text-brand-orange hover:underline font-medium">
             Entrar
           </Link>

@@ -65,6 +65,8 @@ interface DataTableProps<TData, TValue> {
   emptyMessage?: string
   // Loading state
   loading?: boolean
+  // Row selection callback
+  onRowSelectionChange?: (rows: TData[]) => void
 }
 
 export function DataTable<TData, TValue>({
@@ -81,6 +83,7 @@ export function DataTable<TData, TValue>({
   pageSizeOptions = [10, 20, 30, 50],
   emptyMessage = "Nenhum resultado encontrado.",
   loading = false,
+  onRowSelectionChange: onRowSelectionChangeProp,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -88,6 +91,27 @@ export function DataTable<TData, TValue>({
   const [rowSelection, setRowSelection] = React.useState({})
 
   const isServerSide = pageCount !== undefined && onPaginationChange !== undefined
+
+  // Store data in ref to avoid stale closures in the selection handler
+  const dataRef = React.useRef(data)
+  dataRef.current = data
+
+  const handleRowSelectionChange = React.useCallback(
+    (updaterOrValue: React.SetStateAction<Record<string, boolean>>) => {
+      setRowSelection((prev) => {
+        const next = typeof updaterOrValue === 'function' ? updaterOrValue(prev) : updaterOrValue
+        if (onRowSelectionChangeProp) {
+          const selectedData = Object.keys(next)
+            .filter((key) => next[key])
+            .map((index) => dataRef.current[Number(index)])
+            .filter(Boolean)
+          onRowSelectionChangeProp(selectedData)
+        }
+        return next
+      })
+    },
+    [onRowSelectionChangeProp]
+  )
 
   const table = useReactTable({
     data,
@@ -108,7 +132,7 @@ export function DataTable<TData, TValue>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: handleRowSelectionChange as any,
     getCoreRowModel: getCoreRowModel(),
     ...(isServerSide
       ? { manualPagination: true }

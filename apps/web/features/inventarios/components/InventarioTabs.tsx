@@ -6,7 +6,6 @@ import {
   LayoutGrid,
   Package,
   Users,
-  RefreshCw,
   ClipboardList,
   Calculator,
   UserCheck,
@@ -55,11 +54,6 @@ const OperadoresTab = dynamic(
   { loading: () => <TabContentSkeleton />, ssr: false }
 )
 
-const RecontagemTab = dynamic(
-  () => import("./recontagem/RecontagemTab").then((mod) => ({ default: mod.RecontagemTab })),
-  { loading: () => <TabContentSkeleton />, ssr: false }
-)
-
 const ContagemSetoresTab = dynamic(
   () => import("./contagem/ContagemSetoresTab").then((mod) => ({ default: mod.ContagemSetoresTab })),
   { loading: () => <TabContentSkeleton />, ssr: false }
@@ -81,7 +75,6 @@ const tabs = [
   { value: "setores", label: "Setores", icon: LayoutGrid },
   { value: "produtos", label: "Produtos", icon: Package },
   { value: "operador", label: "Operadores", icon: Users },
-  { value: "recontagem", label: "Recontagem", icon: RefreshCw },
   { value: "contagem-setores", label: "Contagem Setores", icon: ClipboardList },
   { value: "contagem", label: "Contagem", icon: Calculator },
   { value: "contagem-operador", label: "Contagem Operador", icon: UserCheck },
@@ -93,50 +86,58 @@ interface InventarioTabsProps {
 
 export function InventarioTabs({ inventario }: InventarioTabsProps) {
   return (
-    <Tabs defaultValue="cadastro" className="space-y-6">
-      <TabsList className="flex flex-wrap h-auto w-full justify-start">
-        {tabs.map((tab) => {
-          const Icon = tab.icon
-          return (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              <Icon />
-              <span>{tab.label}</span>
-            </TabsTrigger>
-          )
-        })}
-      </TabsList>
+    <Tabs defaultValue="cadastro">
+      <div className="rounded-xl border border-border bg-background shadow-sm overflow-hidden">
+        {/* Tab navigation strip */}
+        <div className="bg-muted/40 border-b border-border px-4 pt-3 pb-0">
+          <TabsList className="flex flex-wrap h-auto w-full justify-start bg-transparent p-0 gap-0 rounded-none">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="relative rounded-none rounded-t-md border border-transparent bg-transparent px-4 py-2.5 -mb-px text-muted-foreground shadow-none data-[state=active]:bg-background data-[state=active]:text-brand-orange data-[state=active]:shadow-none data-[state=active]:border-border data-[state=active]:border-b-background data-[state=active]:z-10"
+                >
+                  <Icon />
+                  <span>{tab.label}</span>
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+        </div>
 
-      <TabsContent value="cadastro">
-        <InventarioDetails inventario={inventario} />
-      </TabsContent>
+        {/* Tab content area */}
+        <div className="p-6">
+          <TabsContent value="cadastro" className="mt-0">
+            <InventarioDetails inventario={inventario} />
+          </TabsContent>
 
-      <TabsContent value="setores">
-        <SetoresTab inventarioId={inventario.id} />
-      </TabsContent>
+          <TabsContent value="setores" className="mt-0">
+            <SetoresTab inventarioId={inventario.id} />
+          </TabsContent>
 
-      <TabsContent value="produtos">
-        <ProdutosTab inventarioId={inventario.id} />
-      </TabsContent>
+          <TabsContent value="produtos" className="mt-0">
+            <ProdutosTab inventarioId={inventario.id} />
+          </TabsContent>
 
-      <TabsContent value="operador">
-        <OperadoresTab inventarioId={inventario.id} />
-      </TabsContent>
+          <TabsContent value="operador" className="mt-0">
+            <OperadoresTab inventarioId={inventario.id} />
+          </TabsContent>
 
-      <TabsContent value="recontagem">
-        <RecontagemTab inventarioId={inventario.id} />
-      </TabsContent>
+          <TabsContent value="contagem-setores" className="mt-0">
+            <ContagemSetoresTab inventarioId={inventario.id} />
+          </TabsContent>
 
-      <TabsContent value="contagem-setores">
-        <ContagemSetoresTab inventarioId={inventario.id} />
-      </TabsContent>
+          <TabsContent value="contagem" className="mt-0">
+            <ContagemTab inventarioId={inventario.id} />
+          </TabsContent>
 
-      <TabsContent value="contagem">
-        <ContagemTab inventarioId={inventario.id} />
-      </TabsContent>
-
-      <TabsContent value="contagem-operador">
-        <ContagemOperadorTab inventarioId={inventario.id} />
-      </TabsContent>
+          <TabsContent value="contagem-operador" className="mt-0">
+            <ContagemOperadorTab inventarioId={inventario.id} />
+          </TabsContent>
+        </div>
+      </div>
     </Tabs>
   )
 }

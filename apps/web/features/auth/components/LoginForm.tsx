@@ -77,7 +77,7 @@ export function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
     });
 
     if (sessionError) {
-      setError('Erro ao iniciar sessão');
+      setError('Erro ao iniciar a sessão');
       setLoading(false);
       return;
     }
@@ -94,17 +94,17 @@ export function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
     >
       {verified && (
         <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 rounded-md">
-          Email verificado com sucesso! Faca login para continuar.
+          Email verificado com sucesso! Faça login para continuar.
         </div>
       )}
       {reset && (
         <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 rounded-md">
-          Senha alterada com sucesso! Faca login com sua nova senha.
+          Senha alterada com sucesso! Faça login com sua nova senha.
         </div>
       )}
       {tokenError && (
         <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 rounded-md">
-          Link invalido ou expirado. Solicite um novo link.
+          Link inválido ou expirado. Solicite um novo link.
         </div>
       )}
       <Form {...form}>

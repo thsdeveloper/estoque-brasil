@@ -11,10 +11,7 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-        <div className="mx-auto mb-4 h-12 w-12 rounded-lg bg-brand-orange flex items-center justify-center">
-          <span className="text-white font-bold text-lg">EB</span>
-        </div>
-        <CardTitle className="text-xl">{title}</CardTitle>
+<CardTitle className="text-xl">{title}</CardTitle>
         {description && (
           <CardDescription>{description}</CardDescription>
         )}
