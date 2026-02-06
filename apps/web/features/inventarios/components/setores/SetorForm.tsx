@@ -54,7 +54,7 @@ export function SetorForm({
       if (setor) {
         await inventariosApi.updateSetor(setor.id, data)
       } else {
-        await inventariosApi.createSetor(data)
+        await inventariosApi.createSetor({ ...data, abertoEm: null })
       }
       onSuccess()
     } catch (err) {
