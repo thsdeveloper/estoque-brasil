@@ -1,13 +1,13 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Pencil, Calendar, Store, Building2 } from "lucide-react"
+import { ArrowLeft, Calendar, Store, Building2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Skeleton } from "@/shared/components/ui/skeleton"
 // Direct imports instead of barrel file (bundle-barrel-imports)
-import { DeleteInventarioButton } from "@/features/inventarios/components/DeleteInventarioButton"
 import { inventariosServerApi } from "@/features/inventarios/api/inventarios-api.server"
 import { InventarioTabs } from "@/features/inventarios/components/InventarioTabs"
+import { InventarioActions } from "@/features/inventarios/components/InventarioActions"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -101,15 +101,7 @@ export default async function ViewInventarioPage({ params }: PageProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`/admin/inventarios/${id}/edit`}>
-                <Pencil className="h-3.5 w-3.5" />
-                Editar
-              </Link>
-            </Button>
-            <DeleteInventarioButton inventario={inventario} />
-          </div>
+          <InventarioActions inventario={inventario} />
         </div>
       </div>
 

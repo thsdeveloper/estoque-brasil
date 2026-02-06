@@ -42,6 +42,7 @@ export interface ContagemResponseDTO {
   validade: string | null;
   quantidade: number;
   divergente: boolean;
+  idUsuario: string | null;
 }
 
 export interface PaginatedContagemResponseDTO {
@@ -62,5 +63,6 @@ export function toContagemResponseDTO(contagem: InventarioContagem): ContagemRes
     validade: contagem.validade?.toISOString().split('T')[0] ?? null,
     quantidade: contagem.quantidade,
     divergente: contagem.divergente,
+    idUsuario: contagem.idUsuario,
   };
 }

@@ -44,9 +44,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         {/* Orange accent gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-[#f84704]/20 to-transparent" />
 
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full items-center">
           {/* Main content */}
-          <div className="flex-1 flex flex-col justify-center max-w-lg">
+          <div className="flex-1 flex flex-col justify-center max-w-lg w-full">
             {/* Logo */}
             <Link href="/" className="block mb-8 text-center">
               <Image

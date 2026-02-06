@@ -1,13 +1,15 @@
 "use client"
 
 import React from "react"
-import { ClipboardList, Package, Radio, MapPin } from "lucide-react"
+import { ClipboardList, Package, Radio, MapPin, Users } from "lucide-react"
 
 interface ContagemMetricsProps {
   totalContagens: number
   totalQuantidade: number
   setoresAtivos: number
   totalSetores: number
+  operadoresAtivos: number
+  totalOperadores: number
 }
 
 export const ContagemMetrics = React.memo(function ContagemMetrics({
@@ -15,6 +17,8 @@ export const ContagemMetrics = React.memo(function ContagemMetrics({
   totalQuantidade,
   setoresAtivos,
   totalSetores,
+  operadoresAtivos,
+  totalOperadores,
 }: ContagemMetricsProps) {
   const metrics = [
     {
@@ -50,10 +54,19 @@ export const ContagemMetrics = React.memo(function ContagemMetrics({
       iconBg: "bg-violet-500",
       valueColor: "text-violet-700",
     },
+    {
+      title: "Operadores Ativos",
+      value: `${operadoresAtivos}/${totalOperadores}`,
+      icon: Users,
+      bg: "bg-rose-50",
+      iconBg: "bg-rose-500",
+      valueColor: "text-rose-700",
+      subtitle: "ativos nos ultimos 5 min",
+    },
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
       {metrics.map((m) => {
         const Icon = m.icon
         const formatted =

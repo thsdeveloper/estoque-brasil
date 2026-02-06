@@ -7,6 +7,7 @@ export interface SetorProps {
   inicio: number;
   termino: number;
   descricao?: string | null;
+  abertoEm?: Date | null;
 }
 
 export class Setor {
@@ -16,6 +17,7 @@ export class Setor {
   private _inicio: number;
   private _termino: number;
   private _descricao: string | null;
+  private _abertoEm: Date | null;
 
   private constructor(props: SetorProps) {
     this._id = props.id;
@@ -24,6 +26,7 @@ export class Setor {
     this._inicio = props.inicio;
     this._termino = props.termino;
     this._descricao = props.descricao ?? null;
+    this._abertoEm = props.abertoEm ?? null;
   }
 
   static create(props: SetorProps): Setor {
@@ -112,6 +115,15 @@ export class Setor {
 
   get descricao(): string | null {
     return this._descricao;
+  }
+
+  get abertoEm(): Date | null {
+    return this._abertoEm;
+  }
+
+  abrir(): void {
+    if (this._abertoEm !== null) return;
+    this._abertoEm = new Date();
   }
 
   /**

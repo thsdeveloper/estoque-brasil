@@ -7,6 +7,7 @@ export interface SetorDbRow {
   inicio: number;
   termino: number;
   descricao: string | null;
+  aberto_em: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -28,6 +29,7 @@ export class SetorMapper {
       inicio: row.inicio,
       termino: row.termino,
       descricao: row.descricao,
+      abertoEm: row.aberto_em ? new Date(row.aberto_em) : null,
     });
   }
 
@@ -41,9 +43,10 @@ export class SetorMapper {
     };
   }
 
-  static toUpdateRow(setor: Setor): SetorInsertRow & { updated_at: string } {
+  static toUpdateRow(setor: Setor): SetorInsertRow & { aberto_em: string | null; updated_at: string } {
     return {
       ...this.toInsertRow(setor),
+      aberto_em: setor.abertoEm?.toISOString() ?? null,
       updated_at: new Date().toISOString(),
     };
   }

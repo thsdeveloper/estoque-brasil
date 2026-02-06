@@ -231,4 +231,74 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
 
     return (count ?? 0) > 0;
   }
+
+  async hasContagens(inventarioId: number): Promise<boolean> {
+    // contagens reference setores via id_inventario_setor, setores have id_inventario
+    const { data: setores, error: setoresError } = await this.supabase
+      .from('setores')
+      .select('id')
+      .eq('id_inventario', inventarioId);
+
+    if (setoresError) {
+      throw new Error(`Failed to check setores: ${setoresError.message}`);
+    }
+
+    if (!setores || setores.length === 0) return false;
+
+    const setorIds = setores.map((s: { id: number }) => s.id);
+
+    const { count, error } = await this.supabase
+      .from('inventarios_contagens')
+      .select('id', { count: 'exact', head: true })
+      .in('id_inventario_setor', setorIds)
+      .limit(1);
+
+    if (error) {
+      throw new Error(`Failed to check contagens: ${error.message}`);
+    }
+
+    return (count ?? 0) > 0;
+  }
+
+  async getInventariosComContagens(ids: number[]): Promise<Set<number>> {
+    if (ids.length === 0) return new Set();
+
+    // Get all setores for these inventarios
+    const { data: setores, error: setoresError } = await this.supabase
+      .from('setores')
+      .select('id, id_inventario')
+      .in('id_inventario', ids);
+
+    if (setoresError) {
+      throw new Error(`Failed to check setores batch: ${setoresError.message}`);
+    }
+
+    if (!setores || setores.length === 0) return new Set();
+
+    const setorIds = setores.map((s: { id: number }) => s.id);
+    const setorToInventario = new Map<number, number>();
+    for (const s of setores as Array<{ id: number; id_inventario: number }>) {
+      setorToInventario.set(s.id, s.id_inventario);
+    }
+
+    // Find which setores have contagens
+    const { data: contagens, error } = await this.supabase
+      .from('inventarios_contagens')
+      .select('id_inventario_setor')
+      .in('id_inventario_setor', setorIds);
+
+    if (error) {
+      throw new Error(`Failed to check contagens batch: ${error.message}`);
+    }
+
+    const result = new Set<number>();
+    for (const c of contagens as Array<{ id_inventario_setor: number }>) {
+      const inventarioId = setorToInventario.get(c.id_inventario_setor);
+      if (inventarioId !== undefined) {
+        result.add(inventarioId);
+      }
+    }
+
+    return result;
+  }
 }

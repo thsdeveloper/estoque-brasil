@@ -9,6 +9,7 @@ export interface InventarioContagemDbRow {
   validade: string | null;
   quantidade: number;
   divergente: boolean;
+  id_usuario: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -21,6 +22,7 @@ export interface InventarioContagemInsertRow {
   validade?: string | null;
   quantidade: number;
   divergente?: boolean;
+  id_usuario?: string | null;
 }
 
 export class InventarioContagemMapper {
@@ -34,6 +36,7 @@ export class InventarioContagemMapper {
       validade: row.validade ? new Date(row.validade) : null,
       quantidade: row.quantidade,
       divergente: row.divergente,
+      idUsuario: row.id_usuario,
     });
   }
 
@@ -46,6 +49,7 @@ export class InventarioContagemMapper {
       validade: contagem.validade?.toISOString().split('T')[0] ?? null,
       quantidade: contagem.quantidade,
       divergente: contagem.divergente,
+      id_usuario: contagem.idUsuario,
     };
   }
 

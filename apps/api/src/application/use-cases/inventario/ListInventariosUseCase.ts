@@ -28,8 +28,15 @@ export class ListInventariosUseCase {
 
     const result = await this.inventarioRepository.findAll(params);
 
+    const ids = result.data
+      .map((inv) => inv.id)
+      .filter((id): id is number => id !== undefined);
+    const inventariosComContagens = await this.inventarioRepository.getInventariosComContagens(ids);
+
     return {
-      data: result.data.map(toInventarioResponseDTO),
+      data: result.data.map((inv) =>
+        toInventarioResponseDTO(inv, inventariosComContagens.has(inv.id!))
+      ),
       total: result.total,
       page: result.page,
       limit: result.limit,

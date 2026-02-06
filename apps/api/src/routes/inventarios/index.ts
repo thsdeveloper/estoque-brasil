@@ -3,6 +3,7 @@ import { InventarioController } from '../../interface-adapters/controllers/Inven
 import { SupabaseInventarioRepository } from '../../infrastructure/database/supabase/repositories/SupabaseInventarioRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { restrictLiderColetaOnStartedInventario } from '../../plugins/authorization.js';
 
 const inventarioResponseSchema = {
   type: 'object',
@@ -21,6 +22,7 @@ const inventarioResponseSchema = {
     nomeLoja: { type: ['string', 'null'] },
     cnpjLoja: { type: ['string', 'null'] },
     nomeCliente: { type: ['string', 'null'] },
+    temContagens: { type: 'boolean' },
   },
 };
 
@@ -163,7 +165,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/inventarios/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, restrictLiderColetaOnStartedInventario()],
       schema: {
         tags: ['Inventários'],
         summary: 'Atualizar inventário',
@@ -181,6 +183,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
           200: inventarioResponseSchema,
           400: errorResponseSchema,
           401: errorResponseSchema,
+          403: errorResponseSchema,
           404: errorResponseSchema,
           500: errorResponseSchema,
         },
@@ -192,7 +195,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/inventarios/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, restrictLiderColetaOnStartedInventario()],
       schema: {
         tags: ['Inventários'],
         summary: 'Excluir inventário',
@@ -208,6 +211,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
         response: {
           204: { type: 'null', description: 'Inventário excluído com sucesso' },
           401: errorResponseSchema,
+          403: errorResponseSchema,
           404: errorResponseSchema,
           500: errorResponseSchema,
         },

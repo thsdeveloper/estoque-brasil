@@ -9,6 +9,7 @@ export interface InventarioContagemProps {
   validade?: Date | null;
   quantidade: number;
   divergente?: boolean;
+  idUsuario?: string | null;
 }
 
 export class InventarioContagem {
@@ -20,6 +21,7 @@ export class InventarioContagem {
   private _validade: Date | null;
   private _quantidade: number;
   private _divergente: boolean;
+  private _idUsuario: string | null;
 
   private constructor(props: InventarioContagemProps) {
     this._id = props.id;
@@ -30,6 +32,7 @@ export class InventarioContagem {
     this._validade = props.validade ?? null;
     this._quantidade = props.quantidade;
     this._divergente = props.divergente ?? false;
+    this._idUsuario = props.idUsuario ?? null;
   }
 
   static create(props: InventarioContagemProps): InventarioContagem {
@@ -128,5 +131,9 @@ export class InventarioContagem {
 
   get divergente(): boolean {
     return this._divergente;
+  }
+
+  get idUsuario(): string | null {
+    return this._idUsuario;
   }
 }

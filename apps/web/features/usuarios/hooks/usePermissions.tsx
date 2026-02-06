@@ -15,7 +15,9 @@ interface PermissionsContextValue {
   permissions: UserPermissions | null
   loading: boolean
   error: string | null
+  roles: string[]
   hasPermission: (resource: string, action: PermissionAction) => boolean
+  hasRole: (name: string) => boolean
   canRead: (resource: string) => boolean
   canCreate: (resource: string) => boolean
   canUpdate: (resource: string) => boolean
@@ -54,6 +56,8 @@ export function PermissionsProvider({ children }: PermissionsProviderProps) {
     fetchPermissions()
   }, [fetchPermissions])
 
+  const roles = permissions?.roles ?? []
+
   const hasPermission = useCallback(
     (resource: string, action: PermissionAction): boolean => {
       if (!permissions) return false
@@ -62,6 +66,13 @@ export function PermissionsProvider({ children }: PermissionsProviderProps) {
       )
     },
     [permissions]
+  )
+
+  const hasRole = useCallback(
+    (name: string): boolean => {
+      return roles.includes(name)
+    },
+    [roles]
   )
 
   const canRead = useCallback(
@@ -88,7 +99,9 @@ export function PermissionsProvider({ children }: PermissionsProviderProps) {
     permissions,
     loading,
     error,
+    roles,
     hasPermission,
+    hasRole,
     canRead,
     canCreate,
     canUpdate,

@@ -41,6 +41,7 @@ export interface UserPermissions {
     resource: string;
     action: PermissionAction;
   }>;
+  roles: string[];
 }
 
 // Input types for API

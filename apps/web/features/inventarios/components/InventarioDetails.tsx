@@ -16,6 +16,13 @@ import {
 } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip"
+import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { useLojas } from "@/features/lojas/hooks/useLojas"
 import { useEmpresas } from "@/features/empresas/hooks/useEmpresas"
 
@@ -92,7 +99,15 @@ function DataRow({
   )
 }
 
+const RESTRICTION_MESSAGE =
+  "Líder de coleta não pode editar/excluir inventários que já possuem contagens."
+
 export function InventarioDetails({ inventario }: InventarioDetailsProps) {
+  // Permissions
+  const { hasRole } = usePermissions()
+  const isLiderColeta = hasRole("lider_coleta")
+  const editDisabled = isLiderColeta && !!inventario.temContagens
+
   // Fetch related data
   const { lojas } = useLojas({ limit: 100 })
   const { empresas } = useEmpresas({ limit: 100 })
@@ -113,12 +128,30 @@ export function InventarioDetails({ inventario }: InventarioDetailsProps) {
             Informações cadastrais e configurações
           </p>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/admin/inventarios/${inventario.id}/edit`}>
-            <Pencil className="h-3.5 w-3.5" />
-            Editar
-          </Link>
-        </Button>
+        {editDisabled ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button variant="outline" size="sm" disabled>
+                    <Pencil className="h-3.5 w-3.5" />
+                    Editar
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{RESTRICTION_MESSAGE}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/inventarios/${inventario.id}/edit`}>
+              <Pencil className="h-3.5 w-3.5" />
+              Editar
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Main content grid */}

@@ -15,6 +15,7 @@ const contagemResponseSchema = {
     validade: { type: ['string', 'null'], format: 'date' },
     quantidade: { type: 'number' },
     divergente: { type: 'boolean' },
+    idUsuario: { type: ['string', 'null'] },
   },
 };
 

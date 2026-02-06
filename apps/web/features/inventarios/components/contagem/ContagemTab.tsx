@@ -6,6 +6,7 @@ import { useContagemRealtime } from "../../hooks/useContagemRealtime"
 import { ContagemMetrics } from "./ContagemMetrics"
 import { ContagemChart } from "./ContagemChart"
 import { SetorCard } from "./SetorCard"
+import { OperadorCard } from "./OperadorCard"
 
 interface ContagemTabProps {
   inventarioId: number
@@ -15,9 +16,11 @@ export function ContagemTab({ inventarioId }: ContagemTabProps) {
   const {
     sectors,
     timeline,
+    operators,
     totalContagens,
     totalQuantidade,
     setoresAtivos,
+    operadoresAtivos,
     isConnected,
     error,
   } = useContagemRealtime(inventarioId)
@@ -48,10 +51,26 @@ export function ContagemTab({ inventarioId }: ContagemTabProps) {
         totalQuantidade={totalQuantidade}
         setoresAtivos={setoresAtivos}
         totalSetores={sectors.length}
+        operadoresAtivos={operadoresAtivos}
+        totalOperadores={operators.length}
       />
 
       {/* Timeline chart */}
       <ContagemChart timeline={timeline} />
+
+      {/* Operator cards grid */}
+      {operators.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-700 mb-3">
+            Operadores
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {operators.map((operador) => (
+              <OperadorCard key={operador.user_id} operador={operador} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Sector cards grid */}
       {sectors.length > 0 && (

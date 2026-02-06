@@ -16,13 +16,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip"
 import { inventariosApi } from "../api/inventarios-api"
 
 interface DeleteInventarioButtonProps {
   inventario: Inventario
+  disabled?: boolean
 }
 
-export function DeleteInventarioButton({ inventario }: DeleteInventarioButtonProps) {
+const RESTRICTION_MESSAGE =
+  "Líder de coleta não pode editar/excluir inventários que já possuem contagens."
+
+export function DeleteInventarioButton({ inventario, disabled }: DeleteInventarioButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,6 +50,26 @@ export function DeleteInventarioButton({ inventario }: DeleteInventarioButtonPro
       setError(err instanceof Error ? err.message : "Erro ao excluir inventario")
       setLoading(false)
     }
+  }
+
+  if (disabled) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span tabIndex={0}>
+              <Button variant="destructive" disabled>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{RESTRICTION_MESSAGE}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
   }
 
   return (

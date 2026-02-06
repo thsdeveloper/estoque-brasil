@@ -22,4 +22,6 @@ export interface IInventarioRepository {
   update(inventario: Inventario): Promise<Inventario>;
   delete(id: number): Promise<void>;
   existsAtivo(idLoja: number, excludeId?: number): Promise<boolean>;
+  hasContagens(inventarioId: number): Promise<boolean>;
+  getInventariosComContagens(ids: number[]): Promise<Set<number>>;
 }

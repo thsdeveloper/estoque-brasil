@@ -12,6 +12,8 @@ export class GetInventarioUseCase {
       throw new InventarioNotFoundError(id);
     }
 
-    return toInventarioResponseDTO(inventario);
+    const temContagens = await this.inventarioRepository.hasContagens(id);
+
+    return toInventarioResponseDTO(inventario, temContagens);
   }
 }

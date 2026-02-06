@@ -27,7 +27,8 @@ export class ContagemController {
   async create(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const validatedData = createContagemSchema.parse(request.body);
-      const contagem = await this.createContagemUseCase.execute(validatedData);
+      const userId = request.user?.sub;
+      const contagem = await this.createContagemUseCase.execute(validatedData, userId);
       reply.status(201).send(contagem);
     } catch (error) {
       this.handleError(error, reply);

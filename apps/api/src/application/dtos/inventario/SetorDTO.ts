@@ -59,6 +59,7 @@ export interface SetorResponseDTO {
   inicio: number;
   termino: number;
   descricao: string | null;
+  abertoEm: string | null;
 }
 
 export function toSetorResponseDTO(setor: Setor): SetorResponseDTO {
@@ -69,5 +70,6 @@ export function toSetorResponseDTO(setor: Setor): SetorResponseDTO {
     inicio: setor.inicio,
     termino: setor.termino,
     descricao: setor.descricao,
+    abertoEm: setor.abertoEm?.toISOString() ?? null,
   };
 }

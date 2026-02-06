@@ -104,6 +104,7 @@ export interface InventarioResponseDTO {
   nomeLoja: string | null;
   cnpjLoja: string | null;
   nomeCliente: string | null;
+  temContagens: boolean;
 }
 
 export interface PaginatedInventarioResponseDTO {
@@ -114,7 +115,7 @@ export interface PaginatedInventarioResponseDTO {
   totalPages: number;
 }
 
-export function toInventarioResponseDTO(inventario: Inventario): InventarioResponseDTO {
+export function toInventarioResponseDTO(inventario: Inventario, temContagens = false): InventarioResponseDTO {
   return {
     id: inventario.id!,
     idLoja: inventario.idLoja,
@@ -130,5 +131,6 @@ export function toInventarioResponseDTO(inventario: Inventario): InventarioRespo
     nomeLoja: inventario.nomeLoja,
     cnpjLoja: inventario.cnpjLoja,
     nomeCliente: inventario.nomeCliente,
+    temContagens,
   };
 }

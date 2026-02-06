@@ -1,5 +1,6 @@
 import { useCallback, useContext, useState } from 'react';
 import { InventarioContext } from '@/contexts/InventarioContext';
+import { inventarioService } from '@/services/inventario.service';
 import { produtoService } from '@/services/produto.service';
 import { contagemService } from '@/services/contagem.service';
 import { useSound } from './useSound';
@@ -37,11 +38,24 @@ export function useContagem(): UseContagemReturn {
   const { inventario } = useContext(InventarioContext);
   const { playSuccess, playError, playAttention } = useSound();
 
-  const [activeSetor, setActiveSetor] = useState<Setor | null>(null);
+  const [activeSetor, setActiveSectorState] = useState<Setor | null>(null);
   const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
   const [totalContagens, setTotalContagens] = useState(0);
   const [searchMode, setSearchMode] = useState<'ean' | 'interno'>('ean');
   const [isMultipleMode, setIsMultipleMode] = useState(false);
+
+  const setActiveSetor = useCallback(async (setor: Setor | null) => {
+    if (setor) {
+      try {
+        const updated = await inventarioService.abrirSetor(setor.id);
+        setActiveSectorState({ ...setor, abertoEm: updated.abertoEm });
+      } catch {
+        setActiveSectorState(setor);
+      }
+    } else {
+      setActiveSectorState(null);
+    }
+  }, []);
 
   const loadExistingContagens = useCallback(async () => {
     if (!activeSetor) return;

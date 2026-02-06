@@ -18,4 +18,9 @@ export const inventarioService = {
     const { data } = await api.get<Setor[]>(`/inventarios/${idInventario}/setores`);
     return data;
   },
+
+  async abrirSetor(id: number): Promise<Setor> {
+    const { data } = await api.patch<Setor>(`/setores/${id}/abrir`);
+    return data;
+  },
 };

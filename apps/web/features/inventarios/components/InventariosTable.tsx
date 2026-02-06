@@ -7,6 +7,7 @@ import { Package, Plus, RefreshCw, AlertCircle } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { useInventarios } from "../hooks/useInventarios"
 import { DeleteInventarioDialog } from "./DeleteInventarioDialog"
 import { getColumns } from "./columns"
@@ -29,6 +30,8 @@ export function InventariosTable({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { hasRole } = usePermissions()
+  const isLiderColeta = hasRole("lider_coleta")
 
   const [pageSize, setPageSize] = useState(10)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -85,8 +88,8 @@ export function InventariosTable({
 
   // Memoize columns with proper dependencies (rerender-memo)
   const columns = useMemo(
-    () => getColumns({ onDelete: handleDeleteClick }),
-    [handleDeleteClick]
+    () => getColumns({ onDelete: handleDeleteClick, isLiderColeta }),
+    [handleDeleteClick, isLiderColeta]
   )
 
   const hasFilters = idLoja || idEmpresa || ativo !== undefined

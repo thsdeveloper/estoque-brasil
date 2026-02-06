@@ -1,17 +1,27 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import Image from 'next/image';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/shared/components/ui/card';
 
 interface AuthCardProps {
-  title: string;
+  title?: string;
   description?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
 
-export function AuthCard({ title, description, children, footer }: AuthCardProps) {
+export function AuthCard({ description, children, footer }: AuthCardProps) {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="text-center">
-<CardTitle className="text-xl">{title}</CardTitle>
+        <div className="flex justify-center mb-4">
+          <Image
+            src="/images/logo-estoque-negativo.png"
+            alt="Estoque Brasil Inventários"
+            width={280}
+            height={90}
+            priority
+            className="h-auto w-44"
+          />
+        </div>
         {description && (
           <CardDescription>{description}</CardDescription>
         )}

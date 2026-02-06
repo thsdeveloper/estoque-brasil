@@ -33,7 +33,7 @@ export function SectorListItem({ setor, onPress, isActive }: Props) {
       </View>
       <View style={[styles.badge, isActive && styles.badgeActive]}>
         <Text style={[styles.badgeText, isActive && styles.badgeTextActive]}>
-          {isActive ? 'Ativo' : 'Abrir'}
+          {isActive ? 'Ativo' : setor.abertoEm ? 'Reabrir' : 'Abrir'}
         </Text>
       </View>
     </Pressable>

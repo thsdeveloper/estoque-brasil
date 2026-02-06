@@ -17,6 +17,8 @@ interface AuthContextData extends AuthState {
 
 export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
+const ALLOWED_ROLES = ['operador', 'lider_coleta'];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -62,9 +64,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (credentials: LoginRequest) => {
     const response = await authService.login(credentials);
+    const profile = await authService.me();
+
+    const hasAllowedRole = profile.roles.some((r) => ALLOWED_ROLES.includes(r.name));
+    if (!hasAllowedRole) {
+      await authService.logout();
+      throw new Error('Acesso permitido apenas para Operadores e Líderes de Coleta.');
+    }
+
     setState((prev) => ({
       ...prev,
       user: response.user,
+      profile,
       isAuthenticated: true,
     }));
   }, []);

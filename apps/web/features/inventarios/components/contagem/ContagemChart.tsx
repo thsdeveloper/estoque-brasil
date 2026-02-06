@@ -32,6 +32,12 @@ export const ContagemChart = React.memo(function ContagemChart({
     [timeline]
   )
 
+  // Show a tick every ~30 minutes for readability
+  const tickInterval = useMemo(() => {
+    if (chartData.length <= 60) return undefined // let Recharts decide
+    return Math.max(1, Math.floor(chartData.length / 20))
+  }, [chartData.length])
+
   if (chartData.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-zinc-100 p-6">
@@ -68,6 +74,7 @@ export const ContagemChart = React.memo(function ContagemChart({
             tick={{ fontSize: 11, fill: "#999" }}
             tickLine={false}
             axisLine={{ stroke: "#e5e5e5" }}
+            interval={tickInterval}
           />
           <YAxis
             tick={{ fontSize: 11, fill: "#999" }}

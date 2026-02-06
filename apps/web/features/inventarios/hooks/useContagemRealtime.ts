@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
-const TIMELINE_MAX_POINTS = 60
+const TIMELINE_MAX_POINTS = 1440 // full day (1 point per minute)
 const RECENT_EVENTS_MAX = 50
 const HEARTBEAT_TIMEOUT_MS = 45_000 // 30s heartbeat + 15s grace
 const MAX_RECONNECT_DELAY_MS = 30_000
@@ -36,15 +36,31 @@ export interface ContagemEvent {
   lote: string | null
   validade: string | null
   divergente: boolean
+  idUsuario: string | null
+  operadorNome: string | null
+}
+
+export interface OperatorStats {
+  user_id: string
+  full_name: string
+  email: string
+  avatar_url: string | null
+  total_contagens: number
+  total_quantidade: number
+  ultima_contagem: string
+  setor_atual_id: number | null
+  setor_atual_descricao: string
 }
 
 interface UseContagemRealtimeReturn {
   sectors: SectorStats[]
   timeline: TimelinePoint[]
   recentEvents: ContagemEvent[]
+  operators: OperatorStats[]
   totalContagens: number
   totalQuantidade: number
   setoresAtivos: number
+  operadoresAtivos: number
   isConnected: boolean
   error: string | null
 }
@@ -53,6 +69,7 @@ export function useContagemRealtime(inventarioId: number): UseContagemRealtimeRe
   const [sectors, setSectors] = useState<SectorStats[]>([])
   const [timeline, setTimeline] = useState<TimelinePoint[]>([])
   const [recentEvents, setRecentEvents] = useState<ContagemEvent[]>([])
+  const [operators, setOperators] = useState<OperatorStats[]>([])
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -91,9 +108,11 @@ export function useContagemRealtime(inventarioId: number): UseContagemRealtimeRe
         const data = JSON.parse(e.data) as {
           sectors: SectorStats[]
           timeline: TimelinePoint[]
+          operators: OperatorStats[]
         }
         setSectors(data.sectors)
         setTimeline(data.timeline.slice(-TIMELINE_MAX_POINTS))
+        setOperators(data.operators || [])
         setIsConnected(true)
         setError(null)
         reconnectAttemptRef.current = 0
@@ -154,6 +173,41 @@ export function useContagemRealtime(inventarioId: number): UseContagemRealtimeRe
 
         // Add to recent events
         setRecentEvents((prev) => [contagem, ...prev].slice(0, RECENT_EVENTS_MAX))
+
+        // Update operators incrementally
+        if (contagem.idUsuario) {
+          setOperators((prev) => {
+            const existing = prev.find((op) => op.user_id === contagem.idUsuario)
+            if (existing) {
+              return prev.map((op) =>
+                op.user_id === contagem.idUsuario
+                  ? {
+                      ...op,
+                      total_contagens: op.total_contagens + 1,
+                      total_quantidade: op.total_quantidade + contagem.quantidade,
+                      ultima_contagem: contagem.data,
+                      setor_atual_id: contagem.idInventarioSetor,
+                    }
+                  : op
+              )
+            }
+            // New operator — add with basic info
+            return [
+              {
+                user_id: contagem.idUsuario!,
+                full_name: contagem.operadorNome || "Operador",
+                email: "",
+                avatar_url: null,
+                total_contagens: 1,
+                total_quantidade: contagem.quantidade,
+                ultima_contagem: contagem.data,
+                setor_atual_id: contagem.idInventarioSetor,
+                setor_atual_descricao: "",
+              },
+              ...prev,
+            ]
+          })
+        }
       } catch {
         // Invalid JSON
       }
@@ -209,13 +263,22 @@ export function useContagemRealtime(inventarioId: number): UseContagemRealtimeRe
     ).length
   }, [sectors])
 
+  const operadoresAtivos = useMemo(() => {
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
+    return operators.filter(
+      (op) => op.ultima_contagem && new Date(op.ultima_contagem) > fiveMinutesAgo
+    ).length
+  }, [operators])
+
   return {
     sectors,
     timeline,
     recentEvents,
+    operators,
     totalContagens,
     totalQuantidade,
     setoresAtivos,
+    operadoresAtivos,
     isConnected,
     error,
   }

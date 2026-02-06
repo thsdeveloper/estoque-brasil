@@ -61,6 +61,7 @@ export interface Setor {
   inicio: number;
   termino: number;
   descricao?: string;
+  abertoEm?: string;
 }
 
 // Produto

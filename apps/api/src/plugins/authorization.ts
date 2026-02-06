@@ -76,6 +76,67 @@ export function requireAnyPermission(
 }
 
 /**
+ * Middleware that prevents lider_coleta from editing/deleting inventários that already have contagens.
+ * Usage: fastify.put('/inventarios/:id', { preHandler: [requireAuth, restrictLiderColetaOnStartedInventario()] }, handler)
+ */
+export function restrictLiderColetaOnStartedInventario() {
+  return async (request: FastifyRequest, _reply: FastifyReply) => {
+    const userId = request.user?.sub;
+
+    if (!userId) {
+      throw new UnauthorizedError('Usuário não autenticado');
+    }
+
+    const supabase = getSupabaseAdminClient();
+
+    // Check if user has lider_coleta role
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('role_id, roles(name)')
+      .eq('user_id', userId);
+
+    if (rolesError) {
+      console.error('Error checking user roles:', rolesError);
+      return;
+    }
+
+    const isLiderColeta = (userRoles ?? []).some(
+      (ur: any) => ur.roles?.name === 'lider_coleta'
+    );
+
+    if (!isLiderColeta) {
+      return; // Not a lider_coleta, allow
+    }
+
+    // Check if inventário has contagens
+    const inventarioId = Number((request.params as { id: number }).id);
+
+    const { data: setores } = await supabase
+      .from('setores')
+      .select('id')
+      .eq('id_inventario', inventarioId);
+
+    if (!setores || setores.length === 0) {
+      return; // No setores, no contagens
+    }
+
+    const setorIds = setores.map((s: { id: number }) => s.id);
+
+    const { count } = await supabase
+      .from('inventarios_contagens')
+      .select('id', { count: 'exact', head: true })
+      .in('id_inventario_setor', setorIds)
+      .limit(1);
+
+    if ((count ?? 0) > 0) {
+      throw new ForbiddenError(
+        'Líder de coleta não pode alterar inventários que já possuem contagens.'
+      );
+    }
+  };
+}
+
+/**
  * Middleware factory that checks if user has all specified permissions
  * Usage: fastify.post('/admin', { preHandler: [requireAuth, requireAllPermissions([['usuarios', 'create'], ['usuarios', 'update']])] }, handler)
  */

@@ -88,7 +88,6 @@ export function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
 
   return (
     <AuthCard
-      title="Login"
       description="Entre com suas credenciais para acessar o painel administrativo."
       footer={<AuthLinks type="login" />}
     >

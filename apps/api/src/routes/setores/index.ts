@@ -13,6 +13,7 @@ const setorResponseSchema = {
     inicio: { type: 'integer' },
     termino: { type: 'integer' },
     descricao: { type: ['string', 'null'] },
+    abertoEm: { type: ['string', 'null'] },
   },
 };
 
@@ -198,5 +199,32 @@ export default async function setorRoutes(fastify: FastifyInstance) {
       },
     },
     (request, reply) => controller.delete(request as any, reply)
+  );
+
+  fastify.patch(
+    '/setores/:id/abrir',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Setores'],
+        summary: 'Abrir setor para contagem',
+        description: 'Marca o momento em que o setor foi aberto pela primeira vez (write-once)',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        response: {
+          200: setorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.abrir(request as any, reply)
   );
 }

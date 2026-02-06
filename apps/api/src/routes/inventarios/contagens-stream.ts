@@ -20,6 +20,18 @@ interface TimelinePoint {
   quantidade_no_minuto: number;
 }
 
+interface OperatorStats {
+  user_id: string;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  total_contagens: number;
+  total_quantidade: number;
+  ultima_contagem: string;
+  setor_atual_id: number | null;
+  setor_atual_descricao: string;
+}
+
 export default async function contagensStreamRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/inventarios/:id/contagens/stream',
@@ -97,16 +109,28 @@ export default async function contagensStreamRoutes(fastify: FastifyInstance) {
         reply.raw.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
       };
 
+      // Profile cache for resolving operator names in realtime events
+      const profileCache = new Map<string, { full_name: string; email: string }>();
+
       // Send initial snapshot
       try {
-        const [statsResult, timelineResult] = await Promise.all([
+        const [statsResult, timelineResult, operatorsResult] = await Promise.all([
           supabase.rpc('get_contagem_sector_stats', { p_id_inventario: id }),
-          supabase.rpc('get_contagem_timeline', { p_id_inventario: id, p_minutes: 30 }),
+          supabase.rpc('get_contagem_timeline', { p_id_inventario: id, p_minutes: 1440 }),
+          supabase.rpc('get_contagem_operator_stats', { p_id_inventario: id }),
         ]);
+
+        const operators = (operatorsResult.data || []) as OperatorStats[];
+
+        // Populate profile cache from snapshot
+        for (const op of operators) {
+          profileCache.set(op.user_id, { full_name: op.full_name, email: op.email });
+        }
 
         send('snapshot', {
           sectors: (statsResult.data || []) as SectorStats[],
           timeline: (timelineResult.data || []) as TimelinePoint[],
+          operators,
         });
       } catch (err) {
         request.log.error({ error: err }, 'Erro ao buscar snapshot inicial');
@@ -126,7 +150,7 @@ export default async function contagensStreamRoutes(fastify: FastifyInstance) {
               schema: 'public',
               table: 'inventarios_contagens',
             },
-            (payload) => {
+            async (payload) => {
               const newRecord = payload.new as {
                 id: number;
                 id_inventario_setor: number;
@@ -136,10 +160,34 @@ export default async function contagensStreamRoutes(fastify: FastifyInstance) {
                 lote: string | null;
                 validade: string | null;
                 divergente: boolean;
+                id_usuario: string | null;
               };
 
               // Filter: only send if sector belongs to this inventory
               if (sectorIds.has(newRecord.id_inventario_setor)) {
+                let operadorNome: string | null = null;
+
+                if (newRecord.id_usuario) {
+                  const cached = profileCache.get(newRecord.id_usuario);
+                  if (cached) {
+                    operadorNome = cached.full_name;
+                  } else {
+                    // Fetch and cache profile
+                    const { data: profile } = await supabase
+                      .from('user_profiles')
+                      .select('full_name, email')
+                      .eq('id', newRecord.id_usuario)
+                      .single();
+                    if (profile) {
+                      profileCache.set(newRecord.id_usuario, {
+                        full_name: profile.full_name,
+                        email: profile.email,
+                      });
+                      operadorNome = profile.full_name;
+                    }
+                  }
+                }
+
                 send('contagem', {
                   id: newRecord.id,
                   idInventarioSetor: newRecord.id_inventario_setor,
@@ -149,6 +197,8 @@ export default async function contagensStreamRoutes(fastify: FastifyInstance) {
                   lote: newRecord.lote,
                   validade: newRecord.validade,
                   divergente: newRecord.divergente,
+                  idUsuario: newRecord.id_usuario,
+                  operadorNome,
                 });
               }
             }

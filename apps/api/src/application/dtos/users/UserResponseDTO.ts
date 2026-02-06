@@ -43,6 +43,7 @@ export interface UserPermissionsResponseDTO {
     resource: string;
     action: string;
   }>;
+  roles: string[];
 }
 
 export function toPermissionResponseDTO(permission: Permission): PermissionResponseDTO {
@@ -86,6 +87,7 @@ export function toUserPermissionsResponseDTO(user: User): UserPermissionsRespons
   return {
     userId: user.id!,
     permissions: user.permissions,
+    roles: user.roleNames,
   };
 }
 

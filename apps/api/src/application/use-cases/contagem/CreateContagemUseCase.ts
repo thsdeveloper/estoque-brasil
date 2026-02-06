@@ -5,7 +5,7 @@ import { CreateContagemDTO, ContagemResponseDTO, toContagemResponseDTO } from '.
 export class CreateContagemUseCase {
   constructor(private readonly contagemRepository: IInventarioContagemRepository) {}
 
-  async execute(data: CreateContagemDTO): Promise<ContagemResponseDTO> {
+  async execute(data: CreateContagemDTO, userId?: string): Promise<ContagemResponseDTO> {
     const contagem = InventarioContagem.create({
       idInventarioSetor: data.idInventarioSetor,
       idProduto: data.idProduto,
@@ -13,6 +13,7 @@ export class CreateContagemUseCase {
       validade: data.validade ? new Date(data.validade) : null,
       quantidade: data.quantidade,
       divergente: data.divergente,
+      idUsuario: userId ?? null,
     });
 
     const savedContagem = await this.contagemRepository.create(contagem);

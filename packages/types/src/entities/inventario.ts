@@ -15,6 +15,7 @@ export interface Inventario {
   nomeLoja?: string | null;
   cnpjLoja?: string | null;
   nomeCliente?: string | null;
+  temContagens?: boolean;
 }
 
 export type CreateInventarioInput = Omit<Inventario, 'id'>;
@@ -39,6 +40,7 @@ export interface Setor {
   inicio: number;
   termino: number;
   descricao: string | null;
+  abertoEm: string | null;
 }
 
 export type CreateSetorInput = Omit<Setor, 'id'>;

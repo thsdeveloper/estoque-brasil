@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
+import { AbrirSetorUseCase } from '../../application/use-cases/setor/AbrirSetorUseCase.js';
 import { CreateSetorUseCase } from '../../application/use-cases/setor/CreateSetorUseCase.js';
 import { GetSetorUseCase } from '../../application/use-cases/setor/GetSetorUseCase.js';
 import { UpdateSetorUseCase } from '../../application/use-cases/setor/UpdateSetorUseCase.js';
@@ -10,6 +11,7 @@ import { ISetorRepository } from '../../domain/repositories/ISetorRepository.js'
 import { createSetorSchema, updateSetorSchema } from '../../application/dtos/inventario/SetorDTO.js';
 
 export class SetorController {
+  private readonly abrirSetorUseCase: AbrirSetorUseCase;
   private readonly createSetorUseCase: CreateSetorUseCase;
   private readonly getSetorUseCase: GetSetorUseCase;
   private readonly updateSetorUseCase: UpdateSetorUseCase;
@@ -17,6 +19,7 @@ export class SetorController {
   private readonly listSetoresByInventarioUseCase: ListSetoresByInventarioUseCase;
 
   constructor(setorRepository: ISetorRepository) {
+    this.abrirSetorUseCase = new AbrirSetorUseCase(setorRepository);
     this.createSetorUseCase = new CreateSetorUseCase(setorRepository);
     this.getSetorUseCase = new GetSetorUseCase(setorRepository);
     this.updateSetorUseCase = new UpdateSetorUseCase(setorRepository);
@@ -69,6 +72,19 @@ export class SetorController {
       const id = parseInt(request.params.id, 10);
       await this.deleteSetorUseCase.execute(id);
       reply.status(204).send();
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async abrir(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const id = parseInt(request.params.id, 10);
+      const setor = await this.abrirSetorUseCase.execute(id);
+      reply.send(setor);
     } catch (error) {
       this.handleError(error, reply);
     }
