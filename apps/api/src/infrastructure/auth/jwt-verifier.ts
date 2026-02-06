@@ -25,6 +25,8 @@ export async function verifyJWT(token: string): Promise<JWTClaims> {
     if (error instanceof jose.errors.JWTExpired) {
       throw new TokenExpiredError();
     }
+    console.error('[JWT Verify] Token validation failed:', error instanceof Error ? error.message : error);
+    console.error('[JWT Verify] Error type:', error instanceof Error ? error.constructor.name : typeof error);
     throw new InvalidTokenError();
   }
 }

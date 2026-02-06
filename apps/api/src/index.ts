@@ -1,6 +1,12 @@
+import { webcrypto } from 'node:crypto';
 import { config } from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+
+// Polyfill globalThis.crypto for Node 18 (required by jose)
+if (!globalThis.crypto) {
+  (globalThis as Record<string, unknown>).crypto = webcrypto;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

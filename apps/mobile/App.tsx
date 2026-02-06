@@ -1,20 +1,18 @@
+import React from 'react';
+import { StatusBar as RNStatusBar } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { InventarioProvider } from '@/contexts/InventarioContext';
+import { AppNavigator } from '@/navigation/AppNavigator';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AuthProvider>
+      <InventarioProvider>
+        <StatusBar style="light" />
+        <RNStatusBar translucent={false} backgroundColor="#121212" />
+        <AppNavigator />
+      </InventarioProvider>
+    </AuthProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

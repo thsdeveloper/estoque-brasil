@@ -15,6 +15,7 @@ import produtoRoutes from './routes/produtos/index.js';
 import contagemRoutes from './routes/contagens/index.js';
 import userRoutes from './routes/users/index.js';
 import rolesRoutes from './routes/roles/index.js';
+import monitorRoutes from './routes/inventarios/monitor.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -43,6 +44,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(empresaRoutes, { prefix: '/api' });
   await app.register(lojaRoutes, { prefix: '/api' });
   await app.register(inventarioRoutes, { prefix: '/api' });
+  await app.register(monitorRoutes, { prefix: '/api' });
   await app.register(setorRoutes, { prefix: '/api' });
   await app.register(produtoRoutes, { prefix: '/api' });
   await app.register(contagemRoutes, { prefix: '/api' });

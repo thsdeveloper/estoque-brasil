@@ -33,6 +33,21 @@ export interface ApiError {
   errors?: { field: string; message: string }[]
 }
 
+export interface MonitorMetrics {
+  estimativa: number
+  totalContado: number
+  diferenca: number
+  quantidadeSkus: number
+  skusPendentes: number
+  skusSemDivergencia: number
+  divergenciasAguardandoRecontagem: number
+  recontados: number
+  divergenciaConfirmada: number
+  rupturaCritica: number
+  entradaNaoPrevista: number
+  impactoCritico: number
+}
+
 class ApiClient {
   private baseUrl: string
 
@@ -187,6 +202,10 @@ export const inventariosApi = {
 
   finalizar: (id: number | string): Promise<Inventario> => {
     return apiClient.post<Inventario>(`/api/inventarios/${id}/finalizar`, {})
+  },
+
+  getMonitorMetrics: (idInventario: number | string): Promise<MonitorMetrics> => {
+    return apiClient.get<MonitorMetrics>(`/api/inventarios/${idInventario}/monitor-metrics`)
   },
 
   // ====== SETORES ======
