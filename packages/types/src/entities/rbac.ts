@@ -2,13 +2,16 @@
 // RBAC - Role-Based Access Control Types
 // ============================================
 
-export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
+export type PermissionAction = string;
+export type StandardPermissionAction = 'read' | 'create' | 'update' | 'delete';
 
 export interface Permission {
   id: string;
   resource: string;
   action: PermissionAction;
   description: string | null;
+  resourceId?: string | null;
+  actionId?: string | null;
 }
 
 export interface Role {
@@ -17,7 +20,8 @@ export interface Role {
   displayName: string;
   description: string | null;
   isSystemRole: boolean;
-  permissions?: Permission[];
+  policies?: AccessPolicy[];
+  policyIds?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -42,6 +46,46 @@ export interface UserPermissions {
     action: PermissionAction;
   }>;
   roles: string[];
+}
+
+// ============================================
+// Access Control - Resources, Actions, Policies
+// ============================================
+
+export interface AccessResource {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string | null;
+  icon: string | null;
+  isSystem: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccessAction {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string | null;
+  isSystem: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccessPolicy {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string | null;
+  icon: string | null;
+  isSystemPolicy: boolean;
+  permissions?: Permission[];
+  permissionIds?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Input types for API

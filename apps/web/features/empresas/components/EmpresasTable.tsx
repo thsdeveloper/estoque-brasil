@@ -6,6 +6,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Empresa } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { empresasApi, type PaginatedResponse } from "../api/empresas-api"
 import { DeleteEmpresaDialog } from "./DeleteEmpresaDialog"
 import { getColumns } from "./columns"
@@ -20,6 +21,9 @@ export function EmpresasTable({ page, search, ativo }: EmpresasTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { canUpdate, canDelete } = usePermissions()
+  const canEditEmpresa = canUpdate("empresas")
+  const canDeleteEmpresa = canDelete("empresas")
 
   const [data, setData] = useState<PaginatedResponse<Empresa> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -77,8 +81,8 @@ export function EmpresasTable({ page, search, ativo }: EmpresasTableProps) {
   }
 
   const columns = useMemo(
-    () => getColumns({ onDelete: handleDeleteClick }),
-    []
+    () => getColumns({ onDelete: handleDeleteClick, canEdit: canEditEmpresa, canDelete: canDeleteEmpresa }),
+    [canEditEmpresa, canDeleteEmpresa]
   )
 
   if (error) {

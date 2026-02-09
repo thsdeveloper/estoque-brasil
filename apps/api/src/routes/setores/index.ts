@@ -3,6 +3,7 @@ import { SetorController } from '../../interface-adapters/controllers/SetorContr
 import { SupabaseSetorRepository } from '../../infrastructure/database/supabase/repositories/SupabaseSetorRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { requirePermission } from '../../plugins/authorization.js';
 
 const setorResponseSchema = {
   type: 'object',
@@ -127,7 +128,7 @@ export default async function setorRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/setores',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('setores', 'create')],
       schema: {
         tags: ['Setores'],
         summary: 'Criar novo setor',
@@ -148,7 +149,7 @@ export default async function setorRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/setores/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('setores', 'update')],
       schema: {
         tags: ['Setores'],
         summary: 'Atualizar setor',
@@ -177,7 +178,7 @@ export default async function setorRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/setores/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('setores', 'delete')],
       schema: {
         tags: ['Setores'],
         summary: 'Excluir setor',

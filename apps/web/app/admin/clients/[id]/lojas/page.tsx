@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ArrowLeft, Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { PermissionGate } from "@/shared/components/PermissionGate"
 import { LojasTable, LojasTableSkeleton } from "@/features/lojas"
 import { clientsApi } from "@/features/clients"
 
@@ -44,12 +45,14 @@ export default async function ClientLojasPage({ params, searchParams }: PageProp
             </p>
           </div>
         </div>
-        <Button asChild>
-          <Link href={`/admin/clients/${clientId}/lojas/new`}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Loja
-          </Link>
-        </Button>
+        <PermissionGate resource="lojas" action="create">
+          <Button asChild>
+            <Link href={`/admin/clients/${clientId}/lojas/new`}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Loja
+            </Link>
+          </Button>
+        </PermissionGate>
       </div>
 
       <Card>

@@ -3,6 +3,7 @@ import { ContagemController } from '../../interface-adapters/controllers/Contage
 import { SupabaseInventarioContagemRepository } from '../../infrastructure/database/supabase/repositories/SupabaseInventarioContagemRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { requirePermission } from '../../plugins/authorization.js';
 
 const contagemResponseSchema = {
   type: 'object',
@@ -143,7 +144,7 @@ export default async function contagemRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/contagens',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('contagens', 'create')],
       schema: {
         tags: ['Contagens'],
         summary: 'Criar nova contagem',
@@ -164,7 +165,7 @@ export default async function contagemRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/contagens/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('contagens', 'update')],
       schema: {
         tags: ['Contagens'],
         summary: 'Atualizar contagem',
@@ -193,7 +194,7 @@ export default async function contagemRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/contagens/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('contagens', 'delete')],
       schema: {
         tags: ['Contagens'],
         summary: 'Excluir contagem',

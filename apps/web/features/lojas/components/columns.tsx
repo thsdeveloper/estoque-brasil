@@ -14,6 +14,8 @@ import { DataTableRowActions } from "@/shared/components/ui/data-table-row-actio
 interface ColumnsProps {
   clientId: string
   onDelete: (loja: Loja) => void
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 // Format CNPJ for display
@@ -25,7 +27,7 @@ function formatCNPJ(cnpj: string | null): string {
   )
 }
 
-export function getColumns({ clientId, onDelete }: ColumnsProps): ColumnDef<Loja>[] {
+export function getColumns({ clientId, onDelete, canEdit = true, canDelete = true }: ColumnsProps): ColumnDef<Loja>[] {
   return [
     {
       accessorKey: "nome",
@@ -67,20 +69,26 @@ export function getColumns({ clientId, onDelete }: ColumnsProps): ColumnDef<Loja
                   Visualizar
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/admin/clients/${clientId}/lojas/${loja.id}/edit`}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-500 focus:text-red-500"
-                onClick={() => onDelete(loja)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
-              </DropdownMenuItem>
+              {canEdit && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/admin/clients/${clientId}/lojas/${loja.id}/edit`}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Editar
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-500 focus:text-red-500"
+                    onClick={() => onDelete(loja)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Excluir
+                  </DropdownMenuItem>
+                </>
+              )}
             </DataTableRowActions>
           </div>
         )

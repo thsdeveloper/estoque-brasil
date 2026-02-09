@@ -158,6 +158,26 @@ export default async function userRoutes(fastify: FastifyInstance) {
     (request, reply) => controller.getMyPermissions(request, reply)
   );
 
+  // Get current user profile (any authenticated user)
+  fastify.get(
+    '/users/me',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Users'],
+        summary: 'Obter perfil do usuário atual',
+        description: 'Retorna os dados completos do usuário autenticado',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: userResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.getMe(request, reply)
+  );
+
   // List users (requires usuarios:read permission)
   fastify.get(
     '/users',

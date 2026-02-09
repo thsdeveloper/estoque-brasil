@@ -3,6 +3,7 @@ import { ClientController } from '../../interface-adapters/controllers/ClientCon
 import { SupabaseClientRepository } from '../../infrastructure/database/supabase/repositories/SupabaseClientRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { requirePermission } from '../../plugins/authorization.js';
 
 const clientResponseSchema = {
   type: 'object',
@@ -165,7 +166,7 @@ export default async function clientRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/clients',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('clients', 'create')],
       schema: {
         tags: ['Clients'],
         summary: 'Criar novo cliente',
@@ -187,7 +188,7 @@ export default async function clientRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/clients/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('clients', 'update')],
       schema: {
         tags: ['Clients'],
         summary: 'Atualizar cliente',
@@ -217,7 +218,7 @@ export default async function clientRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/clients/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('clients', 'delete')],
       schema: {
         tags: ['Clients'],
         summary: 'Excluir cliente',

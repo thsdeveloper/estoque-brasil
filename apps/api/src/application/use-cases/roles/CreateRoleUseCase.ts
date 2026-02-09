@@ -27,7 +27,6 @@ export class CreateRoleUseCase {
       displayName,
       description: description ?? null,
       isSystemRole: false,
-      permissions: [],
     });
 
     return this.roleRepository.create(role);

@@ -9,14 +9,14 @@ import {
   ReactNode,
 } from "react"
 import { usuariosApi } from "../api/usuarios-api"
-import type { UserPermissions, PermissionAction } from "../types"
+import type { UserPermissions } from "../types"
 
 interface PermissionsContextValue {
   permissions: UserPermissions | null
   loading: boolean
   error: string | null
   roles: string[]
-  hasPermission: (resource: string, action: PermissionAction) => boolean
+  hasPermission: (resource: string, action: string) => boolean
   hasRole: (name: string) => boolean
   canRead: (resource: string) => boolean
   canCreate: (resource: string) => boolean
@@ -59,7 +59,7 @@ export function PermissionsProvider({ children }: PermissionsProviderProps) {
   const roles = permissions?.roles ?? []
 
   const hasPermission = useCallback(
-    (resource: string, action: PermissionAction): boolean => {
+    (resource: string, action: string): boolean => {
       if (!permissions) return false
       return permissions.permissions.some(
         (p) => p.resource === resource && p.action === action
@@ -127,7 +127,7 @@ export function usePermissions(): PermissionsContextValue {
 // Convenience hook for checking a specific permission
 export function useHasPermission(
   resource: string,
-  action: PermissionAction
+  action: string
 ): boolean {
   const { hasPermission, loading } = usePermissions()
   // Return false while loading to prevent flash of unauthorized content

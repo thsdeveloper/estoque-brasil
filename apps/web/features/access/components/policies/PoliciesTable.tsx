@@ -1,0 +1,190 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { Loader2, Plus, Pencil, Trash2, Eye, ShieldCheck } from "lucide-react"
+import { Button } from "@/shared/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog"
+import { Badge } from "@/shared/components/ui/badge"
+import { policiesApi, type ApiError } from "../../api/access-api"
+import type { AccessPolicy } from "../../types"
+
+export function PoliciesTable() {
+  const router = useRouter()
+  const [policies, setPolicies] = useState<AccessPolicy[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+
+  useEffect(() => {
+    fetchPolicies()
+  }, [])
+
+  async function fetchPolicies() {
+    try {
+      setLoading(true)
+      const data = await policiesApi.list()
+      setPolicies(data)
+    } catch (err) {
+      setError("Erro ao carregar políticas")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteId) return
+    setDeleting(true)
+    try {
+      await policiesApi.delete(deleteId)
+      setPolicies((prev) => prev.filter((p) => p.id !== deleteId))
+      setDeleteId(null)
+    } catch (err) {
+      const apiError = err as ApiError
+      setError(apiError.message || "Erro ao excluir política")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Políticas de Acesso</h2>
+          <p className="text-muted-foreground">
+            Gerencie as políticas de acesso do sistema. Cada política agrupa um conjunto de permissões.
+          </p>
+        </div>
+        <Button onClick={() => router.push("/admin/acesso/politicas/create")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nova Política
+        </Button>
+      </div>
+
+      {error && (
+        <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+          {error}
+        </div>
+      )}
+
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Nome de Exibição</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead className="text-center">Permissões</TableHead>
+              <TableHead className="text-center">Tipo</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {policies.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <ShieldCheck className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  Nenhuma política cadastrada
+                </TableCell>
+              </TableRow>
+            ) : (
+              policies.map((policy) => (
+                <TableRow key={policy.id}>
+                  <TableCell className="font-mono text-sm">{policy.name}</TableCell>
+                  <TableCell className="font-medium">{policy.displayName}</TableCell>
+                  <TableCell className="text-muted-foreground max-w-[300px] truncate">
+                    {policy.description || "-"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline">
+                      {policy.permissions?.length ?? 0}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {policy.isSystemPolicy ? (
+                      <Badge variant="secondary">Sistema</Badge>
+                    ) : (
+                      <Badge variant="outline">Custom</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => router.push(`/admin/acesso/politicas/${policy.id}`)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => router.push(`/admin/acesso/politicas/${policy.id}/edit`)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteId(policy.id)}
+                        disabled={policy.isSystemPolicy}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Política</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta política? Esta ação não pode ser desfeita.
+              As roles que utilizam esta política perderão as permissões associadas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting}>
+              {deleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  )
+}

@@ -1,4 +1,4 @@
-import { Permission } from './Permission.js';
+import { AccessPolicy } from './AccessPolicy.js';
 import { InvalidRoleError } from '../errors/UserErrors.js';
 
 export interface RoleProps {
@@ -7,7 +7,7 @@ export interface RoleProps {
   displayName: string;
   description?: string | null;
   isSystemRole?: boolean;
-  permissions?: Permission[];
+  policies?: AccessPolicy[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -18,7 +18,7 @@ export class Role {
   private _displayName: string;
   private _description: string | null;
   private readonly _isSystemRole: boolean;
-  private _permissions: Permission[];
+  private _policies: AccessPolicy[];
   private readonly _createdAt: Date;
   private _updatedAt: Date;
 
@@ -28,7 +28,7 @@ export class Role {
     this._displayName = props.displayName;
     this._description = props.description ?? null;
     this._isSystemRole = props.isSystemRole ?? false;
-    this._permissions = props.permissions ?? [];
+    this._policies = props.policies ?? [];
     this._createdAt = props.createdAt ?? new Date();
     this._updatedAt = props.updatedAt ?? new Date();
   }
@@ -82,31 +82,17 @@ export class Role {
       this._description = props.description ?? null;
     }
 
-    if (props.permissions !== undefined) {
-      this._permissions = props.permissions;
+    if (props.policies !== undefined) {
+      this._policies = props.policies;
     }
 
     this._updatedAt = new Date();
   }
 
   hasPermission(resource: string, action: string): boolean {
-    return this._permissions.some(
-      (p) => p.resource === resource && p.action === action
+    return this._policies.some(policy =>
+      policy.hasPermission(resource, action)
     );
-  }
-
-  addPermission(permission: Permission): void {
-    if (!this.hasPermission(permission.resource, permission.action)) {
-      this._permissions.push(permission);
-      this._updatedAt = new Date();
-    }
-  }
-
-  removePermission(resource: string, action: string): void {
-    this._permissions = this._permissions.filter(
-      (p) => !(p.resource === resource && p.action === action)
-    );
-    this._updatedAt = new Date();
   }
 
   get id(): string | undefined {
@@ -129,8 +115,8 @@ export class Role {
     return this._isSystemRole;
   }
 
-  get permissions(): Permission[] {
-    return [...this._permissions];
+  get policies(): AccessPolicy[] {
+    return [...this._policies];
   }
 
   get createdAt(): Date {

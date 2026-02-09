@@ -3,6 +3,7 @@ import { EmpresaController } from '../../interface-adapters/controllers/EmpresaC
 import { SupabaseEmpresaRepository } from '../../infrastructure/database/supabase/repositories/SupabaseEmpresaRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { requirePermission } from '../../plugins/authorization.js';
 
 const empresaResponseSchema = {
   type: 'object',
@@ -121,7 +122,7 @@ export default async function empresaRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/empresas',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('empresas', 'create')],
       schema: {
         tags: ['Empresas'],
         summary: 'Criar nova empresa',
@@ -143,7 +144,7 @@ export default async function empresaRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/empresas/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('empresas', 'update')],
       schema: {
         tags: ['Empresas'],
         summary: 'Atualizar empresa',
@@ -173,7 +174,7 @@ export default async function empresaRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/empresas/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('empresas', 'delete')],
       schema: {
         tags: ['Empresas'],
         summary: 'Excluir empresa',

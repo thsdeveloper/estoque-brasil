@@ -30,8 +30,10 @@ export function InventariosTable({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { hasRole } = usePermissions()
+  const { hasRole, canUpdate, canDelete } = usePermissions()
   const isLiderColeta = hasRole("lider_coleta")
+  const canEditInventario = canUpdate("inventarios")
+  const canDeleteInventario = canDelete("inventarios")
 
   const [pageSize, setPageSize] = useState(10)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -88,8 +90,8 @@ export function InventariosTable({
 
   // Memoize columns with proper dependencies (rerender-memo)
   const columns = useMemo(
-    () => getColumns({ onDelete: handleDeleteClick, isLiderColeta }),
-    [handleDeleteClick, isLiderColeta]
+    () => getColumns({ onDelete: handleDeleteClick, isLiderColeta, canEdit: canEditInventario, canDelete: canDeleteInventario }),
+    [handleDeleteClick, isLiderColeta, canEditInventario, canDeleteInventario]
   )
 
   const hasFilters = idLoja || idEmpresa || ativo !== undefined

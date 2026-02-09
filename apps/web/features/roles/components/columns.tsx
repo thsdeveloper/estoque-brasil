@@ -61,21 +61,6 @@ export function getColumns({ onDelete, canUpdate, canDelete }: ColumnsProps): Co
       ),
     },
     {
-      accessorKey: "permissions",
-      header: "Permissões",
-      cell: ({ row }) => {
-        const role = row.original
-        const count = role.permissions?.length || 0
-        return (
-          <Link href={`/admin/cadastros/roles/${role.id}`}>
-            <Badge variant="outline" className="cursor-pointer hover:bg-muted">
-              {count} {count === 1 ? "permissão" : "permissões"}
-            </Badge>
-          </Link>
-        )
-      },
-    },
-    {
       id: "actions",
       header: "Ações",
       cell: ({ row }) => {

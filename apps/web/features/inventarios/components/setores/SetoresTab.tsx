@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog"
 import { inventariosApi } from "../../api/inventarios-api"
+import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { SetorForm } from "./SetorForm"
 
 interface SetoresTabProps {
@@ -44,6 +45,10 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
   const [editingSetor, setEditingSetor] = useState<Setor | null>(null)
   const [deletingSetor, setDeletingSetor] = useState<Setor | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const { canCreate, canUpdate, canDelete } = usePermissions()
+  const canCreateSetor = canCreate("setores")
+  const canEditSetor = canUpdate("setores")
+  const canDeleteSetor = canDelete("setores")
 
   const fetchSetores = useCallback(async () => {
     setLoading(true)
@@ -125,10 +130,12 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
             Gerencie os setores para organizacao da contagem
           </CardDescription>
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Setor
-        </Button>
+        {canCreateSetor && (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Setor
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -147,10 +154,12 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
             <p className="text-gray-light mb-4">
               Nenhum setor cadastrado neste inventario
             </p>
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Cadastrar primeiro setor
-            </Button>
+            {canCreateSetor && (
+              <Button onClick={() => setShowForm(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Cadastrar primeiro setor
+              </Button>
+            )}
           </div>
         ) : (
           <Table>
@@ -160,7 +169,9 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
                 <TableHead>Inicio</TableHead>
                 <TableHead>Termino</TableHead>
                 <TableHead>Descricao</TableHead>
-                <TableHead className="text-right">Acoes</TableHead>
+                {(canEditSetor || canDeleteSetor) && (
+                  <TableHead className="text-right">Acoes</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -172,25 +183,31 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
                   <TableCell>{setor.inicio}</TableCell>
                   <TableCell>{setor.termino}</TableCell>
                   <TableCell>{setor.descricao || "-"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(setor)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={() => setDeletingSetor(setor)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  {(canEditSetor || canDeleteSetor) && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        {canEditSetor && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(setor)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {canDeleteSetor && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-600"
+                            onClick={() => setDeletingSetor(setor)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

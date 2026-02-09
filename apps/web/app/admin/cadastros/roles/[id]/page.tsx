@@ -14,7 +14,8 @@ import {
 } from "@/shared/components/ui/card"
 import { Badge } from "@/shared/components/ui/badge"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
-import { rolesApi, PermissionsMatrix, type Role } from "@/features/roles"
+import { rolesApi, type Role } from "@/features/roles"
+import { RolePoliciesSelector } from "@/features/roles/components/RolePoliciesSelector"
 
 export default function RoleDetailPage() {
   const params = useParams()
@@ -96,17 +97,16 @@ export default function RoleDetailPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Permissões</CardTitle>
+          <CardTitle>Políticas de Acesso</CardTitle>
           <CardDescription>
             {canUpdate("usuarios")
-              ? "Selecione as permissões que este perfil terá acesso"
-              : "Visualize as permissões deste perfil"}
+              ? "Selecione as políticas que este perfil terá. Cada política agrupa um conjunto de permissões."
+              : "Visualize as políticas atribuídas a este perfil."}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <PermissionsMatrix
-            role={role}
-            onUpdate={setRole}
+          <RolePoliciesSelector
+            roleId={role.id}
             readonly={!canUpdate("usuarios")}
           />
         </CardContent>

@@ -1,7 +1,7 @@
 // Components
 export { RolesTable } from "./components/RolesTable"
 export { RoleForm } from "./components/RoleForm"
-export { PermissionsMatrix } from "./components/PermissionsMatrix"
+export { RolePoliciesSelector } from "./components/RolePoliciesSelector"
 export { DeleteRoleDialog } from "./components/DeleteRoleDialog"
 export { CreateRoleButton } from "./components/CreateRoleButton"
 export { getColumns as getRoleColumns } from "./components/columns"
@@ -17,7 +17,7 @@ export type {
   PermissionsByResource,
   CreateRoleInput,
   UpdateRoleInput,
-  UpdateRolePermissionsInput,
+  SetRolePoliciesInput,
   CreateRoleFormData,
   UpdateRoleFormData,
 } from "./types"

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Client } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { clientsApi, type PaginatedResponse } from "../api/clients-api"
 import { DeleteClientDialog } from "./DeleteClientDialog"
 import { getColumns } from "./columns"
@@ -20,6 +21,9 @@ export function ClientsTable({ page, search, uf }: ClientsTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { canUpdate, canDelete } = usePermissions()
+  const canEditClient = canUpdate("clients")
+  const canDeleteClient = canDelete("clients")
 
   const [data, setData] = useState<PaginatedResponse<Client> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,8 +76,8 @@ export function ClientsTable({ page, search, uf }: ClientsTableProps) {
   }
 
   const columns = useMemo(
-    () => getColumns({ onDelete: handleDeleteClick }),
-    []
+    () => getColumns({ onDelete: handleDeleteClick, canEdit: canEditClient, canDelete: canDeleteClient }),
+    [canEditClient, canDeleteClient]
   )
 
   if (error) {

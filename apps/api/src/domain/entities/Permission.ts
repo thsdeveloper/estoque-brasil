@@ -1,10 +1,13 @@
-export type PermissionAction = 'read' | 'create' | 'update' | 'delete';
+export type PermissionAction = string;
+export type StandardPermissionAction = 'read' | 'create' | 'update' | 'delete';
 
 export interface PermissionProps {
   id?: string;
   resource: string;
   action: PermissionAction;
   description?: string | null;
+  resourceId?: string | null;
+  actionId?: string | null;
   createdAt?: Date;
 }
 
@@ -13,6 +16,8 @@ export class Permission {
   private readonly _resource: string;
   private readonly _action: PermissionAction;
   private readonly _description: string | null;
+  private readonly _resourceId: string | null;
+  private readonly _actionId: string | null;
   private readonly _createdAt: Date;
 
   private constructor(props: PermissionProps) {
@@ -20,6 +25,8 @@ export class Permission {
     this._resource = props.resource;
     this._action = props.action;
     this._description = props.description ?? null;
+    this._resourceId = props.resourceId ?? null;
+    this._actionId = props.actionId ?? null;
     this._createdAt = props.createdAt ?? new Date();
   }
 
@@ -33,8 +40,8 @@ export class Permission {
       throw new Error('Resource é obrigatório');
     }
 
-    if (!props.action || !['read', 'create', 'update', 'delete'].includes(props.action)) {
-      throw new Error('Action deve ser: read, create, update ou delete');
+    if (!props.action || props.action.trim().length === 0) {
+      throw new Error('Action é obrigatório');
     }
   }
 
@@ -52,6 +59,14 @@ export class Permission {
 
   get description(): string | null {
     return this._description;
+  }
+
+  get resourceId(): string | null {
+    return this._resourceId;
+  }
+
+  get actionId(): string | null {
+    return this._actionId;
   }
 
   get createdAt(): Date {

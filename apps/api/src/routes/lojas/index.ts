@@ -3,6 +3,7 @@ import { LojaController } from '../../interface-adapters/controllers/LojaControl
 import { SupabaseLojaRepository } from '../../infrastructure/database/supabase/repositories/SupabaseLojaRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { requirePermission } from '../../plugins/authorization.js';
 
 const lojaResponseSchema = {
   type: 'object',
@@ -115,7 +116,7 @@ export default async function lojaRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/lojas',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('lojas', 'create')],
       schema: {
         tags: ['Lojas'],
         summary: 'Criar nova loja',
@@ -137,7 +138,7 @@ export default async function lojaRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/lojas/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('lojas', 'update')],
       schema: {
         tags: ['Lojas'],
         summary: 'Atualizar loja',
@@ -167,7 +168,7 @@ export default async function lojaRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/lojas/:id',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('lojas', 'delete')],
       schema: {
         tags: ['Lojas'],
         summary: 'Excluir loja',

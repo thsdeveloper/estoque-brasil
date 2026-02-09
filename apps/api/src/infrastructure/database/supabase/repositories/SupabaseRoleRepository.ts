@@ -14,14 +14,7 @@ import {
 
 const ROLES_TABLE = 'roles';
 const PERMISSIONS_TABLE = 'permissions';
-const ROLE_PERMISSIONS_TABLE = 'role_permissions';
-
-const ROLE_WITH_PERMISSIONS_SELECT = `
-  *,
-  role_permissions (
-    permission:permissions (*)
-  )
-`;
+const ROLE_POLICIES_TABLE = 'role_policies';
 
 export class SupabaseRoleRepository implements IRoleRepository {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -42,13 +35,13 @@ export class SupabaseRoleRepository implements IRoleRepository {
       throw new Error(`Failed to create role: ${error.message}`);
     }
 
-    return RoleMapper.toDomain(data as RoleDbRow, []);
+    return RoleMapper.toDomain(data as RoleDbRow);
   }
 
   async findById(id: string): Promise<Role | null> {
     const { data, error } = await this.supabase
       .from(ROLES_TABLE)
-      .select(ROLE_WITH_PERMISSIONS_SELECT)
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -59,13 +52,13 @@ export class SupabaseRoleRepository implements IRoleRepository {
       throw new Error(`Failed to find role: ${error.message}`);
     }
 
-    return data ? RoleMapper.toDomainWithPermissions(data) : null;
+    return data ? RoleMapper.toDomain(data as RoleDbRow) : null;
   }
 
   async findByName(name: string): Promise<Role | null> {
     const { data, error } = await this.supabase
       .from(ROLES_TABLE)
-      .select(ROLE_WITH_PERMISSIONS_SELECT)
+      .select('*')
       .eq('name', name)
       .single();
 
@@ -76,20 +69,20 @@ export class SupabaseRoleRepository implements IRoleRepository {
       throw new Error(`Failed to find role by name: ${error.message}`);
     }
 
-    return data ? RoleMapper.toDomainWithPermissions(data) : null;
+    return data ? RoleMapper.toDomain(data as RoleDbRow) : null;
   }
 
   async findAll(): Promise<Role[]> {
     const { data, error } = await this.supabase
       .from(ROLES_TABLE)
-      .select(ROLE_WITH_PERMISSIONS_SELECT)
+      .select('*')
       .order('display_name', { ascending: true });
 
     if (error) {
       throw new Error(`Failed to list roles: ${error.message}`);
     }
 
-    return data.map(RoleMapper.toDomainWithPermissions);
+    return data.map((row: RoleDbRow) => RoleMapper.toDomain(row));
   }
 
   async update(role: Role): Promise<Role> {
@@ -113,7 +106,7 @@ export class SupabaseRoleRepository implements IRoleRepository {
       throw new Error(`Failed to update role: ${error.message}`);
     }
 
-    return RoleMapper.toDomain(data as RoleDbRow, role.permissions);
+    return RoleMapper.toDomain(data as RoleDbRow);
   }
 
   async delete(id: string): Promise<void> {
@@ -146,43 +139,45 @@ export class SupabaseRoleRepository implements IRoleRepository {
     return (count ?? 0) > 0;
   }
 
-  async assignPermission(roleId: string, permissionId: string): Promise<void> {
-    const { error } = await this.supabase.from(ROLE_PERMISSIONS_TABLE).insert({
-      role_id: roleId,
-      permission_id: permissionId,
-    });
+  async setPolicies(roleId: string, policyIds: string[]): Promise<void> {
+    // Delete all existing role policies
+    const { error: deleteError } = await this.supabase
+      .from(ROLE_POLICIES_TABLE)
+      .delete()
+      .eq('role_id', roleId);
 
-    if (error) {
-      // Ignore duplicate key error
-      if (error.code !== '23505') {
-        throw new Error(`Failed to assign permission: ${error.message}`);
+    if (deleteError) {
+      throw new Error(`Failed to clear role policies: ${deleteError.message}`);
+    }
+
+    // Insert new ones
+    if (policyIds.length > 0) {
+      const rows = policyIds.map((policyId) => ({
+        role_id: roleId,
+        policy_id: policyId,
+      }));
+
+      const { error: insertError } = await this.supabase
+        .from(ROLE_POLICIES_TABLE)
+        .insert(rows);
+
+      if (insertError) {
+        throw new Error(`Failed to set role policies: ${insertError.message}`);
       }
     }
   }
 
-  async removePermission(roleId: string, permissionId: string): Promise<void> {
-    const { error } = await this.supabase
-      .from(ROLE_PERMISSIONS_TABLE)
-      .delete()
-      .eq('role_id', roleId)
-      .eq('permission_id', permissionId);
-
-    if (error) {
-      throw new Error(`Failed to remove permission: ${error.message}`);
-    }
-  }
-
-  async getRolePermissionIds(roleId: string): Promise<string[]> {
+  async getRolePolicyIds(roleId: string): Promise<string[]> {
     const { data, error } = await this.supabase
-      .from(ROLE_PERMISSIONS_TABLE)
-      .select('permission_id')
+      .from(ROLE_POLICIES_TABLE)
+      .select('policy_id')
       .eq('role_id', roleId);
 
     if (error) {
-      throw new Error(`Failed to get role permissions: ${error.message}`);
+      throw new Error(`Failed to get role policies: ${error.message}`);
     }
 
-    return data.map((row) => row.permission_id);
+    return data.map((row) => row.policy_id);
   }
 }
 

@@ -8,7 +8,6 @@ import { Loader2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Textarea } from "@/shared/components/ui/textarea"
-import { Checkbox } from "@/shared/components/ui/checkbox"
 import {
   Card,
   CardContent,
@@ -25,23 +24,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/components/ui/table"
 import { rolesApi, type ApiError } from "../api/roles-api"
+import { RolePoliciesSelector } from "./RolePoliciesSelector"
 import {
   createRoleFormSchema,
   updateRoleFormSchema,
   type CreateRoleFormData,
   type UpdateRoleFormData,
   type Role,
-  type PermissionsByResource,
-  ACTION_DISPLAY_NAMES,
 } from "../types"
 
 interface RoleFormProps {
@@ -65,11 +55,7 @@ export function RoleForm({ role, mode }: RoleFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Permissions state (only for create mode)
-  const [permissionsGrouped, setPermissionsGrouped] = useState<PermissionsByResource[]>([])
-  const [selectedPermissionIds, setSelectedPermissionIds] = useState<Set<string>>(new Set())
-  const [loadingPermissions, setLoadingPermissions] = useState(mode === "create")
+  const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([])
 
   const isCreate = mode === "create"
   const schema = isCreate ? createRoleFormSchema : updateRoleFormSchema
@@ -98,51 +84,9 @@ export function RoleForm({ role, mode }: RoleFormProps) {
     }
   }, [displayName, isCreate, form])
 
-  // Load permissions for create mode
-  useEffect(() => {
-    if (isCreate) {
-      async function fetchPermissions() {
-        try {
-          const grouped = await rolesApi.listPermissionsGrouped()
-          setPermissionsGrouped(grouped)
-        } catch (err) {
-          console.error("Erro ao carregar permissões:", err)
-        } finally {
-          setLoadingPermissions(false)
-        }
-      }
-      fetchPermissions()
-    }
-  }, [isCreate])
-
-  const handleTogglePermission = useCallback((permissionId: string) => {
-    setSelectedPermissionIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(permissionId)) {
-        next.delete(permissionId)
-      } else {
-        next.add(permissionId)
-      }
-      return next
-    })
+  const handlePolicySelectionChange = useCallback((policyIds: string[]) => {
+    setSelectedPolicyIds(policyIds)
   }, [])
-
-  const handleToggleResource = useCallback(
-    (permissionIds: string[], checked: boolean) => {
-      setSelectedPermissionIds((prev) => {
-        const next = new Set(prev)
-        permissionIds.forEach((id) => {
-          if (checked) {
-            next.add(id)
-          } else {
-            next.delete(id)
-          }
-        })
-        return next
-      })
-    },
-    []
-  )
 
   const onSubmit = async (data: CreateRoleFormData | UpdateRoleFormData) => {
     setLoading(true)
@@ -150,13 +94,12 @@ export function RoleForm({ role, mode }: RoleFormProps) {
 
     try {
       if (isCreate) {
-        // Create role first
         const newRole = await rolesApi.create(data as CreateRoleFormData)
 
-        // Then update permissions if any selected
-        if (selectedPermissionIds.size > 0) {
-          await rolesApi.updatePermissions(newRole.id, {
-            permissionIds: Array.from(selectedPermissionIds),
+        // Set policies if any selected
+        if (selectedPolicyIds.length > 0) {
+          await rolesApi.setPolicies(newRole.id, {
+            policyIds: selectedPolicyIds,
           })
         }
 
@@ -181,23 +124,6 @@ export function RoleForm({ role, mode }: RoleFormProps) {
       setLoading(false)
     }
   }
-
-  const isResourceFullySelected = useCallback(
-    (permissionIds: string[]) => {
-      return permissionIds.every((id) => selectedPermissionIds.has(id))
-    },
-    [selectedPermissionIds]
-  )
-
-  const isResourcePartiallySelected = useCallback(
-    (permissionIds: string[]) => {
-      const selectedCount = permissionIds.filter((id) =>
-        selectedPermissionIds.has(id)
-      ).length
-      return selectedCount > 0 && selectedCount < permissionIds.length
-    },
-    [selectedPermissionIds]
-  )
 
   return (
     <div className="space-y-6">
@@ -308,101 +234,24 @@ export function RoleForm({ role, mode }: RoleFormProps) {
         </CardContent>
       </Card>
 
-      {/* Permissions Matrix - Only for Create mode */}
+      {/* Policies Selector - Only for Create mode */}
       {isCreate && (
         <Card>
           <CardHeader>
-            <CardTitle>Permissões</CardTitle>
+            <CardTitle>Políticas de Acesso</CardTitle>
             <CardDescription>
-              Selecione as permissões que este perfil terá acesso
+              Selecione as políticas que este perfil terá. Cada política agrupa um conjunto de permissões.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loadingPermissions ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[200px]">Recurso</TableHead>
-                        {["read", "create", "update", "delete"].map((action) => (
-                          <TableHead key={action} className="text-center w-[100px]">
-                            {ACTION_DISPLAY_NAMES[action]}
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {permissionsGrouped.map((group) => {
-                        const permissionIds = group.permissions.map((p) => p.id)
-                        const fullySelected = isResourceFullySelected(permissionIds)
-                        const partiallySelected = isResourcePartiallySelected(permissionIds)
-
-                        return (
-                          <TableRow key={group.resource}>
-                            <TableCell className="font-medium">
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  checked={fullySelected}
-                                  ref={(el) => {
-                                    if (el) {
-                                      (el as HTMLButtonElement).dataset.state =
-                                        partiallySelected ? "indeterminate" : fullySelected ? "checked" : "unchecked"
-                                    }
-                                  }}
-                                  onCheckedChange={(checked) =>
-                                    handleToggleResource(permissionIds, checked === true)
-                                  }
-                                />
-                                {group.resourceDisplayName}
-                              </div>
-                            </TableCell>
-                            {["read", "create", "update", "delete"].map((action) => {
-                              const permission = group.permissions.find(
-                                (p) => p.action === action
-                              )
-                              if (!permission) {
-                                return (
-                                  <TableCell key={action} className="text-center">
-                                    <span className="text-muted-foreground">-</span>
-                                  </TableCell>
-                                )
-                              }
-                              const isSelected = selectedPermissionIds.has(permission.id)
-                              return (
-                                <TableCell key={action} className="text-center">
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={() =>
-                                      handleTogglePermission(permission.id)
-                                    }
-                                  />
-                                </TableCell>
-                              )
-                            })}
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    {selectedPermissionIds.size} permissões selecionadas
-                  </p>
-                </div>
-              </div>
-            )}
+            <RolePoliciesSelector
+              onSelectionChange={handlePolicySelectionChange}
+            />
           </CardContent>
         </Card>
       )}
 
-      {/* Submit buttons for Create mode - at the bottom after permissions */}
+      {/* Submit buttons for Create mode - at the bottom after policies */}
       {isCreate && (
         <div className="flex gap-4">
           <Button

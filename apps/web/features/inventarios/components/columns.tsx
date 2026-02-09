@@ -13,6 +13,8 @@ import { cn } from "@/shared/lib/utils"
 interface ColumnsProps {
   onDelete: (inventario: Inventario) => void
   isLiderColeta?: boolean
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 function formatDate(dateString: string | null) {
@@ -24,7 +26,7 @@ function formatDate(dateString: string | null) {
   }).format(new Date(dateString))
 }
 
-export function getColumns({ onDelete, isLiderColeta }: ColumnsProps): ColumnDef<Inventario>[] {
+export function getColumns({ onDelete, isLiderColeta, canEdit = true, canDelete = true }: ColumnsProps): ColumnDef<Inventario>[] {
   return [
     {
       accessorKey: "id",
@@ -197,34 +199,40 @@ export function getColumns({ onDelete, isLiderColeta }: ColumnsProps): ColumnDef
                   <span>Visualizar</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={restricted}
-                asChild={!restricted}
-              >
-                {restricted ? (
-                  <span className="flex items-center opacity-50">
-                    <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span>Editar</span>
-                  </span>
-                ) : (
-                  <Link
-                    href={`/admin/inventarios/${inventario.id}/edit`}
-                    className="flex items-center"
+              {canEdit && (
+                <DropdownMenuItem
+                  disabled={restricted}
+                  asChild={!restricted}
+                >
+                  {restricted ? (
+                    <span className="flex items-center opacity-50">
+                      <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <span>Editar</span>
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/admin/inventarios/${inventario.id}/edit`}
+                      className="flex items-center"
+                    >
+                      <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <span>Editar</span>
+                    </Link>
+                  )}
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                    onClick={() => !restricted && onDelete(inventario)}
+                    disabled={restricted}
                   >
-                    <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <span>Editar</span>
-                  </Link>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                onClick={() => !restricted && onDelete(inventario)}
-                disabled={restricted}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Excluir</span>
-              </DropdownMenuItem>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Excluir</span>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DataTableRowActions>
           </div>
         )

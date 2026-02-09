@@ -130,6 +130,21 @@ export class UserController {
     }
   }
 
+  async getMe(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const userId = request.user?.sub;
+      if (!userId) {
+        reply.status(401).send({ code: 'UNAUTHORIZED', message: 'Não autenticado' });
+        return;
+      }
+
+      const user = await this.getUserUseCase.execute(userId);
+      reply.send(user);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
   async getMyPermissions(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const userId = request.user?.sub;
@@ -150,9 +165,8 @@ export class UserController {
     reply: FastifyReply
   ): Promise<void> {
     try {
-      const includePermissions = request.query.includePermissions === 'true';
       const roles = await this.listRolesUseCase.execute();
-      reply.send(roles.map((role) => toRoleResponseDTO(role, includePermissions)));
+      reply.send(roles.map((role) => toRoleResponseDTO(role)));
     } catch (error) {
       this.handleError(error, reply);
     }

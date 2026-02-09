@@ -10,11 +10,14 @@ import {
   CreateRoleUseCase,
   UpdateRoleUseCase,
   DeleteRoleUseCase,
-  UpdateRolePermissionsUseCase,
   ListPermissionsUseCase,
 } from '../../application/use-cases/roles/index.js';
-import { CreateRoleDTO, UpdateRoleDTO, UpdateRolePermissionsDTO } from '../../application/dtos/roles/RoleDTO.js';
+import { CreateRoleDTO, UpdateRoleDTO } from '../../application/dtos/roles/RoleDTO.js';
 import { toRoleResponse, toPermissionResponse } from '../../application/dtos/users/UserResponseDTO.js';
+import { SetRolePoliciesUseCase } from '../../application/use-cases/access/index.js';
+import { SupabaseAccessPolicyRepository } from '../../infrastructure/database/supabase/repositories/SupabaseAccessPolicyRepository.js';
+import { toAccessPolicyResponse } from '../../application/dtos/access/AccessResponseDTO.js';
+import { RoleNotFoundError } from '../../domain/errors/UserErrors.js';
 
 export class RoleController {
   // List all roles
@@ -92,24 +95,6 @@ export class RoleController {
     return reply.status(204).send();
   }
 
-  // Update role permissions
-  static async updateRolePermissions(
-    request: FastifyRequest<{
-      Params: { id: string };
-      Body: UpdateRolePermissionsDTO;
-    }>,
-    reply: FastifyReply
-  ) {
-    const supabase = request.server.supabase as SupabaseClient;
-    const roleRepository = new SupabaseRoleRepository(supabase);
-    const permissionRepository = new SupabasePermissionRepository(supabase);
-
-    const useCase = new UpdateRolePermissionsUseCase(roleRepository, permissionRepository);
-    const role = await useCase.execute(request.params.id, request.body);
-
-    return reply.send(toRoleResponse(role));
-  }
-
   // List all permissions
   static async listPermissions(request: FastifyRequest, reply: FastifyReply) {
     const supabase = request.server.supabase as SupabaseClient;
@@ -136,5 +121,40 @@ export class RoleController {
         permissions: g.permissions.map(toPermissionResponse),
       }))
     );
+  }
+
+  // Set role policies
+  static async setRolePolicies(
+    request: FastifyRequest<{ Params: { id: string }; Body: { policyIds: string[] } }>,
+    reply: FastifyReply
+  ) {
+    const supabase = request.server.supabase as SupabaseClient;
+    const roleRepository = new SupabaseRoleRepository(supabase);
+    const useCase = new SetRolePoliciesUseCase(roleRepository);
+    await useCase.execute(request.params.id, request.body);
+    // Re-fetch role
+    const getUseCase = new GetRoleUseCase(roleRepository);
+    const role = await getUseCase.execute(request.params.id);
+    return reply.send(toRoleResponse(role));
+  }
+
+  // Get role policies
+  static async getRolePolicies(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ) {
+    const supabase = request.server.supabase as SupabaseClient;
+    const roleRepository = new SupabaseRoleRepository(supabase);
+    const role = await roleRepository.findById(request.params.id);
+    if (!role) throw new RoleNotFoundError(request.params.id);
+    // Get policy IDs and fetch policies
+    const policyRepository = new SupabaseAccessPolicyRepository(supabase);
+    const policyIds = await roleRepository.getRolePolicyIds(request.params.id);
+    const policies = [];
+    for (const pid of policyIds) {
+      const p = await policyRepository.findById(pid);
+      if (p) policies.push(toAccessPolicyResponse(p));
+    }
+    return reply.send(policies);
   }
 }

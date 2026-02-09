@@ -6,6 +6,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Loja } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { lojasApi, type PaginatedResponse } from "../api/lojas-api"
 import { DeleteLojaDialog } from "./DeleteLojaDialog"
 import { getColumns } from "./columns"
@@ -20,6 +21,9 @@ export function LojasTable({ clientId, page, search }: LojasTableProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { canUpdate, canDelete } = usePermissions()
+  const canEditLoja = canUpdate("lojas")
+  const canDeleteLoja = canDelete("lojas")
 
   const [data, setData] = useState<PaginatedResponse<Loja> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -75,8 +79,8 @@ export function LojasTable({ clientId, page, search }: LojasTableProps) {
   }
 
   const columns = useMemo(
-    () => getColumns({ clientId, onDelete: handleDeleteClick }),
-    [clientId]
+    () => getColumns({ clientId, onDelete: handleDeleteClick, canEdit: canEditLoja, canDelete: canDeleteLoja }),
+    [clientId, canEditLoja, canDeleteLoja]
   )
 
   if (error) {

@@ -2,7 +2,8 @@ import { FastifyInstance } from 'fastify';
 import { RoleController } from '../../interface-adapters/controllers/RoleController.js';
 import { requireAuth } from '../../plugins/auth.js';
 import { requirePermission } from '../../plugins/authorization.js';
-import type { CreateRoleDTO, UpdateRoleDTO, UpdateRolePermissionsDTO } from '../../application/dtos/roles/RoleDTO.js';
+import type { CreateRoleDTO, UpdateRoleDTO } from '../../application/dtos/roles/RoleDTO.js';
+import type { SetRolePoliciesDTO } from '../../application/dtos/access/AccessDTO.js';
 
 const permissionSchema = {
   type: 'object',
@@ -22,10 +23,6 @@ const roleResponseSchema = {
     displayName: { type: 'string' },
     description: { type: ['string', 'null'] },
     isSystemRole: { type: 'boolean' },
-    permissions: {
-      type: 'array',
-      items: permissionSchema,
-    },
     createdAt: { type: 'string', format: 'date-time' },
     updatedAt: { type: 'string', format: 'date-time' },
   },
@@ -75,11 +72,6 @@ const createRoleBodySchema = {
       description: 'Nome de exibição',
     },
     description: { type: ['string', 'null'], maxLength: 500 },
-    permissionIds: {
-      type: 'array',
-      items: { type: 'string', format: 'uuid' },
-      description: 'IDs das permissões a atribuir',
-    },
   },
 };
 
@@ -92,17 +84,6 @@ const updateRoleBodySchema = {
       maxLength: 100,
     },
     description: { type: ['string', 'null'], maxLength: 500 },
-  },
-};
-
-const updateRolePermissionsBodySchema = {
-  type: 'object',
-  required: ['permissionIds'],
-  properties: {
-    permissionIds: {
-      type: 'array',
-      items: { type: 'string', format: 'uuid' },
-    },
   },
 };
 
@@ -132,16 +113,6 @@ export async function rolesRoutes(fastify: FastifyInstance) {
         summary: 'Listar roles',
         description: 'Retorna uma lista de todas as roles do sistema',
         security: [{ bearerAuth: [] }],
-        querystring: {
-          type: 'object',
-          properties: {
-            includePermissions: {
-              type: 'string',
-              enum: ['true', 'false'],
-              description: 'Incluir permissões de cada role',
-            },
-          },
-        },
         response: {
           200: { type: 'array', items: roleResponseSchema },
           401: errorResponseSchema,
@@ -161,7 +132,7 @@ export async function rolesRoutes(fastify: FastifyInstance) {
       schema: {
         tags: ['Roles'],
         summary: 'Buscar role por ID',
-        description: 'Retorna os dados de uma role específica com suas permissões',
+        description: 'Retorna os dados de uma role específica',
         security: [{ bearerAuth: [] }],
         params: {
           type: 'object',
@@ -267,37 +238,6 @@ export async function rolesRoutes(fastify: FastifyInstance) {
     RoleController.deleteRole
   );
 
-  // PUT /roles/:id/permissions - Update role permissions
-  fastify.put<{ Params: { id: string }; Body: UpdateRolePermissionsDTO }>(
-    '/:id/permissions',
-    {
-      preHandler: [requireAuth, requirePermission('usuarios', 'update')],
-      schema: {
-        tags: ['Roles'],
-        summary: 'Atualizar permissões da role',
-        description: 'Substitui todas as permissões de uma role',
-        security: [{ bearerAuth: [] }],
-        params: {
-          type: 'object',
-          required: ['id'],
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-          },
-        },
-        body: updateRolePermissionsBodySchema,
-        response: {
-          200: roleResponseSchema,
-          400: validationErrorResponseSchema,
-          401: errorResponseSchema,
-          403: errorResponseSchema,
-          404: errorResponseSchema,
-          500: errorResponseSchema,
-        },
-      },
-    },
-    RoleController.updateRolePermissions
-  );
-
   // GET /permissions/all - List all permissions
   fastify.get(
     '/permissions/all',
@@ -338,6 +278,39 @@ export async function rolesRoutes(fastify: FastifyInstance) {
       },
     },
     RoleController.listPermissionsGrouped
+  );
+
+  // PUT /roles/:id/policies - Set role policies
+  fastify.put<{ Params: { id: string }; Body: SetRolePoliciesDTO }>(
+    '/:id/policies',
+    {
+      preHandler: [requireAuth, requirePermission('usuarios', 'update')],
+      schema: {
+        tags: ['Roles'],
+        summary: 'Definir políticas da role',
+        description: 'Substitui todas as políticas de acesso de uma role',
+        security: [{ bearerAuth: [] }],
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'string', format: 'uuid' } } },
+        body: { type: 'object', required: ['policyIds'], properties: { policyIds: { type: 'array', items: { type: 'string', format: 'uuid' } } } },
+        response: { 200: roleResponseSchema, 401: errorResponseSchema, 403: errorResponseSchema, 404: errorResponseSchema },
+      },
+    },
+    RoleController.setRolePolicies
+  );
+
+  // GET /roles/:id/policies - Get role policies
+  fastify.get<{ Params: { id: string } }>(
+    '/:id/policies',
+    {
+      preHandler: [requireAuth, requirePermission('usuarios', 'read')],
+      schema: {
+        tags: ['Roles'],
+        summary: 'Listar políticas da role',
+        security: [{ bearerAuth: [] }],
+        params: { type: 'object', required: ['id'], properties: { id: { type: 'string', format: 'uuid' } } },
+      },
+    },
+    RoleController.getRolePolicies
   );
 }
 

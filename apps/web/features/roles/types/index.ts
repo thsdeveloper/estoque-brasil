@@ -1,11 +1,14 @@
 import { z } from "zod"
+import type { AccessPolicy } from "@estoque-brasil/types"
 
 // Permission type
 export interface Permission {
   id: string
   resource: string
-  action: "read" | "create" | "update" | "delete"
+  action: string
   description: string | null
+  resourceId?: string | null
+  actionId?: string | null
 }
 
 // Role type
@@ -15,7 +18,8 @@ export interface Role {
   displayName: string
   description: string | null
   isSystemRole: boolean
-  permissions?: Permission[]
+  policies?: AccessPolicy[]
+  policyIds?: string[]
   createdAt?: string
   updatedAt?: string
 }
@@ -64,11 +68,11 @@ export interface UpdateRoleInput {
   description?: string | null
 }
 
-export interface UpdateRolePermissionsInput {
-  permissionIds: string[]
+export interface SetRolePoliciesInput {
+  policyIds: string[]
 }
 
-// Action display names
+// Action display names (fallback for standard actions)
 export const ACTION_DISPLAY_NAMES: Record<string, string> = {
   read: "Visualizar",
   create: "Criar",

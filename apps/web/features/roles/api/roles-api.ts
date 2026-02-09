@@ -5,8 +5,9 @@ import type {
   PermissionsByResource,
   CreateRoleInput,
   UpdateRoleInput,
-  UpdateRolePermissionsInput,
+  SetRolePoliciesInput,
 } from "../types"
+import type { AccessPolicy } from "@estoque-brasil/types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || ""
 
@@ -133,18 +134,20 @@ export const rolesApi = {
   },
 
   // Permissions
-  updatePermissions: (
-    roleId: string,
-    data: UpdateRolePermissionsInput
-  ): Promise<Role> => {
-    return apiClient.put<Role>(`/api/roles/${roleId}/permissions`, data)
-  },
-
   listPermissions: (): Promise<Permission[]> => {
     return apiClient.get<Permission[]>("/api/roles/permissions/all")
   },
 
   listPermissionsGrouped: (): Promise<PermissionsByResource[]> => {
     return apiClient.get<PermissionsByResource[]>("/api/roles/permissions/grouped")
+  },
+
+  // Policies
+  setPolicies: (roleId: string, data: SetRolePoliciesInput): Promise<void> => {
+    return apiClient.put<void>(`/api/roles/${roleId}/policies`, data)
+  },
+
+  getPolicies: (roleId: string): Promise<string[]> => {
+    return apiClient.get<string[]>(`/api/roles/${roleId}/policies`)
   },
 }

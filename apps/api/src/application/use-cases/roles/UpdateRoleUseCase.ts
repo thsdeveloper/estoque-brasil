@@ -28,7 +28,7 @@ export class UpdateRoleUseCase {
       displayName: displayName ?? existingRole.displayName,
       description: description !== undefined ? description : existingRole.description,
       isSystemRole: existingRole.isSystemRole,
-      permissions: existingRole.permissions,
+      policies: existingRole.policies,
       createdAt: existingRole.createdAt,
     });
 

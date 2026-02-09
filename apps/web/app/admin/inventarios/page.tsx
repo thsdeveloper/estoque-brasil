@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
+import { PermissionGate } from "@/shared/components/PermissionGate"
 // Direct imports instead of barrel file (bundle-barrel-imports)
 import { InventariosTable } from "@/features/inventarios/components/InventariosTable"
 import { InventarioSearchFilters } from "@/features/inventarios/components/InventarioSearchFilters"
@@ -33,12 +34,14 @@ export default async function InventariosPage({ searchParams }: PageProps) {
             Gerencie e acompanhe os inventarios de estoque
           </p>
         </div>
-        <Button asChild size="sm" className="w-fit">
-          <Link href="/admin/inventarios/new">
-            <Plus className="mr-1.5 h-4 w-4" />
-            Novo Inventario
-          </Link>
-        </Button>
+        <PermissionGate resource="inventarios" action="create">
+          <Button asChild size="sm" className="w-fit">
+            <Link href="/admin/inventarios/new">
+              <Plus className="mr-1.5 h-4 w-4" />
+              Novo Inventario
+            </Link>
+          </Button>
+        </PermissionGate>
       </div>
 
       {/* Filters + Table Container */}

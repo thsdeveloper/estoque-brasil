@@ -186,24 +186,4 @@ export class User {
   get roleNames(): string[] {
     return this._roles.map((role) => role.name);
   }
-
-  get permissions(): Array<{ resource: string; action: string }> {
-    const permissionSet = new Set<string>();
-    const permissions: Array<{ resource: string; action: string }> = [];
-
-    for (const role of this._roles) {
-      for (const permission of role.permissions) {
-        const key = `${permission.resource}:${permission.action}`;
-        if (!permissionSet.has(key)) {
-          permissionSet.add(key);
-          permissions.push({
-            resource: permission.resource,
-            action: permission.action,
-          });
-        }
-      }
-    }
-
-    return permissions;
-  }
 }

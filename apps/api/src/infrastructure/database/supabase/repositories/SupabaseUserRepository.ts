@@ -17,12 +17,7 @@ const USER_ROLES_TABLE = 'user_roles';
 const USER_WITH_ROLES_SELECT = `
   *,
   user_roles!user_roles_user_id_fkey (
-    role:roles (
-      *,
-      role_permissions (
-        permission:permissions (*)
-      )
-    )
+    role:roles (*)
   )
 `;
 
@@ -248,5 +243,17 @@ export class SupabaseUserRepository implements IUserRepository {
     // Count unique users with admin role
     const uniqueUserIds = new Set(data.map((row) => row.user_id));
     return uniqueUserIds.size;
+  }
+
+  async getUserPermissions(userId: string): Promise<Array<{ resource: string; action: string }>> {
+    const { data, error } = await this.supabase.rpc('get_user_permissions', {
+      user_uuid: userId,
+    });
+
+    if (error) {
+      throw new Error(`Failed to get user permissions: ${error.message}`);
+    }
+
+    return data ?? [];
   }
 }

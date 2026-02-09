@@ -22,10 +22,5 @@ export const updateRoleSchema = z.object({
   description: z.string().max(500).nullable().optional(),
 });
 
-export const updateRolePermissionsSchema = z.object({
-  permissionIds: z.array(z.string().uuid()),
-});
-
 export type CreateRoleDTO = z.infer<typeof createRoleSchema>;
 export type UpdateRoleDTO = z.infer<typeof updateRoleSchema>;
-export type UpdateRolePermissionsDTO = z.infer<typeof updateRolePermissionsSchema>;

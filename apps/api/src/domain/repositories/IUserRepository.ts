@@ -21,4 +21,5 @@ export interface IUserRepository {
   removeRole(userId: string, roleId: string): Promise<void>;
   getUserRoleIds(userId: string): Promise<string[]>;
   countAdmins(): Promise<number>;
+  getUserPermissions(userId: string): Promise<Array<{ resource: string; action: string }>>;
 }

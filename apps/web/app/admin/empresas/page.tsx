@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { PermissionGate } from "@/shared/components/PermissionGate"
 import {
   EmpresasTable,
   EmpresasTableSkeleton,
@@ -37,12 +38,14 @@ export default async function EmpresasPage({ searchParams }: PageProps) {
             Gerencie as empresas cadastradas no sistema
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin/empresas/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Empresa
-          </Link>
-        </Button>
+        <PermissionGate resource="empresas" action="create">
+          <Button asChild>
+            <Link href="/admin/empresas/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Empresa
+            </Link>
+          </Button>
+        </PermissionGate>
       </div>
 
       <Card>

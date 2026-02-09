@@ -30,16 +30,14 @@ export interface PermissionDbRow {
   resource: string;
   action: string;
   description: string | null;
+  resource_id: string | null;
+  action_id: string | null;
   created_at: string;
 }
 
 export interface UserWithRolesDbRow extends UserProfileDbRow {
   user_roles: Array<{
-    role: RoleDbRow & {
-      role_permissions: Array<{
-        permission: PermissionDbRow;
-      }>;
-    };
+    role: RoleDbRow;
   }>;
 }
 
@@ -69,33 +67,24 @@ export class PermissionMapper {
       resource: row.resource,
       action: row.action as PermissionAction,
       description: row.description,
+      resourceId: row.resource_id,
+      actionId: row.action_id,
       createdAt: new Date(row.created_at),
     });
   }
 }
 
 export class RoleMapper {
-  static toDomain(row: RoleDbRow, permissions: Permission[] = []): Role {
+  static toDomain(row: RoleDbRow): Role {
     return Role.create({
       id: row.id,
       name: row.name,
       displayName: row.display_name,
       description: row.description,
       isSystemRole: row.is_system_role,
-      permissions,
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     });
-  }
-
-  static toDomainWithPermissions(
-    row: RoleDbRow & { role_permissions?: Array<{ permission: PermissionDbRow }> }
-  ): Role {
-    const permissions = row.role_permissions?.map((rp) =>
-      PermissionMapper.toDomain(rp.permission)
-    ) ?? [];
-
-    return RoleMapper.toDomain(row, permissions);
   }
 }
 
@@ -117,7 +106,7 @@ export class UserMapper {
 
   static toDomainWithRoles(row: UserWithRolesDbRow): User {
     const roles = row.user_roles?.map((ur) =>
-      RoleMapper.toDomainWithPermissions(ur.role)
+      RoleMapper.toDomain(ur.role)
     ) ?? [];
 
     return UserMapper.toDomain(row, roles);

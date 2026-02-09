@@ -9,9 +9,8 @@ export interface IRoleRepository {
   update(role: Role): Promise<Role>;
   delete(id: string): Promise<void>;
   existsByName(name: string, excludeId?: string): Promise<boolean>;
-  assignPermission(roleId: string, permissionId: string): Promise<void>;
-  removePermission(roleId: string, permissionId: string): Promise<void>;
-  getRolePermissionIds(roleId: string): Promise<string[]>;
+  setPolicies(roleId: string, policyIds: string[]): Promise<void>;
+  getRolePolicyIds(roleId: string): Promise<string[]>;
 }
 
 export interface IPermissionRepository {

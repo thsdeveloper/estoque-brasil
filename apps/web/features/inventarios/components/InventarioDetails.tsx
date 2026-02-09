@@ -104,9 +104,10 @@ const RESTRICTION_MESSAGE =
 
 export function InventarioDetails({ inventario }: InventarioDetailsProps) {
   // Permissions
-  const { hasRole } = usePermissions()
+  const { hasRole, canUpdate } = usePermissions()
   const isLiderColeta = hasRole("lider_coleta")
-  const editDisabled = isLiderColeta && !!inventario.temContagens
+  const canEditInventario = canUpdate("inventarios")
+  const editDisabled = !canEditInventario || (isLiderColeta && !!inventario.temContagens)
 
   // Fetch related data
   const { lojas } = useLojas({ limit: 100 })

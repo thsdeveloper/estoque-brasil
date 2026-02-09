@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { PermissionGate } from "@/shared/components/PermissionGate"
 import { SearchFilters } from "@/features/admin-layout"
 import { ClientsTable, ClientsTableSkeleton } from "@/features/clients"
 
@@ -24,12 +25,14 @@ export default async function ClientsPage({ searchParams }: PageProps) {
           <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
           <p className="text-gray-light">Gerencie os clientes cadastrados no sistema</p>
         </div>
-        <Button asChild>
-          <Link href="/admin/clients/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Cliente
-          </Link>
-        </Button>
+        <PermissionGate resource="clients" action="create">
+          <Button asChild>
+            <Link href="/admin/clients/create">
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Cliente
+            </Link>
+          </Button>
+        </PermissionGate>
       </div>
 
       <Card>

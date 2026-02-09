@@ -15,6 +15,7 @@ import produtoRoutes from './routes/produtos/index.js';
 import contagemRoutes from './routes/contagens/index.js';
 import userRoutes from './routes/users/index.js';
 import rolesRoutes from './routes/roles/index.js';
+import accessRoutes from './routes/access/index.js';
 import monitorRoutes from './routes/inventarios/monitor.js';
 import operadoresRoutes from './routes/inventarios/operadores.js';
 import contagensStreamRoutes from './routes/inventarios/contagens-stream.js';
@@ -54,6 +55,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(contagemRoutes, { prefix: '/api' });
   await app.register(userRoutes, { prefix: '/api' });
   await app.register(rolesRoutes, { prefix: '/api/roles' });
+  await app.register(accessRoutes, { prefix: '/api/access' });
 
   return app;
 }

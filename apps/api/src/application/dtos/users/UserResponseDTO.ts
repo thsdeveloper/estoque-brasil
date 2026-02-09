@@ -13,7 +13,6 @@ export interface RoleResponseDTO {
   displayName: string;
   description: string | null;
   isSystemRole: boolean;
-  permissions?: PermissionResponseDTO[];
 }
 
 export interface UserResponseDTO {
@@ -55,16 +54,13 @@ export function toPermissionResponseDTO(permission: Permission): PermissionRespo
   };
 }
 
-export function toRoleResponseDTO(role: Role, includePermissions = false): RoleResponseDTO {
+export function toRoleResponseDTO(role: Role): RoleResponseDTO {
   return {
     id: role.id!,
     name: role.name,
     displayName: role.displayName,
     description: role.description,
     isSystemRole: role.isSystemRole,
-    ...(includePermissions && {
-      permissions: role.permissions.map(toPermissionResponseDTO),
-    }),
   };
 }
 
@@ -83,15 +79,7 @@ export function toUserResponseDTO(user: User): UserResponseDTO {
   };
 }
 
-export function toUserPermissionsResponseDTO(user: User): UserPermissionsResponseDTO {
-  return {
-    userId: user.id!,
-    permissions: user.permissions,
-    roles: user.roleNames,
-  };
-}
-
 // Shorter aliases for convenience
 export const toPermissionResponse = toPermissionResponseDTO;
-export const toRoleResponse = (role: Role) => toRoleResponseDTO(role, true);
+export const toRoleResponse = toRoleResponseDTO;
 export const toUserResponse = toUserResponseDTO;

@@ -14,6 +14,8 @@ import { DataTableRowActions } from "@/shared/components/ui/data-table-row-actio
 
 interface ColumnsProps {
   onDelete: (empresa: Empresa) => void
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 // Format CNPJ for display
@@ -25,7 +27,7 @@ function formatCNPJ(cnpj: string | null): string {
   )
 }
 
-export function getColumns({ onDelete }: ColumnsProps): ColumnDef<Empresa>[] {
+export function getColumns({ onDelete, canEdit = true, canDelete = true }: ColumnsProps): ColumnDef<Empresa>[] {
   return [
     {
       accessorKey: "razaoSocial",
@@ -112,20 +114,26 @@ export function getColumns({ onDelete }: ColumnsProps): ColumnDef<Empresa>[] {
                   Visualizar
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/admin/empresas/${empresa.id}/edit`}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-500 focus:text-red-500"
-                onClick={() => onDelete(empresa)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Excluir
-              </DropdownMenuItem>
+              {canEdit && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/admin/empresas/${empresa.id}/edit`}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Editar
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-500 focus:text-red-500"
+                    onClick={() => onDelete(empresa)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Excluir
+                  </DropdownMenuItem>
+                </>
+              )}
             </DataTableRowActions>
           </div>
         )

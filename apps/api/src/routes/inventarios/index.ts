@@ -3,7 +3,7 @@ import { InventarioController } from '../../interface-adapters/controllers/Inven
 import { SupabaseInventarioRepository } from '../../infrastructure/database/supabase/repositories/SupabaseInventarioRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
-import { restrictLiderColetaOnStartedInventario } from '../../plugins/authorization.js';
+import { requirePermission, restrictLiderColetaOnStartedInventario } from '../../plugins/authorization.js';
 
 const inventarioResponseSchema = {
   type: 'object',
@@ -143,7 +143,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/inventarios',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('inventarios', 'create')],
       schema: {
         tags: ['Inventários'],
         summary: 'Criar novo inventário',
@@ -165,7 +165,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
   fastify.put(
     '/inventarios/:id',
     {
-      preHandler: [requireAuth, restrictLiderColetaOnStartedInventario()],
+      preHandler: [requireAuth, requirePermission('inventarios', 'update'), restrictLiderColetaOnStartedInventario()],
       schema: {
         tags: ['Inventários'],
         summary: 'Atualizar inventário',
@@ -195,7 +195,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
   fastify.delete(
     '/inventarios/:id',
     {
-      preHandler: [requireAuth, restrictLiderColetaOnStartedInventario()],
+      preHandler: [requireAuth, requirePermission('inventarios', 'delete'), restrictLiderColetaOnStartedInventario()],
       schema: {
         tags: ['Inventários'],
         summary: 'Excluir inventário',
@@ -223,7 +223,7 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
   fastify.post(
     '/inventarios/:id/finalizar',
     {
-      preHandler: [requireAuth],
+      preHandler: [requireAuth, requirePermission('inventarios', 'update')],
       schema: {
         tags: ['Inventários'],
         summary: 'Finalizar inventário',

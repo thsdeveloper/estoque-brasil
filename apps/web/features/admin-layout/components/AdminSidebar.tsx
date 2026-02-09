@@ -17,6 +17,7 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
+  Shield,
 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
@@ -30,7 +31,7 @@ import {
 interface NavChild {
   name: string
   href: string
-  permission?: { resource: string; action: "read" | "create" | "update" | "delete" }
+  permission?: { resource: string; action: string }
 }
 
 interface NavItem {
@@ -38,7 +39,7 @@ interface NavItem {
   href?: string
   icon: React.ElementType
   children?: NavChild[]
-  permission?: { resource: string; action: "read" | "create" | "update" | "delete" }
+  permission?: { resource: string; action: string }
   isNew?: boolean
 }
 
@@ -97,6 +98,28 @@ const navigation: NavItem[] = [
       {
         name: "Perfis e Permissões",
         href: "/admin/cadastros/roles",
+        permission: { resource: "usuarios", action: "read" },
+      },
+    ],
+  },
+  {
+    name: "Controle de Acesso",
+    icon: Shield,
+    permission: { resource: "usuarios", action: "read" },
+    children: [
+      {
+        name: "Recursos",
+        href: "/admin/acesso/recursos",
+        permission: { resource: "usuarios", action: "read" },
+      },
+      {
+        name: "Ações",
+        href: "/admin/acesso/acoes",
+        permission: { resource: "usuarios", action: "read" },
+      },
+      {
+        name: "Políticas",
+        href: "/admin/acesso/politicas",
         permission: { resource: "usuarios", action: "read" },
       },
     ],
