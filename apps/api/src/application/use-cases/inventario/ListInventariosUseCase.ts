@@ -8,6 +8,7 @@ export interface ListInventariosInput {
   idEmpresa?: number;
   ativo?: boolean;
   search?: string;
+  userId?: string;
 }
 
 export class ListInventariosUseCase {
@@ -24,6 +25,7 @@ export class ListInventariosUseCase {
       idEmpresa: input.idEmpresa,
       ativo: input.ativo,
       search: input.search,
+      userId: input.userId,
     };
 
     const result = await this.inventarioRepository.findAll(params);

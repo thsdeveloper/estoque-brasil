@@ -60,6 +60,12 @@ export interface SetorResponseDTO {
   termino: number;
   descricao: string | null;
   abertoEm: string | null;
+  status: string;
+  idUsuarioContagem: string | null;
+}
+
+export interface AbrirSetorResponseDTO extends SetorResponseDTO {
+  warning?: { code: string; message: string };
 }
 
 export function toSetorResponseDTO(setor: Setor): SetorResponseDTO {
@@ -71,5 +77,7 @@ export function toSetorResponseDTO(setor: Setor): SetorResponseDTO {
     termino: setor.termino,
     descricao: setor.descricao,
     abertoEm: setor.abertoEm?.toISOString() ?? null,
+    status: setor.status,
+    idUsuarioContagem: setor.idUsuarioContagem,
   };
 }

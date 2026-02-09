@@ -95,4 +95,59 @@ export class SupabaseSetorRepository implements ISetorRepository {
       throw new Error(`Failed to delete setores by inventario: ${error.message}`);
     }
   }
+
+  async findByUsuarioEmContagem(userId: string, idInventario: number): Promise<Setor | null> {
+    const { data, error } = await this.supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .eq('id_inventario', idInventario)
+      .eq('id_usuario_contagem', userId)
+      .eq('status', 'em_contagem')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(`Failed to find setor by usuario em contagem: ${error.message}`);
+    }
+
+    return data ? SetorMapper.toDomain(data as SetorDbRow) : null;
+  }
+
+  async findNextPendenteByOrder(idInventario: number): Promise<Setor | null> {
+    const { data, error } = await this.supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .eq('id_inventario', idInventario)
+      .eq('status', 'pendente')
+      .order('prefixo', { ascending: true })
+      .order('inicio', { ascending: true })
+      .limit(1)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(`Failed to find next pendente setor: ${error.message}`);
+    }
+
+    return data ? SetorMapper.toDomain(data as SetorDbRow) : null;
+  }
+
+  async findByInventarioWithStatus(idInventario: number): Promise<Setor[]> {
+    const { data, error } = await this.supabase
+      .from(TABLE_NAME)
+      .select('*')
+      .eq('id_inventario', idInventario)
+      .order('prefixo', { ascending: true })
+      .order('inicio', { ascending: true });
+
+    if (error) {
+      throw new Error(`Failed to find setores with status: ${error.message}`);
+    }
+
+    return (data as SetorDbRow[]).map(SetorMapper.toDomain);
+  }
 }

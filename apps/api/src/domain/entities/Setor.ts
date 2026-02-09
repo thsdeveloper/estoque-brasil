@@ -1,5 +1,7 @@
 import { InvalidSetorError } from '../errors/InventarioErrors.js';
 
+export type SetorStatus = 'pendente' | 'em_contagem' | 'finalizado';
+
 export interface SetorProps {
   id?: number;
   idInventario: number;
@@ -8,6 +10,8 @@ export interface SetorProps {
   termino: number;
   descricao?: string | null;
   abertoEm?: Date | null;
+  status?: SetorStatus;
+  idUsuarioContagem?: string | null;
 }
 
 export class Setor {
@@ -18,6 +22,8 @@ export class Setor {
   private _termino: number;
   private _descricao: string | null;
   private _abertoEm: Date | null;
+  private _status: SetorStatus;
+  private _idUsuarioContagem: string | null;
 
   private constructor(props: SetorProps) {
     this._id = props.id;
@@ -27,6 +33,8 @@ export class Setor {
     this._termino = props.termino;
     this._descricao = props.descricao ?? null;
     this._abertoEm = props.abertoEm ?? null;
+    this._status = props.status ?? 'pendente';
+    this._idUsuarioContagem = props.idUsuarioContagem ?? null;
   }
 
   static create(props: SetorProps): Setor {
@@ -121,9 +129,28 @@ export class Setor {
     return this._abertoEm;
   }
 
-  abrir(): void {
-    if (this._abertoEm !== null) return;
-    this._abertoEm = new Date();
+  get status(): SetorStatus {
+    return this._status;
+  }
+
+  get idUsuarioContagem(): string | null {
+    return this._idUsuarioContagem;
+  }
+
+  abrir(userId: string): void {
+    this._abertoEm = this._abertoEm ?? new Date();
+    this._status = 'em_contagem';
+    this._idUsuarioContagem = userId;
+  }
+
+  finalizar(): void {
+    this._status = 'finalizado';
+    this._idUsuarioContagem = null;
+  }
+
+  reabrir(): void {
+    this._status = 'pendente';
+    this._idUsuarioContagem = null;
   }
 
   /**

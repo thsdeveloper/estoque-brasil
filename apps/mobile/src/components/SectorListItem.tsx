@@ -9,10 +9,29 @@ interface Props {
   isActive?: boolean;
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  pendente: '#6B7280',
+  em_contagem: '#F59E0B',
+  finalizado: '#10B981',
+};
+
+function getStatusLabel(status?: string): string {
+  switch (status) {
+    case 'em_contagem':
+      return 'Em Contagem';
+    case 'finalizado':
+      return 'Finalizado';
+    default:
+      return 'Pendente';
+  }
+}
+
 export function SectorListItem({ setor, onPress, isActive }: Props) {
   const rangeLabel = setor.prefixo
     ? `${setor.prefixo}${setor.inicio} - ${setor.prefixo}${setor.termino}`
     : `${setor.inicio} - ${setor.termino}`;
+
+  const statusColor = STATUS_COLORS[setor.status] || STATUS_COLORS.pendente;
 
   return (
     <Pressable
@@ -23,6 +42,7 @@ export function SectorListItem({ setor, onPress, isActive }: Props) {
       ]}
       onPress={() => onPress(setor)}
     >
+      <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
       <View style={styles.info}>
         <Text style={styles.range}>{rangeLabel}</Text>
         {setor.descricao && (
@@ -30,6 +50,9 @@ export function SectorListItem({ setor, onPress, isActive }: Props) {
             {setor.descricao}
           </Text>
         )}
+        <Text style={[styles.statusLabel, { color: statusColor }]}>
+          {getStatusLabel(setor.status)}
+        </Text>
       </View>
       <View style={[styles.badge, isActive && styles.badgeActive]}>
         <Text style={[styles.badgeText, isActive && styles.badgeTextActive]}>
@@ -49,6 +72,17 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
+    gap: spacing.md,
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  statusLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: '500',
+    marginTop: 2,
   },
   active: {
     borderColor: colors.primary,

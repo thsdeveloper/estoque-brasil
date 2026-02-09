@@ -10,6 +10,7 @@ export interface InventarioPaginationParams {
   dataInicio?: Date;
   dataTermino?: Date;
   search?: string;
+  userId?: string;
 }
 
 export interface IInventarioRepository {

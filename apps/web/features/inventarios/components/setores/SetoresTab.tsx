@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Loader2, Trash2, Pencil } from "lucide-react"
+import { Plus, Loader2, Trash2, Pencil, RotateCcw, Lock } from "lucide-react"
 import type { Setor } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import {
@@ -29,6 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog"
+import { Badge } from "@/shared/components/ui/badge"
 import { inventariosApi } from "../../api/inventarios-api"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { SetorForm } from "./SetorForm"
@@ -45,6 +46,10 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
   const [editingSetor, setEditingSetor] = useState<Setor | null>(null)
   const [deletingSetor, setDeletingSetor] = useState<Setor | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [reabrindoSetor, setReabrindoSetor] = useState<Setor | null>(null)
+  const [reabrirLoading, setReabrirLoading] = useState(false)
+  const [finalizandoSetor, setFinalizandoSetor] = useState<Setor | null>(null)
+  const [finalizarLoading, setFinalizarLoading] = useState(false)
   const { canCreate, canUpdate, canDelete } = usePermissions()
   const canCreateSetor = canCreate("setores")
   const canEditSetor = canUpdate("setores")
@@ -96,6 +101,48 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
   const handleCancel = () => {
     setShowForm(false)
     setEditingSetor(null)
+  }
+
+  const handleReabrirSetor = async () => {
+    if (!reabrindoSetor) return
+
+    setReabrirLoading(true)
+    try {
+      await inventariosApi.reabrirSetor(reabrindoSetor.id)
+      setReabrindoSetor(null)
+      fetchSetores()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao reabrir setor")
+    } finally {
+      setReabrirLoading(false)
+    }
+  }
+
+  const handleFinalizarSetor = async () => {
+    if (!finalizandoSetor) return
+
+    setFinalizarLoading(true)
+    try {
+      await inventariosApi.finalizarSetor(finalizandoSetor.id)
+      setFinalizandoSetor(null)
+      fetchSetores()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao finalizar setor")
+    } finally {
+      setFinalizarLoading(false)
+    }
+  }
+
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case "finalizado":
+        return <Badge variant="success">Finalizado</Badge>
+      case "em_contagem":
+        return <Badge variant="warning">Em Contagem</Badge>
+      case "pendente":
+      default:
+        return <Badge variant="secondary">Pendente</Badge>
+    }
   }
 
   if (showForm) {
@@ -169,6 +216,7 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
                 <TableHead>Inicio</TableHead>
                 <TableHead>Termino</TableHead>
                 <TableHead>Descricao</TableHead>
+                <TableHead>Status</TableHead>
                 {(canEditSetor || canDeleteSetor) && (
                   <TableHead className="text-right">Acoes</TableHead>
                 )}
@@ -183,9 +231,31 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
                   <TableCell>{setor.inicio}</TableCell>
                   <TableCell>{setor.termino}</TableCell>
                   <TableCell>{setor.descricao || "-"}</TableCell>
+                  <TableCell>{getStatusBadge((setor as any).status)}</TableCell>
                   {(canEditSetor || canDeleteSetor) && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        {canEditSetor && (setor as any).status !== "finalizado" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setFinalizandoSetor(setor)}
+                            title="Finalizar setor"
+                          >
+                            <Lock className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {canEditSetor && (setor as any).status === "finalizado" && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-amber-600 hover:text-amber-700"
+                            onClick={() => setReabrindoSetor(setor)}
+                            title="Reabrir setor"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        )}
                         {canEditSetor && (
                           <Button
                             variant="ghost"
@@ -240,6 +310,66 @@ export function SetoresTab({ inventarioId }: SetoresTabProps) {
               className="bg-red-500 hover:bg-red-600"
             >
               {deleteLoading ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!reabrindoSetor}
+        onOpenChange={(open) => !open && setReabrindoSetor(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reabrir setor</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja reabrir o setor{" "}
+              <span className="font-semibold">
+                {reabrindoSetor?.prefixo || reabrindoSetor?.descricao || `#${reabrindoSetor?.id}`}
+              </span>
+              ? O setor voltara ao status anterior e podera receber novas contagens.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reabrirLoading}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReabrirSetor}
+              disabled={reabrirLoading}
+              className="bg-amber-500 hover:bg-amber-600"
+            >
+              {reabrirLoading ? "Reabrindo..." : "Reabrir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={!!finalizandoSetor}
+        onOpenChange={(open) => !open && setFinalizandoSetor(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Finalizar setor</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja finalizar o setor{" "}
+              <span className="font-semibold">
+                {finalizandoSetor?.prefixo || finalizandoSetor?.descricao || `#${finalizandoSetor?.id}`}
+              </span>
+              ? O setor nao aceitara mais contagens ate ser reaberto.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={finalizarLoading}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleFinalizarSetor}
+              disabled={finalizarLoading}
+              className="bg-emerald-500 hover:bg-emerald-600"
+            >
+              {finalizarLoading ? "Finalizando..." : "Finalizar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

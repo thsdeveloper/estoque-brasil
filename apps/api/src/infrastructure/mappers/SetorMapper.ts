@@ -1,4 +1,4 @@
-import { Setor } from '../../domain/entities/Setor.js';
+import { Setor, SetorStatus } from '../../domain/entities/Setor.js';
 
 export interface SetorDbRow {
   id: number;
@@ -8,6 +8,8 @@ export interface SetorDbRow {
   termino: number;
   descricao: string | null;
   aberto_em: string | null;
+  status: string;
+  id_usuario_contagem: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,6 +32,8 @@ export class SetorMapper {
       termino: row.termino,
       descricao: row.descricao,
       abertoEm: row.aberto_em ? new Date(row.aberto_em) : null,
+      status: (row.status as SetorStatus) || 'pendente',
+      idUsuarioContagem: row.id_usuario_contagem,
     });
   }
 
@@ -43,10 +47,12 @@ export class SetorMapper {
     };
   }
 
-  static toUpdateRow(setor: Setor): SetorInsertRow & { aberto_em: string | null; updated_at: string } {
+  static toUpdateRow(setor: Setor): SetorInsertRow & { aberto_em: string | null; status: string; id_usuario_contagem: string | null; updated_at: string } {
     return {
       ...this.toInsertRow(setor),
       aberto_em: setor.abertoEm?.toISOString() ?? null,
+      status: setor.status,
+      id_usuario_contagem: setor.idUsuarioContagem,
       updated_at: new Date().toISOString(),
     };
   }

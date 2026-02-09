@@ -6,9 +6,16 @@ import { UpdateInventarioUseCase } from '../../application/use-cases/inventario/
 import { DeleteInventarioUseCase } from '../../application/use-cases/inventario/DeleteInventarioUseCase.js';
 import { ListInventariosUseCase } from '../../application/use-cases/inventario/ListInventariosUseCase.js';
 import { FinalizarInventarioUseCase } from '../../application/use-cases/inventario/FinalizarInventarioUseCase.js';
+import { ReabrirInventarioUseCase } from '../../application/use-cases/inventario/ReabrirInventarioUseCase.js';
 import { DomainError } from '../../domain/errors/DomainError.js';
 import { IInventarioRepository } from '../../domain/repositories/IInventarioRepository.js';
+import { ISetorRepository } from '../../domain/repositories/ISetorRepository.js';
+import { IAuditLogRepository } from '../../domain/repositories/IAuditLogRepository.js';
+import { AuditService } from '../../application/services/AuditService.js';
 import { createInventarioSchema, updateInventarioSchema } from '../../application/dtos/inventario/InventarioDTO.js';
+import { ListDivergenciasUseCase } from '../../application/use-cases/inventario/ListDivergenciasUseCase.js';
+import { listDivergenciasQuerySchema } from '../../application/dtos/inventario/DivergenciaDTO.js';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class InventarioController {
   private readonly createInventarioUseCase: CreateInventarioUseCase;
@@ -17,14 +24,28 @@ export class InventarioController {
   private readonly deleteInventarioUseCase: DeleteInventarioUseCase;
   private readonly listInventariosUseCase: ListInventariosUseCase;
   private readonly finalizarInventarioUseCase: FinalizarInventarioUseCase;
+  private readonly reabrirInventarioUseCase: ReabrirInventarioUseCase;
+  private readonly listDivergenciasUseCase: ListDivergenciasUseCase | null;
+  private readonly supabase: SupabaseClient | undefined;
 
-  constructor(inventarioRepository: IInventarioRepository) {
+  constructor(
+    inventarioRepository: IInventarioRepository,
+    setorRepository?: ISetorRepository,
+    auditLogRepository?: IAuditLogRepository,
+    supabase?: SupabaseClient,
+  ) {
+    this.supabase = supabase;
+    const auditService = auditLogRepository ? new AuditService(auditLogRepository) : undefined;
     this.createInventarioUseCase = new CreateInventarioUseCase(inventarioRepository);
     this.getInventarioUseCase = new GetInventarioUseCase(inventarioRepository);
     this.updateInventarioUseCase = new UpdateInventarioUseCase(inventarioRepository);
     this.deleteInventarioUseCase = new DeleteInventarioUseCase(inventarioRepository);
     this.listInventariosUseCase = new ListInventariosUseCase(inventarioRepository);
-    this.finalizarInventarioUseCase = new FinalizarInventarioUseCase(inventarioRepository);
+    this.finalizarInventarioUseCase = setorRepository
+      ? new FinalizarInventarioUseCase(inventarioRepository, setorRepository, auditService)
+      : new FinalizarInventarioUseCase(inventarioRepository, { findByInventarioWithStatus: async () => [] } as any, auditService);
+    this.reabrirInventarioUseCase = new ReabrirInventarioUseCase(inventarioRepository, auditService);
+    this.listDivergenciasUseCase = supabase ? new ListDivergenciasUseCase(supabase) : null;
   }
 
   async create(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -83,7 +104,17 @@ export class InventarioController {
   ): Promise<void> {
     try {
       const { page, limit, idLoja, idEmpresa, ativo, search } = request.query;
-      const result = await this.listInventariosUseCase.execute({ page, limit, idLoja, idEmpresa, ativo, search });
+      const userId = (request as any).user?.sub as string | undefined;
+
+      let filterUserId: string | undefined;
+      if (userId && this.supabase) {
+        const isAdmin = await this.isUserAdmin(userId);
+        if (!isAdmin) {
+          filterUserId = userId;
+        }
+      }
+
+      const result = await this.listInventariosUseCase.execute({ page, limit, idLoja, idEmpresa, ativo, search, userId: filterUserId });
       reply.send(result);
     } catch (error) {
       this.handleError(error, reply);
@@ -91,16 +122,71 @@ export class InventarioController {
   }
 
   async finalizar(
+    request: FastifyRequest<{ Params: { id: string }; Body: { forcado?: boolean } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const id = parseInt(request.params.id, 10);
+      const userId = (request as any).user?.sub;
+      const forcado = (request.body as any)?.forcado;
+      const ipAddress = request.ip;
+      const userAgent = request.headers['user-agent'];
+      const inventario = await this.finalizarInventarioUseCase.execute(id, userId, forcado, ipAddress, userAgent);
+      reply.send(inventario);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async reabrir(
     request: FastifyRequest<{ Params: { id: string } }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
       const id = parseInt(request.params.id, 10);
-      const inventario = await this.finalizarInventarioUseCase.execute(id);
+      const userId = (request as any).user?.sub;
+      const ipAddress = request.ip;
+      const userAgent = request.headers['user-agent'];
+      const inventario = await this.reabrirInventarioUseCase.execute(id, userId, ipAddress, userAgent);
       reply.send(inventario);
     } catch (error) {
       this.handleError(error, reply);
     }
+  }
+
+  async listDivergencias(
+    request: FastifyRequest<{ Params: { id: string }; Querystring: Record<string, unknown> }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      if (!this.listDivergenciasUseCase) {
+        reply.status(500).send({ code: 'INTERNAL_ERROR', message: 'Divergências não configurado' });
+        return;
+      }
+      const idInventario = parseInt(request.params.id, 10);
+      const query = listDivergenciasQuerySchema.parse(request.query);
+      const result = await this.listDivergenciasUseCase.execute(idInventario, query);
+      reply.send(result);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  private async isUserAdmin(userId: string): Promise<boolean> {
+    if (!this.supabase) return false;
+
+    const { data, error } = await this.supabase
+      .from('user_roles')
+      .select('roles!inner(name)')
+      .eq('user_id', userId)
+      .eq('roles.name', 'admin')
+      .limit(1);
+
+    if (error) {
+      throw new Error(`Failed to check user admin role: ${error.message}`);
+    }
+
+    return (data?.length ?? 0) > 0;
   }
 
   private handleError(error: unknown, reply: FastifyReply): void {

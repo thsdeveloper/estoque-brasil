@@ -170,6 +170,118 @@ export class TemplateNotFoundError extends DomainError {
   }
 }
 
+// Setor Business Rule Errors
+export class SetorFinalizadoError extends DomainError {
+  readonly code = 'SETOR_FINALIZADO';
+  readonly statusCode = 403;
+
+  constructor(id: number) {
+    super(`Setor ${id} já foi finalizado e não pode ser aberto`);
+  }
+}
+
+export class SetorEmContagemError extends DomainError {
+  readonly code = 'SETOR_EM_CONTAGEM';
+  readonly statusCode = 409;
+
+  readonly nomeOperador: string;
+
+  constructor(id: number, nomeOperador: string) {
+    super(`Setor ${id} já está em contagem pelo operador: ${nomeOperador}`);
+    this.nomeOperador = nomeOperador;
+  }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      nomeOperador: this.nomeOperador,
+    };
+  }
+}
+
+export class SetorJaAbertoError extends DomainError {
+  readonly code = 'SETOR_JA_ABERTO';
+  readonly statusCode = 409;
+
+  readonly nomeSetor: string;
+  readonly idSetorAberto: number;
+
+  constructor(nomeSetor: string, idSetorAberto: number) {
+    super(`Você já possui o setor "${nomeSetor}" aberto. Finalize-o antes de abrir outro.`);
+    this.nomeSetor = nomeSetor;
+    this.idSetorAberto = idSetorAberto;
+  }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      nomeSetor: this.nomeSetor,
+      idSetorAberto: this.idSetorAberto,
+    };
+  }
+}
+
+// Inventario Finalization Errors
+export class SetoresEmAbertoError extends DomainError {
+  readonly code = 'SETORES_EM_ABERTO';
+  readonly statusCode = 422;
+
+  readonly setoresPendentes: { id: number; descricao: string | null; status: string }[];
+
+  constructor(setoresPendentes: { id: number; descricao: string | null; status: string }[]) {
+    super(`Existem ${setoresPendentes.length} setor(es) não finalizados`);
+    this.setoresPendentes = setoresPendentes;
+  }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      setoresPendentes: this.setoresPendentes,
+    };
+  }
+}
+
+export class DivergenciasPendentesError extends DomainError {
+  readonly code = 'DIVERGENCIAS_PENDENTES';
+  readonly statusCode = 422;
+
+  readonly total: number;
+
+  constructor(total: number) {
+    super(`Existem ${total} divergência(s) não reconferidas`);
+    this.total = total;
+  }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      total: this.total,
+    };
+  }
+}
+
+export class InventarioJaFinalizadoError extends DomainError {
+  readonly code = 'INVENTARIO_JA_FINALIZADO';
+  readonly statusCode = 409;
+
+  constructor(id: number) {
+    super(`Inventário ${id} já está finalizado`);
+  }
+}
+
+export class InventarioNaoFinalizadoError extends DomainError {
+  readonly code = 'INVENTARIO_NAO_FINALIZADO';
+  readonly statusCode = 409;
+
+  constructor(id: number) {
+    super(`Inventário ${id} não está finalizado`);
+  }
+}
+
 // CNPJ Errors
 export class InvalidCNPJError extends DomainError {
   readonly code = 'INVALID_CNPJ';

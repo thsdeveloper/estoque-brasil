@@ -19,8 +19,13 @@ export const inventarioService = {
     return data;
   },
 
-  async abrirSetor(id: number): Promise<Setor> {
-    const { data } = await api.patch<Setor>(`/setores/${id}/abrir`);
+  async abrirSetor(id: number): Promise<Setor & { warning?: { code: string; message: string } }> {
+    const { data } = await api.patch<Setor & { warning?: { code: string; message: string } }>(`/setores/${id}/abrir`);
+    return data;
+  },
+
+  async finalizarSetor(id: number): Promise<Setor> {
+    const { data } = await api.patch<Setor>(`/setores/${id}/finalizar`);
     return data;
   },
 };

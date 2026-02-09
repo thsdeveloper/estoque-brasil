@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { InventarioContext } from '@/contexts/InventarioContext';
+import { inventarioService } from '@/services/inventario.service';
 import { useBarcodeScanner } from '@/hooks/useBarcodeScanner';
 import { useContagem } from '@/hooks/useContagem';
 import { useSound } from '@/hooks/useSound';
@@ -195,11 +196,24 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
     setShowCloseConfirm(true);
   };
 
-  const confirmCloseSetor = () => {
+  const confirmCloseSetor = async () => {
     setShowCloseConfirm(false);
+    try {
+      if (activeSetor) {
+        setLoading(true);
+        await inventarioService.finalizarSetor(activeSetor.id);
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Erro ao finalizar setor';
+      Alert.alert('Erro', message);
+    } finally {
+      setLoading(false);
+    }
     setActiveSetor(null);
     clearScanned();
     playClick();
+    loadSetores();
     sectorScanner.focusInput();
   };
 

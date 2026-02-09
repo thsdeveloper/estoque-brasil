@@ -17,6 +17,7 @@ export const createContagemSchema = z.object({
     .number({ required_error: 'Quantidade é obrigatória' })
     .min(0, 'Quantidade não pode ser negativa'),
   divergente: z.boolean().default(false),
+  reconferencia: z.boolean().default(false),
 });
 
 // Schema de validação para atualização de contagem
@@ -42,6 +43,8 @@ export interface ContagemResponseDTO {
   validade: string | null;
   quantidade: number;
   divergente: boolean;
+  divergenteSaldo: boolean;
+  reconferido: boolean;
   idUsuario: string | null;
 }
 
@@ -63,6 +66,8 @@ export function toContagemResponseDTO(contagem: InventarioContagem): ContagemRes
     validade: contagem.validade?.toISOString().split('T')[0] ?? null,
     quantidade: contagem.quantidade,
     divergente: contagem.divergente,
+    divergenteSaldo: contagem.divergenteSaldo,
+    reconferido: contagem.reconferido,
     idUsuario: contagem.idUsuario,
   };
 }

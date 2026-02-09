@@ -1,4 +1,6 @@
 import { useCallback, useContext, useState } from 'react';
+import { Alert } from 'react-native';
+import { AxiosError } from 'axios';
 import { InventarioContext } from '@/contexts/InventarioContext';
 import { inventarioService } from '@/services/inventario.service';
 import { produtoService } from '@/services/produto.service';
@@ -48,8 +50,31 @@ export function useContagem(): UseContagemReturn {
     if (setor) {
       try {
         const updated = await inventarioService.abrirSetor(setor.id);
-        setActiveSectorState({ ...setor, abertoEm: updated.abertoEm });
-      } catch {
+        setActiveSectorState({ ...setor, abertoEm: updated.abertoEm, status: updated.status, idUsuarioContagem: updated.idUsuarioContagem });
+
+        if (updated.warning?.code === 'FORA_SEQUENCIA') {
+          Alert.alert('Fora de Sequencia', updated.warning.message);
+        }
+      } catch (err: unknown) {
+        if (err instanceof AxiosError && err.response?.data) {
+          const errorData = err.response.data as { code?: string; message?: string; nomeOperador?: string; nomeSetor?: string; idSetorAberto?: number };
+
+          if (errorData.code === 'SETOR_FINALIZADO') {
+            Alert.alert('Setor Finalizado', 'Este setor ja foi finalizado e nao pode ser aberto.');
+            return;
+          }
+
+          if (errorData.code === 'SETOR_EM_CONTAGEM') {
+            Alert.alert('Setor em Uso', `Este setor esta sendo usado por ${errorData.nomeOperador}`);
+            return;
+          }
+
+          if (errorData.code === 'SETOR_JA_ABERTO') {
+            Alert.alert('Setor Ja Aberto', `Voce ja tem o setor "${errorData.nomeSetor}" aberto.`);
+            return;
+          }
+        }
+        // Fallback: set sector state anyway for non-handled errors
         setActiveSectorState(setor);
       }
     } else {
@@ -120,6 +145,7 @@ export function useContagem(): UseContagemReturn {
           quantidade: extraData?.quantidade ?? 1,
           lote: extraData?.lote,
           validade: extraData?.validade,
+          ...(produto.divergente ? { reconferencia: true } : {}),
         });
 
         const newItem: ScannedProduct = {

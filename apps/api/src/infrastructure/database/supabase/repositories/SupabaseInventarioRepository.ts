@@ -92,8 +92,26 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
   }
 
   async findAll(params: InventarioPaginationParams): Promise<PaginatedResult<Inventario>> {
-    const { page, limit, idLoja, idEmpresa, ativo, dataInicio, dataTermino, search } = params;
+    const { page, limit, idLoja, idEmpresa, ativo, dataInicio, dataTermino, search, userId } = params;
     const offset = (page - 1) * limit;
+
+    // When filtering by operator, get allowed inventario IDs
+    let allowedInventarioIds: number[] | undefined;
+    if (userId) {
+      const { data: operadorLinks, error: operadorError } = await this.supabase
+        .from('inventarios_operadores')
+        .select('id_inventario')
+        .eq('user_id', userId);
+
+      if (operadorError) {
+        throw new Error(`Failed to check operator inventarios: ${operadorError.message}`);
+      }
+
+      allowedInventarioIds = operadorLinks?.map((row: { id_inventario: number }) => row.id_inventario) ?? [];
+      if (allowedInventarioIds.length === 0) {
+        return { data: [], total: 0, page, limit, totalPages: 0 };
+      }
+    }
 
     // When searching by client name, we need to find matching loja IDs first
     let searchLojaIds: number[] | undefined;
@@ -116,6 +134,9 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
       .from(TABLE_NAME)
       .select(selectStr, { count: 'exact', head: true });
 
+    if (allowedInventarioIds) {
+      countQuery = countQuery.in('id', allowedInventarioIds);
+    }
     if (searchLojaIds) {
       countQuery = countQuery.in('id_loja', searchLojaIds);
     }
@@ -145,6 +166,9 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
 
     let dataQuery = this.supabase.from(TABLE_NAME).select(selectStr);
 
+    if (allowedInventarioIds) {
+      dataQuery = dataQuery.in('id', allowedInventarioIds);
+    }
     if (searchLojaIds) {
       dataQuery = dataQuery.in('id_loja', searchLojaIds);
     }

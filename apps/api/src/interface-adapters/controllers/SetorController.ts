@@ -1,6 +1,9 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { ZodError } from 'zod';
 import { AbrirSetorUseCase } from '../../application/use-cases/setor/AbrirSetorUseCase.js';
+import { FinalizarSetorUseCase } from '../../application/use-cases/setor/FinalizarSetorUseCase.js';
+import { ReabrirSetorUseCase } from '../../application/use-cases/setor/ReabrirSetorUseCase.js';
 import { CreateSetorUseCase } from '../../application/use-cases/setor/CreateSetorUseCase.js';
 import { GetSetorUseCase } from '../../application/use-cases/setor/GetSetorUseCase.js';
 import { UpdateSetorUseCase } from '../../application/use-cases/setor/UpdateSetorUseCase.js';
@@ -8,18 +11,29 @@ import { DeleteSetorUseCase } from '../../application/use-cases/setor/DeleteSeto
 import { ListSetoresByInventarioUseCase } from '../../application/use-cases/setor/ListSetoresByInventarioUseCase.js';
 import { DomainError } from '../../domain/errors/DomainError.js';
 import { ISetorRepository } from '../../domain/repositories/ISetorRepository.js';
+import { IAuditLogRepository } from '../../domain/repositories/IAuditLogRepository.js';
+import { AuditService } from '../../application/services/AuditService.js';
 import { createSetorSchema, updateSetorSchema } from '../../application/dtos/inventario/SetorDTO.js';
 
 export class SetorController {
   private readonly abrirSetorUseCase: AbrirSetorUseCase;
+  private readonly finalizarSetorUseCase: FinalizarSetorUseCase;
+  private readonly reabrirSetorUseCase: ReabrirSetorUseCase;
   private readonly createSetorUseCase: CreateSetorUseCase;
   private readonly getSetorUseCase: GetSetorUseCase;
   private readonly updateSetorUseCase: UpdateSetorUseCase;
   private readonly deleteSetorUseCase: DeleteSetorUseCase;
   private readonly listSetoresByInventarioUseCase: ListSetoresByInventarioUseCase;
 
-  constructor(setorRepository: ISetorRepository) {
-    this.abrirSetorUseCase = new AbrirSetorUseCase(setorRepository);
+  constructor(
+    setorRepository: ISetorRepository,
+    supabase: SupabaseClient,
+    auditLogRepository?: IAuditLogRepository,
+  ) {
+    const auditService = auditLogRepository ? new AuditService(auditLogRepository) : undefined;
+    this.abrirSetorUseCase = new AbrirSetorUseCase(setorRepository, supabase, auditService);
+    this.finalizarSetorUseCase = new FinalizarSetorUseCase(setorRepository, auditService);
+    this.reabrirSetorUseCase = new ReabrirSetorUseCase(setorRepository, auditService);
     this.createSetorUseCase = new CreateSetorUseCase(setorRepository);
     this.getSetorUseCase = new GetSetorUseCase(setorRepository);
     this.updateSetorUseCase = new UpdateSetorUseCase(setorRepository);
@@ -83,7 +97,42 @@ export class SetorController {
   ): Promise<void> {
     try {
       const id = parseInt(request.params.id, 10);
-      const setor = await this.abrirSetorUseCase.execute(id);
+      const userId = (request as any).user?.sub;
+      const ipAddress = request.ip;
+      const userAgent = request.headers['user-agent'];
+      const setor = await this.abrirSetorUseCase.execute(id, userId, ipAddress, userAgent);
+      reply.send(setor);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async finalizarSetor(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const id = parseInt(request.params.id, 10);
+      const userId = (request as any).user?.sub;
+      const ipAddress = request.ip;
+      const userAgent = request.headers['user-agent'];
+      const setor = await this.finalizarSetorUseCase.execute(id, userId, undefined, ipAddress, userAgent);
+      reply.send(setor);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async reabrirSetor(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const id = parseInt(request.params.id, 10);
+      const userId = (request as any).user?.sub;
+      const ipAddress = request.ip;
+      const userAgent = request.headers['user-agent'];
+      const setor = await this.reabrirSetorUseCase.execute(id, userId, undefined, ipAddress, userAgent);
       reply.send(setor);
     } catch (error) {
       this.handleError(error, reply);

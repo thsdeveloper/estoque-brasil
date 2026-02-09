@@ -7,4 +7,7 @@ export interface ISetorRepository {
   update(setor: Setor): Promise<Setor>;
   delete(id: number): Promise<void>;
   deleteByInventario(idInventario: number): Promise<void>;
+  findByUsuarioEmContagem(userId: string, idInventario: number): Promise<Setor | null>;
+  findNextPendenteByOrder(idInventario: number): Promise<Setor | null>;
+  findByInventarioWithStatus(idInventario: number): Promise<Setor[]>;
 }

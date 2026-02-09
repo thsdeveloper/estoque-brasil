@@ -9,6 +9,8 @@ export interface InventarioContagemProps {
   validade?: Date | null;
   quantidade: number;
   divergente?: boolean;
+  divergenteSaldo?: boolean;
+  reconferido?: boolean;
   idUsuario?: string | null;
 }
 
@@ -21,6 +23,8 @@ export class InventarioContagem {
   private _validade: Date | null;
   private _quantidade: number;
   private _divergente: boolean;
+  private _divergenteSaldo: boolean;
+  private _reconferido: boolean;
   private _idUsuario: string | null;
 
   private constructor(props: InventarioContagemProps) {
@@ -32,6 +36,8 @@ export class InventarioContagem {
     this._validade = props.validade ?? null;
     this._quantidade = props.quantidade;
     this._divergente = props.divergente ?? false;
+    this._divergenteSaldo = props.divergenteSaldo ?? false;
+    this._reconferido = props.reconferido ?? false;
     this._idUsuario = props.idUsuario ?? null;
   }
 
@@ -91,6 +97,14 @@ export class InventarioContagem {
     if (props.divergente !== undefined) {
       this._divergente = props.divergente;
     }
+
+    if (props.divergenteSaldo !== undefined) {
+      this._divergenteSaldo = props.divergenteSaldo;
+    }
+
+    if (props.reconferido !== undefined) {
+      this._reconferido = props.reconferido;
+    }
   }
 
   marcarDivergente(): void {
@@ -131,6 +145,14 @@ export class InventarioContagem {
 
   get divergente(): boolean {
     return this._divergente;
+  }
+
+  get divergenteSaldo(): boolean {
+    return this._divergenteSaldo;
+  }
+
+  get reconferido(): boolean {
+    return this._reconferido;
   }
 
   get idUsuario(): string | null {

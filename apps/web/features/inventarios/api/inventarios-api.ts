@@ -137,6 +137,13 @@ class ApiClient {
     })
   }
 
+  patch<T>(endpoint: string, data?: unknown): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: "PATCH",
+      ...(data !== undefined && { body: JSON.stringify(data) }),
+    })
+  }
+
   delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "DELETE" })
   }
@@ -208,8 +215,8 @@ export const inventariosApi = {
     return apiClient.delete<void>(`/api/inventarios/${id}`)
   },
 
-  finalizar: (id: number | string): Promise<Inventario> => {
-    return apiClient.post<Inventario>(`/api/inventarios/${id}/finalizar`, {})
+  finalizar: (id: number | string, options?: { forcado?: boolean }): Promise<Inventario> => {
+    return apiClient.post<Inventario>(`/api/inventarios/${id}/finalizar`, options || {})
   },
 
   getMonitorMetrics: (idInventario: number | string): Promise<MonitorMetrics> => {
@@ -329,5 +336,24 @@ export const inventariosApi = {
 
   removeOperadoresBatch: (idInventario: number, data: BatchRemoveOperadoresInput): Promise<BatchRemoveOperadoresResult> => {
     return apiClient.post<BatchRemoveOperadoresResult>(`/api/inventarios/${idInventario}/operadores/batch-remove`, data)
+  },
+
+  // ====== ACOES DE INVENTARIO ======
+  reabrirInventario: async (id: number) => {
+    return apiClient.post(`/api/inventarios/${id}/reabrir`, {})
+  },
+
+  listDivergencias: async (inventarioId: number, params?: { idSetor?: number; status?: string; page?: number; limit?: number }) => {
+    const qs = buildQueryString(params || {})
+    return apiClient.get(`/api/inventarios/${inventarioId}/divergencias${qs}`)
+  },
+
+  // ====== ACOES DE SETOR ======
+  finalizarSetor: async (id: number) => {
+    return apiClient.patch(`/api/setores/${id}/finalizar`)
+  },
+
+  reabrirSetor: async (id: number) => {
+    return apiClient.post(`/api/setores/${id}/reabrir`, {})
   },
 }

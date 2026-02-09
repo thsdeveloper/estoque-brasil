@@ -18,6 +18,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Shield,
+  ScrollText,
 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
@@ -123,6 +124,12 @@ const navigation: NavItem[] = [
         permission: { resource: "usuarios", action: "read" },
       },
     ],
+  },
+  {
+    name: "Log de Auditoria",
+    href: "/admin/audit-logs",
+    icon: ScrollText,
+    permission: { resource: "audit_logs", action: "read" },
   },
   {
     name: "Templates",

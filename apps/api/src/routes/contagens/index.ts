@@ -16,6 +16,8 @@ const contagemResponseSchema = {
     validade: { type: ['string', 'null'], format: 'date' },
     quantidade: { type: 'number' },
     divergente: { type: 'boolean' },
+    divergenteSaldo: { type: 'boolean' },
+    reconferido: { type: 'boolean' },
     idUsuario: { type: ['string', 'null'] },
   },
 };
@@ -67,6 +69,7 @@ const createContagemBodySchema = {
     validade: { type: ['string', 'null'], format: 'date' },
     quantidade: { type: 'number', minimum: 0 },
     divergente: { type: 'boolean', default: false },
+    reconferencia: { type: 'boolean', default: false },
   },
 };
 

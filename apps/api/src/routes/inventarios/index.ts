@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { InventarioController } from '../../interface-adapters/controllers/InventarioController.js';
 import { SupabaseInventarioRepository } from '../../infrastructure/database/supabase/repositories/SupabaseInventarioRepository.js';
+import { SupabaseSetorRepository } from '../../infrastructure/database/supabase/repositories/SupabaseSetorRepository.js';
+import { SupabaseAuditLogRepository } from '../../infrastructure/database/supabase/repositories/SupabaseAuditLogRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
 import { requirePermission, restrictLiderColetaOnStartedInventario } from '../../plugins/authorization.js';
@@ -81,7 +83,9 @@ const updateInventarioBodySchema = {
 export default async function inventarioRoutes(fastify: FastifyInstance) {
   const supabase = getSupabaseAdminClient();
   const inventarioRepository = new SupabaseInventarioRepository(supabase);
-  const controller = new InventarioController(inventarioRepository);
+  const setorRepository = new SupabaseSetorRepository(supabase);
+  const auditLogRepository = new SupabaseAuditLogRepository(supabase);
+  const controller = new InventarioController(inventarioRepository, setorRepository, auditLogRepository, supabase);
 
   fastify.get(
     '/inventarios',
@@ -227,7 +231,120 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
       schema: {
         tags: ['Inventários'],
         summary: 'Finalizar inventário',
-        description: 'Finaliza um inventário ativo',
+        description: 'Finaliza um inventário ativo. Retorna 422 se houver setores não finalizados (a menos que forcado=true)',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        body: {
+          type: 'object',
+          properties: {
+            forcado: { type: 'boolean', description: 'Forçar finalização mesmo com setores não finalizados' },
+          },
+        },
+        response: {
+          200: inventarioResponseSchema,
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          409: errorResponseSchema,
+          422: {
+            type: 'object',
+            properties: {
+              code: { type: 'string' },
+              message: { type: 'string' },
+              setoresPendentes: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'integer' },
+                    descricao: { type: 'string' },
+                    status: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.finalizar(request as any, reply)
+  );
+
+  fastify.get(
+    '/inventarios/:id/divergencias',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Inventários'],
+        summary: 'Listar divergências do inventário',
+        description: 'Retorna produtos com diferença entre saldo esperado e quantidade contada',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        querystring: {
+          type: 'object',
+          properties: {
+            idSetor: { type: 'integer', description: 'Filtrar por setor' },
+            status: { type: 'string', enum: ['pendente', 'reconferido', 'todos'], default: 'todos' },
+            page: { type: 'integer', minimum: 1, default: 1 },
+            limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              data: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    idProduto: { type: 'integer' },
+                    codigoBarras: { type: ['string', 'null'] },
+                    descricao: { type: 'string' },
+                    idSetor: { type: 'integer' },
+                    descricaoSetor: { type: ['string', 'null'] },
+                    qtdEsperada: { type: 'number' },
+                    qtdContada: { type: 'number' },
+                    diferenca: { type: 'number' },
+                    reconferido: { type: 'boolean' },
+                  },
+                },
+              },
+              total: { type: 'number' },
+              page: { type: 'number' },
+              limit: { type: 'number' },
+              totalPages: { type: 'number' },
+            },
+          },
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.listDivergencias(request as any, reply)
+  );
+
+  fastify.post(
+    '/inventarios/:id/reabrir',
+    {
+      preHandler: [requireAuth, requirePermission('inventarios', 'update')],
+      schema: {
+        tags: ['Inventários'],
+        summary: 'Reabrir inventário finalizado',
+        description: 'Reabre um inventário previamente finalizado',
         security: [{ bearerAuth: [] }],
         params: {
           type: 'object',
@@ -238,13 +355,14 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
         },
         response: {
           200: inventarioResponseSchema,
-          400: errorResponseSchema,
           401: errorResponseSchema,
+          403: errorResponseSchema,
           404: errorResponseSchema,
+          409: errorResponseSchema,
           500: errorResponseSchema,
         },
       },
     },
-    (request, reply) => controller.finalizar(request as any, reply)
+    (request, reply) => controller.reabrir(request as any, reply)
   );
 }

@@ -140,6 +140,14 @@ export class Inventario {
     this._ativo = false;
   }
 
+  reabrir(): void {
+    if (this._ativo) {
+      throw new InvalidInventarioError('Inventário já está ativo');
+    }
+    this._dataTermino = null;
+    this._ativo = true;
+  }
+
   get id(): number | undefined {
     return this._id;
   }

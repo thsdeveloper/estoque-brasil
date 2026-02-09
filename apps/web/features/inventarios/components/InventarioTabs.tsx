@@ -9,6 +9,7 @@ import {
   ClipboardList,
   Calculator,
   UserCheck,
+  AlertTriangle,
 } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import {
@@ -69,6 +70,11 @@ const ContagemOperadorTab = dynamic(
   { loading: () => <TabContentSkeleton />, ssr: false }
 )
 
+const DivergenciasTab = dynamic(
+  () => import("./divergencias/DivergenciasTab").then((mod) => ({ default: mod.DivergenciasTab })),
+  { loading: () => <TabContentSkeleton />, ssr: false }
+)
+
 // Tab configuration with icons
 const tabs = [
   { value: "cadastro", label: "Detalhes", icon: Info },
@@ -78,6 +84,7 @@ const tabs = [
   { value: "contagem-setores", label: "Contagem Setores", icon: ClipboardList },
   { value: "contagem", label: "Contagem", icon: Calculator },
   { value: "contagem-operador", label: "Contagem Operador", icon: UserCheck },
+  { value: "divergencias", label: "Divergencias", icon: AlertTriangle },
 ] as const
 
 interface InventarioTabsProps {
@@ -135,6 +142,10 @@ export function InventarioTabs({ inventario }: InventarioTabsProps) {
 
           <TabsContent value="contagem-operador" className="mt-0">
             <ContagemOperadorTab inventarioId={inventario.id} />
+          </TabsContent>
+
+          <TabsContent value="divergencias" className="mt-0">
+            <DivergenciasTab inventarioId={inventario.id} />
           </TabsContent>
         </div>
       </div>

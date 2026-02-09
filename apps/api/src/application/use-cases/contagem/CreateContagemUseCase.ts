@@ -13,6 +13,7 @@ export class CreateContagemUseCase {
       validade: data.validade ? new Date(data.validade) : null,
       quantidade: data.quantidade,
       divergente: data.divergente,
+      reconferido: data.reconferencia || false,
       idUsuario: userId ?? null,
     });
 

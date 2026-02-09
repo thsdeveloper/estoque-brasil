@@ -62,6 +62,8 @@ export interface Setor {
   termino: number;
   descricao?: string;
   abertoEm?: string;
+  status: 'pendente' | 'em_contagem' | 'finalizado';
+  idUsuarioContagem: string | null;
 }
 
 // Produto
@@ -88,6 +90,7 @@ export interface Contagem {
   validade?: string;
   quantidade: number;
   divergente: boolean;
+  reconferido: boolean;
 }
 
 export interface CreateContagemRequest {
@@ -97,6 +100,7 @@ export interface CreateContagemRequest {
   lote?: string;
   validade?: string;
   divergente?: boolean;
+  reconferencia?: boolean;
 }
 
 // Paginated response
