@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Alert, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -61,6 +61,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     navigation.navigate('Divergence');
   };
 
+  const handleAtualizar = async () => {
+    playClick();
+    await loadInventario();
+  };
+
   const operadorNome = profile?.fullName || user?.email || 'Operador';
 
   return (
@@ -114,17 +119,27 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             }}
           />
           <MenuCard
-            title="Sair"
-            description="Encerrar sessao"
-            icon={<MaterialCommunityIcons name="logout" size={28} color="#fff" />}
-            color={colors.error}
-            onPress={handleLogout}
+            title="Atualizar"
+            description="Buscar inventarios"
+            icon={<MaterialCommunityIcons name="refresh" size={28} color="#fff" />}
+            color={colors.success}
+            onPress={handleAtualizar}
           />
         </View>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Operador: {operadorNome}</Text>
+        <View style={styles.footerInfo}>
+          <MaterialCommunityIcons name="account" size={16} color={colors.textSecondary} />
+          <Text style={styles.footerText}>{operadorNome}</Text>
+        </View>
+        <Pressable
+          style={({ pressed }) => [styles.logoutButton, pressed && styles.logoutButtonPressed]}
+          onPress={handleLogout}
+        >
+          <MaterialCommunityIcons name="logout" size={16} color="#fff" />
+          <Text style={styles.logoutText}>Sair</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -184,13 +199,39 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: spacing.lg,
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
+  footerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
+  },
   footerText: {
-    fontSize: fontSize.xs,
+    fontSize: fontSize.sm,
     color: colors.textSecondary,
-    textAlign: 'center',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.error,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+  },
+  logoutButtonPressed: {
+    opacity: 0.7,
+  },
+  logoutText: {
+    fontSize: fontSize.sm,
+    fontWeight: 'bold',
+    color: '#fff',
   },
 });

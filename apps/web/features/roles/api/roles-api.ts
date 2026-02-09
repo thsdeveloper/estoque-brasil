@@ -147,7 +147,7 @@ export const rolesApi = {
     return apiClient.put<void>(`/api/roles/${roleId}/policies`, data)
   },
 
-  getPolicies: (roleId: string): Promise<string[]> => {
-    return apiClient.get<string[]>(`/api/roles/${roleId}/policies`)
+  getPolicies: (roleId: string): Promise<AccessPolicy[]> => {
+    return apiClient.get<AccessPolicy[]>(`/api/roles/${roleId}/policies`)
   },
 }

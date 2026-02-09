@@ -20,6 +20,7 @@ import auditLogRoutes from './routes/audit-logs/index.js';
 import monitorRoutes from './routes/inventarios/monitor.js';
 import operadoresRoutes from './routes/inventarios/operadores.js';
 import contagensStreamRoutes from './routes/inventarios/contagens-stream.js';
+import sectorStatsRoutes from './routes/inventarios/sector-stats.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -51,6 +52,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(monitorRoutes, { prefix: '/api' });
   await app.register(operadoresRoutes, { prefix: '/api' });
   await app.register(contagensStreamRoutes, { prefix: '/api' });
+  await app.register(sectorStatsRoutes, { prefix: '/api' });
   await app.register(setorRoutes, { prefix: '/api' });
   await app.register(produtoRoutes, { prefix: '/api' });
   await app.register(contagemRoutes, { prefix: '/api' });

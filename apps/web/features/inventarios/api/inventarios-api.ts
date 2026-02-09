@@ -6,6 +6,7 @@ import type {
   Setor,
   CreateSetorInput,
   UpdateSetorInput,
+  SetorContagemStats,
   InventarioProduto,
   CreateInventarioProdutoInput,
   UpdateInventarioProdutoInput,
@@ -226,6 +227,10 @@ export const inventariosApi = {
   // ====== SETORES ======
   listSetores: (idInventario: number): Promise<Setor[]> => {
     return apiClient.get<Setor[]>(`/api/inventarios/${idInventario}/setores`)
+  },
+
+  getSetorStats: (idInventario: number | string): Promise<SetorContagemStats[]> => {
+    return apiClient.get<SetorContagemStats[]>(`/api/inventarios/${idInventario}/sector-stats`)
   },
 
   getSetor: (id: number | string): Promise<Setor> => {

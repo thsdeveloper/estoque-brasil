@@ -33,6 +33,8 @@ export interface InventarioQueryParams {
 }
 
 // tb_setor - Setor do Inventário
+export type SetorStatus = 'pendente' | 'em_contagem' | 'finalizado';
+
 export interface Setor {
   id: number;
   idInventario: number;
@@ -41,10 +43,20 @@ export interface Setor {
   termino: number;
   descricao: string | null;
   abertoEm: string | null;
+  status: SetorStatus;
+  idUsuarioContagem: string | null;
 }
 
-export type CreateSetorInput = Omit<Setor, 'id'>;
+export type CreateSetorInput = Omit<Setor, 'id' | 'status' | 'idUsuarioContagem'>;
 export type UpdateSetorInput = Partial<CreateSetorInput>;
+
+// Stats de contagem por setor (via RPC get_contagem_sector_stats)
+export interface SetorContagemStats {
+  id: number;
+  total_contagens: number;
+  total_quantidade: number;
+  ultima_contagem: string | null;
+}
 
 // tb_inventario_numeracao - Numeração do Inventário
 export interface InventarioNumeracao {

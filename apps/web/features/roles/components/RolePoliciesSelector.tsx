@@ -37,12 +37,12 @@ export function RolePoliciesSelector({
     async function fetchData() {
       try {
         if (roleId) {
-          const [policies, rolePolicyIds] = await Promise.all([
+          const [policies, rolePolicies] = await Promise.all([
             policiesApi.list(),
             rolesApi.getPolicies(roleId),
           ])
           setAllPolicies(policies)
-          const ids = new Set(rolePolicyIds)
+          const ids = new Set(rolePolicies.map((p) => p.id))
           setSelectedPolicyIds(ids)
           setInitialPolicyIds(ids)
         } else {
