@@ -3,6 +3,7 @@ import { ProdutoController } from '../../interface-adapters/controllers/ProdutoC
 import { SupabaseInventarioProdutoRepository } from '../../infrastructure/database/supabase/repositories/SupabaseInventarioProdutoRepository.js';
 import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import { requireAuth } from '../../plugins/auth.js';
+import { ImportProdutosUseCase } from '../../application/use-cases/produto/ImportProdutosUseCase.js';
 
 const produtoResponseSchema = {
   type: 'object',
@@ -227,5 +228,85 @@ export default async function produtoRoutes(fastify: FastifyInstance) {
       },
     },
     (request, reply) => controller.delete(request as any, reply)
+  );
+
+  // ====== IMPORTAÇÃO EM MASSA ======
+  const importUseCase = new ImportProdutosUseCase(produtoRepository);
+
+  fastify.post(
+    '/produtos/import',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Importar produtos em massa',
+        description: 'Importa uma lista de produtos para um inventário',
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: 'object',
+          required: ['idInventario', 'produtos'],
+          properties: {
+            idInventario: { type: 'integer' },
+            produtos: {
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['descricao'],
+                properties: {
+                  codigoBarras: { type: ['string', 'null'], maxLength: 50 },
+                  codigoInterno: { type: ['string', 'null'], maxLength: 50 },
+                  descricao: { type: 'string', minLength: 1, maxLength: 500 },
+                  lote: { type: ['string', 'null'], maxLength: 50 },
+                  validade: { type: ['string', 'null'] },
+                  saldo: { type: 'number', minimum: 0, default: 0 },
+                  custo: { type: 'number', minimum: 0, default: 0 },
+                },
+              },
+            },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              importados: { type: 'number' },
+              erros: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    linha: { type: 'number' },
+                    erro: { type: 'string' },
+                  },
+                },
+              },
+              produtos: { type: 'array', items: produtoResponseSchema },
+            },
+          },
+          400: validationErrorResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const body = request.body as { idInventario: number; produtos: any[] };
+        const result = await importUseCase.execute(body);
+        reply.send(result);
+      } catch (error) {
+        if (error instanceof Error) {
+          reply.status(500).send({
+            code: 'INTERNAL_ERROR',
+            message: error.message,
+          });
+          return;
+        }
+        reply.status(500).send({
+          code: 'INTERNAL_ERROR',
+          message: 'Erro interno do servidor',
+        });
+      }
+    }
   );
 }

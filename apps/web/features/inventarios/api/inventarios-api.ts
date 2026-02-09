@@ -285,6 +285,21 @@ export const inventariosApi = {
     return apiClient.delete<void>(`/api/produtos/${id}`)
   },
 
+  importProdutos: (
+    idInventario: number,
+    produtos: Array<{
+      codigoBarras?: string | null
+      codigoInterno?: string | null
+      descricao: string
+      lote?: string | null
+      validade?: string | null
+      saldo?: number
+      custo?: number
+    }>
+  ): Promise<{ importados: number; erros: { linha: number; erro: string }[]; produtos: any[] }> => {
+    return apiClient.post(`/api/produtos/import`, { idInventario, produtos })
+  },
+
   // ====== CONTAGENS ======
   listContagens: (
     params: InventarioContagemQueryParams = {}
