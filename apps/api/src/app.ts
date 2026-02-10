@@ -1,5 +1,4 @@
 import Fastify, { FastifyInstance } from 'fastify';
-import compress from '@fastify/compress';
 import cors from './plugins/cors.js';
 import swagger from './plugins/swagger.js';
 import supabase from './plugins/supabase.js';
@@ -38,7 +37,6 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   // Register plugins
-  await app.register(compress, { encodings: ['gzip', 'deflate'] });
   await app.register(cors);
   await app.register(swagger);
   await app.register(supabase);
