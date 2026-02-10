@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   FileText,
   FolderOpen,
-  FileSpreadsheet,
   Users,
   RefreshCw,
   ChevronDown,
@@ -130,15 +129,6 @@ const navigation: NavItem[] = [
     href: "/admin/audit-logs",
     icon: ScrollText,
     permission: { resource: "audit_logs", action: "read" },
-  },
-  {
-    name: "Templates",
-    icon: FileSpreadsheet,
-    children: [
-      { name: "Campos", href: "/admin/templates/campos" },
-      { name: "Template Exportação", href: "/admin/templates/exportacao" },
-      { name: "Template Importação", href: "/admin/templates/importacao" },
-    ],
   },
   {
     name: "Cliente",

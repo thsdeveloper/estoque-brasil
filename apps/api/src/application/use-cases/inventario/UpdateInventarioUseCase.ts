@@ -15,8 +15,6 @@ export class UpdateInventarioUseCase {
     inventario.update({
       idLoja: data.idLoja,
       idEmpresa: data.idEmpresa,
-      idTemplate: data.idTemplate,
-      idTemplateExportacao: data.idTemplateExportacao,
       minimoContagem: data.minimoContagem,
       dataInicio: data.dataInicio ? new Date(data.dataInicio) : undefined,
       dataTermino: data.dataTermino !== undefined
@@ -25,6 +23,7 @@ export class UpdateInventarioUseCase {
       lote: data.lote,
       validade: data.validade,
       ativo: data.ativo,
+      lider: data.lider,
     });
 
     const updatedInventario = await this.inventarioRepository.update(inventario);

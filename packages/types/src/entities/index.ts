@@ -10,9 +10,6 @@ export * from './produto';
 export * from './contagem';
 export * from './operador';
 
-// Templates
-export * from './template';
-
 // Usuários e configurações
 export * from './usuario';
 export * from './configuracao';

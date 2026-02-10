@@ -42,24 +42,35 @@ export function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
   const searchParams = useSearchParams();
 
   const verified = searchParams.get('verified') === 'true';
+  const registered = searchParams.get('registered') === 'true';
   const reset = searchParams.get('reset') === 'true';
   const tokenError = searchParams.get('error') === 'invalid_token';
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      cpf: '',
       password: '',
     },
   });
+
+  const formatCpf = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
 
   const onSubmit = async (data: LoginInput) => {
     setError(null);
     setLoading(true);
 
+    const cpfDigits = data.cpf.replace(/\D/g, '');
+
     // 1. Call API to authenticate
     const { data: loginData, error: apiError } = await apiPost<LoginResponse>('/auth/login', {
-      email: data.email,
+      cpf: cpfDigits,
       password: data.password,
     });
 
@@ -88,12 +99,17 @@ export function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
 
   return (
     <AuthCard
-      description="Entre com suas credenciais para acessar o painel administrativo."
+      description="Entre com seu CPF e senha para acessar o painel administrativo."
       footer={<AuthLinks type="login" />}
     >
       {verified && (
         <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 rounded-md">
-          Email verificado com sucesso! Faça login para continuar.
+          Conta verificada com sucesso! Faça login para continuar.
+        </div>
+      )}
+      {registered && (
+        <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 rounded-md">
+          Conta criada com sucesso! Faça login para continuar.
         </div>
       )}
       {reset && (
@@ -110,16 +126,19 @@ export function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="email"
+            name="cpf"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>CPF</FormLabel>
                 <FormControl>
                   <Input
-                    type="email"
-                    placeholder="seu@email.com"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="000.000.000-00"
+                    maxLength={14}
                     disabled={loading}
                     {...field}
+                    onChange={(e) => field.onChange(formatCpf(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />

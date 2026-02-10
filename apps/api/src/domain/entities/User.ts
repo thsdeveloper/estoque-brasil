@@ -5,6 +5,7 @@ export interface UserProps {
   id?: string;
   email: string;
   fullName: string;
+  cpf?: string | null;
   phone?: string | null;
   avatarUrl?: string | null;
   isActive?: boolean;
@@ -18,6 +19,7 @@ export class User {
   private readonly _id?: string;
   private _email: string;
   private _fullName: string;
+  private _cpf: string | null;
   private _phone: string | null;
   private _avatarUrl: string | null;
   private _isActive: boolean;
@@ -30,6 +32,7 @@ export class User {
     this._id = props.id;
     this._email = props.email;
     this._fullName = props.fullName;
+    this._cpf = props.cpf ?? null;
     this._phone = props.phone ?? null;
     this._avatarUrl = props.avatarUrl ?? null;
     this._isActive = props.isActive ?? true;
@@ -149,6 +152,10 @@ export class User {
 
   get email(): string {
     return this._email;
+  }
+
+  get cpf(): string | null {
+    return this._cpf;
   }
 
   get fullName(): string {

@@ -1,6 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
 import { SupabaseAuthService } from '../../infrastructure/auth/SupabaseAuthService.js';
+import { SupabaseUserRepository } from '../../infrastructure/database/supabase/repositories/SupabaseUserRepository.js';
+import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 import {
   RegisterUseCase,
   LoginUseCase,
@@ -30,7 +32,8 @@ export class AuthController {
 
   constructor() {
     const authService = new SupabaseAuthService();
-    this.registerUseCase = new RegisterUseCase(authService);
+    const userRepository = new SupabaseUserRepository(getSupabaseAdminClient());
+    this.registerUseCase = new RegisterUseCase(authService, userRepository);
     this.loginUseCase = new LoginUseCase(authService);
     this.logoutUseCase = new LogoutUseCase(authService);
     this.forgotPasswordUseCase = new ForgotPasswordUseCase(authService);

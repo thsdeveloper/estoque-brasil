@@ -16,30 +16,43 @@ import { colors, fontSize, spacing, borderRadius } from '@/config/theme';
 
 const logo = require('@/assets/logo.png');
 
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
 export function LoginScreen() {
   const { login } = useAuth();
   const { playError } = useSound();
-  const [email, setEmail] = useState('');
+  const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const passwordRef = useRef<TextInput>(null);
   const scrollRef = useRef<ScrollView>(null);
 
+  const handleCpfChange = (text: string) => {
+    setCpf(formatCpf(text));
+  };
+
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
+    const cpfDigits = cpf.replace(/\D/g, '');
+    if (!cpfDigits || cpfDigits.length !== 11 || !password.trim()) {
       playError();
-      Alert.alert('Erro', 'Preencha email e senha.');
+      Alert.alert('Erro', 'Preencha CPF (11 dígitos) e senha.');
       return;
     }
 
     setLoading(true);
     try {
-      await login({ email: email.trim(), password });
+      await login({ cpf: cpfDigits, password });
     } catch (err: any) {
       playError();
       const msg =
-        err?.response?.data?.message || err?.message || 'Email ou senha incorretos.';
+        err?.response?.data?.message || err?.message || 'CPF ou senha incorretos.';
       Alert.alert('Erro', msg);
     } finally {
       setLoading(false);
@@ -62,16 +75,17 @@ export function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>CPF</Text>
           <TextInput
             style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="seu@email.com"
+            value={cpf}
+            onChangeText={handleCpfChange}
+            placeholder="000.000.000-00"
             placeholderTextColor={colors.textDisabled}
-            keyboardType="email-address"
+            keyboardType="numeric"
             autoCapitalize="none"
             autoCorrect={false}
+            maxLength={14}
             returnKeyType="next"
             onSubmitEditing={() => passwordRef.current?.focus()}
             onFocus={() => scrollRef.current?.scrollToEnd({ animated: true })}

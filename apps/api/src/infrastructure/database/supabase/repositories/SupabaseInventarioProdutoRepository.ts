@@ -43,6 +43,28 @@ export class SupabaseInventarioProdutoRepository implements IInventarioProdutoRe
     return (data as InventarioProdutoDbRow[]).map(InventarioProdutoMapper.toDomain);
   }
 
+  async createManyBulk(produtos: InventarioProduto[]): Promise<number> {
+    const BATCH_SIZE = 500;
+    let totalInserted = 0;
+
+    for (let i = 0; i < produtos.length; i += BATCH_SIZE) {
+      const batch = produtos.slice(i, i + BATCH_SIZE);
+      const insertData = batch.map(InventarioProdutoMapper.toInsertRow);
+
+      const { error } = await this.supabase
+        .from(TABLE_NAME)
+        .insert(insertData);
+
+      if (error) {
+        throw new Error(`Failed to bulk insert produtos (batch ${Math.floor(i / BATCH_SIZE) + 1}): ${error.message}`);
+      }
+
+      totalInserted += batch.length;
+    }
+
+    return totalInserted;
+  }
+
   async findById(id: number): Promise<InventarioProduto | null> {
     const { data, error } = await this.supabase
       .from(TABLE_NAME)

@@ -30,9 +30,10 @@ const validationErrorResponseSchema = {
 
 const registerBodySchema = {
   type: 'object',
-  required: ['email', 'password'],
+  required: ['cpf', 'fullName', 'password'],
   properties: {
-    email: { type: 'string', format: 'email' },
+    cpf: { type: 'string', minLength: 11, maxLength: 14 },
+    fullName: { type: 'string', minLength: 1, maxLength: 255 },
     password: { type: 'string', minLength: 8 },
   },
 };
@@ -41,14 +42,15 @@ const registerResponseSchema = {
   type: 'object',
   properties: {
     message: { type: 'string' },
-    email: { type: 'string' },
+    cpf: { type: 'string' },
   },
 };
 
 const loginBodySchema = {
   type: 'object',
-  required: ['email', 'password'],
+  required: ['password'],
   properties: {
+    cpf: { type: 'string', minLength: 11, maxLength: 14 },
     email: { type: 'string', format: 'email' },
     password: { type: 'string', minLength: 1 },
   },
@@ -132,7 +134,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
       schema: {
         tags: ['Auth'],
         summary: 'Criar nova conta',
-        description: 'Registra um novo usuário no sistema. Um email de verificação será enviado.',
+        description: 'Registra um novo usuário no sistema via CPF.',
         body: registerBodySchema,
         response: {
           201: registerResponseSchema,

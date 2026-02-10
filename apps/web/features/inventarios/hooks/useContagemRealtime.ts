@@ -50,6 +50,7 @@ export interface OperatorStats {
   ultima_contagem: string
   setor_atual_id: number | null
   setor_atual_descricao: string
+  avg_bip_seconds: number
 }
 
 interface UseContagemRealtimeReturn {
@@ -179,17 +180,38 @@ export function useContagemRealtime(inventarioId: number): UseContagemRealtimeRe
           setOperators((prev) => {
             const existing = prev.find((op) => op.user_id === contagem.idUsuario)
             if (existing) {
-              return prev.map((op) =>
-                op.user_id === contagem.idUsuario
-                  ? {
-                      ...op,
-                      total_contagens: op.total_contagens + 1,
-                      total_quantidade: op.total_quantidade + contagem.quantidade,
-                      ultima_contagem: contagem.data,
-                      setor_atual_id: contagem.idInventarioSetor,
+              return prev.map((op) => {
+                if (op.user_id !== contagem.idUsuario) return op
+
+                // Calculate updated avg_bip_seconds incrementally
+                let newAvgBip = op.avg_bip_seconds
+                if (op.ultima_contagem) {
+                  const interval =
+                    (new Date(contagem.data).getTime() -
+                      new Date(op.ultima_contagem).getTime()) /
+                    1000
+                  if (interval > 0 && interval < 3600) {
+                    // Ignore intervals > 1h (likely a break)
+                    const numIntervals = op.total_contagens // intervals = count before this one
+                    if (numIntervals <= 1 || op.avg_bip_seconds === 0) {
+                      newAvgBip = interval
+                    } else {
+                      newAvgBip =
+                        (op.avg_bip_seconds * (numIntervals - 1) + interval) /
+                        numIntervals
                     }
-                  : op
-              )
+                  }
+                }
+
+                return {
+                  ...op,
+                  total_contagens: op.total_contagens + 1,
+                  total_quantidade: op.total_quantidade + contagem.quantidade,
+                  ultima_contagem: contagem.data,
+                  setor_atual_id: contagem.idInventarioSetor,
+                  avg_bip_seconds: newAvgBip,
+                }
+              })
             }
             // New operator — add with basic info
             return [
@@ -203,6 +225,7 @@ export function useContagemRealtime(inventarioId: number): UseContagemRealtimeRe
                 ultima_contagem: contagem.data,
                 setor_atual_id: contagem.idInventarioSetor,
                 setor_atual_descricao: "",
+                avg_bip_seconds: 0,
               },
               ...prev,
             ]

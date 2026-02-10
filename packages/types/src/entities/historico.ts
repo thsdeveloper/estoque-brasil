@@ -2,7 +2,6 @@
 export interface HistoricoExportacao {
   id: number;
   idInventario: number;
-  idTemplateExportacao: number;
   usrCodigo: number;
   idCliente: number;
   data: string; // datetime

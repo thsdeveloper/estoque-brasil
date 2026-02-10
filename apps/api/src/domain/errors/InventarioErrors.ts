@@ -151,25 +151,6 @@ export class OperadorNotFoundError extends DomainError {
   }
 }
 
-// Template Errors
-export class InvalidTemplateError extends DomainError {
-  readonly code = 'INVALID_TEMPLATE';
-  readonly statusCode = 400;
-
-  constructor(message: string) {
-    super(message);
-  }
-}
-
-export class TemplateNotFoundError extends DomainError {
-  readonly code = 'TEMPLATE_NOT_FOUND';
-  readonly statusCode = 404;
-
-  constructor(id: number) {
-    super(`Template não encontrado: ${id}`);
-  }
-}
-
 // Setor Business Rule Errors
 export class SetorFinalizadoError extends DomainError {
   readonly code = 'SETOR_FINALIZADO';

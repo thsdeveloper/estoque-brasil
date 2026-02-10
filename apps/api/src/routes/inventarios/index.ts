@@ -13,8 +13,6 @@ const inventarioResponseSchema = {
     id: { type: 'integer' },
     idLoja: { type: 'integer' },
     idEmpresa: { type: 'integer' },
-    idTemplate: { type: ['integer', 'null'] },
-    idTemplateExportacao: { type: ['integer', 'null'] },
     minimoContagem: { type: 'integer' },
     dataInicio: { type: 'string', format: 'date-time' },
     dataTermino: { type: ['string', 'null'], format: 'date-time' },
@@ -24,6 +22,8 @@ const inventarioResponseSchema = {
     nomeLoja: { type: ['string', 'null'] },
     cnpjLoja: { type: ['string', 'null'] },
     nomeCliente: { type: ['string', 'null'] },
+    lider: { type: ['string', 'null'] },
+    liderNome: { type: ['string', 'null'] },
     temContagens: { type: 'boolean' },
   },
 };
@@ -53,14 +53,13 @@ const createInventarioBodySchema = {
   properties: {
     idLoja: { type: 'integer' },
     idEmpresa: { type: 'integer' },
-    idTemplate: { type: ['integer', 'null'] },
-    idTemplateExportacao: { type: ['integer', 'null'] },
     minimoContagem: { type: 'integer', minimum: 1, default: 1 },
     dataInicio: { type: 'string', format: 'date-time' },
     dataTermino: { type: ['string', 'null'], format: 'date-time' },
     lote: { type: 'boolean', default: false },
     validade: { type: 'boolean', default: false },
     ativo: { type: 'boolean', default: true },
+    lider: { type: ['string', 'null'], format: 'uuid' },
   },
 };
 
@@ -69,14 +68,13 @@ const updateInventarioBodySchema = {
   properties: {
     idLoja: { type: 'integer' },
     idEmpresa: { type: 'integer' },
-    idTemplate: { type: ['integer', 'null'] },
-    idTemplateExportacao: { type: ['integer', 'null'] },
     minimoContagem: { type: 'integer', minimum: 1 },
     dataInicio: { type: 'string', format: 'date-time' },
     dataTermino: { type: ['string', 'null'], format: 'date-time' },
     lote: { type: 'boolean' },
     validade: { type: 'boolean' },
     ativo: { type: 'boolean' },
+    lider: { type: ['string', 'null'], format: 'uuid' },
   },
 };
 

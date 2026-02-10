@@ -4,6 +4,7 @@ import { IRoleRepository } from '../../../domain/repositories/IRoleRepository.js
 import { UserAlreadyExistsError, RoleNotFoundError } from '../../../domain/errors/UserErrors.js';
 import { CreateUserDTO } from '../../dtos/users/CreateUserDTO.js';
 import { UserResponseDTO, toUserResponseDTO } from '../../dtos/users/UserResponseDTO.js';
+import { cpfToEmail, stripCpf, isValidCpf } from '../../../domain/validators/cpf.js';
 
 export interface ICreateUserAuthService {
   createUser(email: string, password: string): Promise<string>;
@@ -17,10 +18,16 @@ export class CreateUserUseCase {
   ) {}
 
   async execute(data: CreateUserDTO, assignedBy?: string): Promise<UserResponseDTO> {
-    // Check if user already exists
-    const existingUser = await this.userRepository.existsByEmail(data.email);
+    const cpf = stripCpf(data.cpf);
+
+    if (!isValidCpf(cpf)) {
+      throw new Error('CPF inválido');
+    }
+
+    // Check if CPF already exists
+    const existingUser = await this.userRepository.existsByCpf(cpf);
     if (existingUser) {
-      throw new UserAlreadyExistsError(data.email);
+      throw new UserAlreadyExistsError(cpf);
     }
 
     // Validate roles exist
@@ -33,14 +40,18 @@ export class CreateUserUseCase {
       roles.push(role);
     }
 
+    // Generate synthetic email
+    const email = cpfToEmail(cpf);
+
     // Create user in auth system (Supabase Auth)
-    const authUserId = await this.authService.createUser(data.email, data.password);
+    const authUserId = await this.authService.createUser(email, data.password);
 
     // Create user profile
     const user = User.create({
       id: authUserId,
-      email: data.email,
+      email,
       fullName: data.fullName,
+      cpf,
       phone: data.phone,
       avatarUrl: data.avatarUrl,
       isActive: data.isActive,

@@ -1,6 +1,6 @@
 // Auth
 export interface LoginRequest {
-  email: string;
+  cpf: string;
   password: string;
 }
 

@@ -5,4 +5,4 @@ export * from './InventarioMapper.js';
 export * from './SetorMapper.js';
 export * from './InventarioProdutoMapper.js';
 export * from './InventarioContagemMapper.js';
-export * from './TemplateImportacaoMapper.js';
+

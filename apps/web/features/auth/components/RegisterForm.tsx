@@ -20,6 +20,14 @@ import { PasswordInput } from './PasswordInput';
 import { register } from '../actions/register-action';
 import { registerSchema, type RegisterInput } from '../types';
 
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
 export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,7 +36,8 @@ export function RegisterForm() {
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      email: '',
+      cpf: '',
+      fullName: '',
       password: '',
       confirmPassword: '',
     },
@@ -38,8 +47,11 @@ export function RegisterForm() {
     setError(null);
     setLoading(true);
 
+    const cpfDigits = data.cpf.replace(/\D/g, '');
+
     const formData = new FormData();
-    formData.append('email', data.email);
+    formData.append('cpf', cpfDigits);
+    formData.append('fullName', data.fullName);
     formData.append('password', data.password);
     formData.append('confirmPassword', data.confirmPassword);
 
@@ -56,7 +68,7 @@ export function RegisterForm() {
       return;
     }
 
-    router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
+    router.push('/login?registered=true');
   };
 
   return (
@@ -69,14 +81,35 @@ export function RegisterForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name="email"
+            name="cpf"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>CPF</FormLabel>
                 <FormControl>
                   <Input
-                    type="email"
-                    placeholder="seu@email.com"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                    disabled={loading}
+                    {...field}
+                    onChange={(e) => field.onChange(formatCpf(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="fullName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome Completo</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Seu nome completo"
                     disabled={loading}
                     {...field}
                   />

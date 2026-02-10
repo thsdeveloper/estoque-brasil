@@ -11,16 +11,6 @@ export const createInventarioSchema = z.object({
     .number({ required_error: 'ID da empresa é obrigatório' })
     .int('ID da empresa deve ser um número inteiro')
     .positive('ID da empresa deve ser positivo'),
-  idTemplate: z
-    .number()
-    .int('ID do template deve ser um número inteiro')
-    .positive('ID do template deve ser positivo')
-    .nullish(),
-  idTemplateExportacao: z
-    .number()
-    .int('ID do template de exportação deve ser um número inteiro')
-    .positive('ID do template de exportação deve ser positivo')
-    .nullish(),
   minimoContagem: z
     .number()
     .int('Mínimo de contagem deve ser um número inteiro')
@@ -36,6 +26,7 @@ export const createInventarioSchema = z.object({
   lote: z.boolean().default(false),
   validade: z.boolean().default(false),
   ativo: z.boolean().default(true),
+  lider: z.string().uuid('Líder deve ser um UUID válido').nullish(),
 }).refine(
   (data) => {
     if (data.dataTermino) {
@@ -58,16 +49,6 @@ export const updateInventarioSchema = z.object({
     .int('ID da empresa deve ser um número inteiro')
     .positive('ID da empresa deve ser positivo')
     .optional(),
-  idTemplate: z
-    .number()
-    .int('ID do template deve ser um número inteiro')
-    .positive('ID do template deve ser positivo')
-    .nullish(),
-  idTemplateExportacao: z
-    .number()
-    .int('ID do template de exportação deve ser um número inteiro')
-    .positive('ID do template de exportação deve ser positivo')
-    .nullish(),
   minimoContagem: z
     .number()
     .int('Mínimo de contagem deve ser um número inteiro')
@@ -84,6 +65,7 @@ export const updateInventarioSchema = z.object({
   lote: z.boolean().optional(),
   validade: z.boolean().optional(),
   ativo: z.boolean().optional(),
+  lider: z.string().uuid('Líder deve ser um UUID válido').nullish(),
 });
 
 export type CreateInventarioDTO = z.infer<typeof createInventarioSchema>;
@@ -93,17 +75,17 @@ export interface InventarioResponseDTO {
   id: number;
   idLoja: number;
   idEmpresa: number;
-  idTemplate: number | null;
-  idTemplateExportacao: number | null;
   minimoContagem: number;
   dataInicio: string;
   dataTermino: string | null;
   lote: boolean;
   validade: boolean;
   ativo: boolean;
+  lider: string | null;
   nomeLoja: string | null;
   cnpjLoja: string | null;
   nomeCliente: string | null;
+  liderNome: string | null;
   temContagens: boolean;
 }
 
@@ -120,17 +102,17 @@ export function toInventarioResponseDTO(inventario: Inventario, temContagens = f
     id: inventario.id!,
     idLoja: inventario.idLoja,
     idEmpresa: inventario.idEmpresa,
-    idTemplate: inventario.idTemplate,
-    idTemplateExportacao: inventario.idTemplateExportacao,
     minimoContagem: inventario.minimoContagem,
     dataInicio: inventario.dataInicio.toISOString(),
     dataTermino: inventario.dataTermino?.toISOString() ?? null,
     lote: inventario.lote,
     validade: inventario.validade,
     ativo: inventario.ativo,
+    lider: inventario.lider,
     nomeLoja: inventario.nomeLoja,
     cnpjLoja: inventario.cnpjLoja,
     nomeCliente: inventario.nomeCliente,
+    liderNome: inventario.liderNome,
     temContagens,
   };
 }

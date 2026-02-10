@@ -19,6 +19,14 @@ interface ColumnsProps {
   canDelete?: boolean
 }
 
+// Format CPF for display
+function formatCpf(cpf: string | null): string {
+  if (!cpf) return "-"
+  const d = cpf.replace(/\D/g, "")
+  if (d.length !== 11) return cpf
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`
+}
+
 // Format date for display
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "-"
@@ -47,7 +55,7 @@ export function getColumns({
               {row.getValue("fullName")}
             </span>
             <span className="text-sm text-muted-foreground">
-              {row.original.email}
+              {formatCpf(row.original.cpf)}
             </span>
           </div>
         )

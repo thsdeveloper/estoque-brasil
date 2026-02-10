@@ -14,6 +14,7 @@ import {
 import { DataTable } from "@/shared/components/ui/data-table"
 import { useProdutos } from "../../hooks/useProdutos"
 import { getColumns } from "./produtos-columns"
+import { ImportProdutosDialog } from "./ImportProdutosDialog"
 
 interface ProdutosTabProps {
   inventarioId: number
@@ -24,6 +25,7 @@ export function ProdutosTab({ inventarioId }: ProdutosTabProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(20)
+  const [importOpen, setImportOpen] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const {
@@ -76,7 +78,7 @@ export function ProdutosTab({ inventarioId }: ProdutosTabProps) {
           </CardDescription>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => setImportOpen(true)}>
             <Upload className="mr-2 h-4 w-4" />
             Importar
           </Button>
@@ -134,7 +136,7 @@ export function ProdutosTab({ inventarioId }: ProdutosTabProps) {
                 : "Nenhum produto importado neste inventario"}
             </p>
             {!debouncedSearch && (
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setImportOpen(true)}>
                 <Upload className="h-4 w-4" />
                 Importar produtos
               </Button>
@@ -159,6 +161,13 @@ export function ProdutosTab({ inventarioId }: ProdutosTabProps) {
           />
         )}
       </CardContent>
+
+      <ImportProdutosDialog
+        inventarioId={inventarioId}
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onSuccess={() => mutate()}
+      />
     </Card>
   )
 }
