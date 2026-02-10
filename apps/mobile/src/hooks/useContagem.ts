@@ -88,7 +88,10 @@ export function useContagem(): UseContagemReturn {
           }
 
           if (errorData.code === 'SETOR_JA_ABERTO') {
-            Alert.alert('Setor Ja Aberto', `Voce ja tem o setor "${errorData.nomeSetor}" aberto.`);
+            Alert.alert(
+              'Setor em Aberto',
+              `Nao e possivel abrir um novo setor. Feche o setor "${errorData.nomeSetor}" antes de continuar.`,
+            );
             return;
           }
         }
