@@ -12,16 +12,26 @@ export interface ApiResponse<T> {
 }
 
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+  const text = await response.text();
+
   if (response.ok) {
-    if (response.status === 204) {
+    if (response.status === 204 || !text) {
       return { data: undefined as T };
     }
-    const data = await response.json();
+    const data = JSON.parse(text);
     return { data };
   }
 
-  const error = await response.json();
-  return { error };
+  if (!text) {
+    return { error: { code: 'UNKNOWN', message: `Erro ${response.status}` } };
+  }
+
+  try {
+    const error = JSON.parse(text);
+    return { error };
+  } catch {
+    return { error: { code: 'UNKNOWN', message: text } };
+  }
 }
 
 export async function apiPost<T>(

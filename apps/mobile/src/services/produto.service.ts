@@ -1,7 +1,20 @@
 import api from './api';
 import type { Produto, PaginatedResponse } from '@/types/api';
 
+interface AllProdutosResponse {
+  data: Produto[];
+  total: number;
+}
+
 export const produtoService = {
+  async buscarTodos(idInventario: number): Promise<Produto[]> {
+    const { data } = await api.get<AllProdutosResponse>('/produtos/all', {
+      params: { idInventario },
+      timeout: 60000,
+    });
+    return data.data;
+  },
+
   async buscarPorBarcode(
     idInventario: number,
     codigoBarras: string,

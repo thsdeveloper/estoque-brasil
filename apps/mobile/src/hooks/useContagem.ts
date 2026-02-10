@@ -6,7 +6,9 @@ import { inventarioService } from '@/services/inventario.service';
 import { produtoService } from '@/services/produto.service';
 import { contagemService } from '@/services/contagem.service';
 import { useSound } from './useSound';
-import type { Contagem, Produto, Setor } from '@/types/api';
+import { useProductCache } from './useProductCache';
+import { useContagemQueue } from './useContagemQueue';
+import type { Contagem, Produto, Setor, SyncStatus } from '@/types/api';
 
 export interface ScannedProduct {
   produto: Produto;
@@ -20,6 +22,9 @@ interface UseContagemReturn {
   totalContagens: number;
   searchMode: 'ean' | 'interno';
   isMultipleMode: boolean;
+  productCacheReady: boolean;
+  productCacheLoading: boolean;
+  syncStatus: SyncStatus;
   setActiveSetor: (setor: Setor | null) => void;
   setSearchMode: (mode: 'ean' | 'interno') => void;
   setIsMultipleMode: (v: boolean) => void;
@@ -34,7 +39,11 @@ interface UseContagemReturn {
   }>;
   clearScanned: () => void;
   loadExistingContagens: () => Promise<void>;
+  flushNow: () => Promise<void>;
+  retryFailed: () => Promise<void>;
 }
+
+let localContagemId = -1;
 
 export function useContagem(): UseContagemReturn {
   const { inventario } = useContext(InventarioContext);
@@ -45,6 +54,15 @@ export function useContagem(): UseContagemReturn {
   const [totalContagens, setTotalContagens] = useState(0);
   const [searchMode, setSearchMode] = useState<'ean' | 'interno'>('ean');
   const [isMultipleMode, setIsMultipleMode] = useState(false);
+
+  const {
+    isLoading: productCacheLoading,
+    isReady: productCacheReady,
+    lookupByBarcode,
+    lookupByCodigoInterno,
+  } = useProductCache(inventario?.id ?? null);
+
+  const { fireAndForget, syncStatus, flushNow, retryFailed } = useContagemQueue();
 
   const setActiveSetor = useCallback(async (setor: Setor | null) => {
     if (setor) {
@@ -103,11 +121,23 @@ export function useContagem(): UseContagemReturn {
       }
 
       try {
-        // Search product
-        const produto =
-          searchMode === 'ean'
-            ? await produtoService.buscarPorBarcode(inventario.id, code)
-            : await produtoService.buscarPorCodigoInterno(inventario.id, code);
+        // Try cache first, fallback to API
+        let produto: Produto | null = null;
+
+        if (productCacheReady) {
+          produto =
+            searchMode === 'ean'
+              ? lookupByBarcode(code)
+              : lookupByCodigoInterno(code);
+        }
+
+        // Fallback to API if not in cache (product added after cache load)
+        if (!produto) {
+          produto =
+            searchMode === 'ean'
+              ? await produtoService.buscarPorBarcode(inventario.id, code)
+              : await produtoService.buscarPorCodigoInterno(inventario.id, code);
+        }
 
         if (!produto) {
           playError();
@@ -130,7 +160,7 @@ export function useContagem(): UseContagemReturn {
         // Check if already scanned and not in multiple mode
         if (!isMultipleMode) {
           const alreadyScanned = scannedProducts.find(
-            (sp) => sp.produto.id === produto.id,
+            (sp) => sp.produto.id === produto!.id,
           );
           if (alreadyScanned) {
             playAttention();
@@ -138,19 +168,35 @@ export function useContagem(): UseContagemReturn {
           }
         }
 
-        // Create contagem
-        const contagem = await contagemService.criar({
+        // Build request
+        const request = {
           idInventarioSetor: activeSetor.id,
           idProduto: produto.id,
           quantidade: extraData?.quantidade ?? 1,
           lote: extraData?.lote,
           validade: extraData?.validade,
           ...(produto.divergente ? { reconferencia: true } : {}),
-        });
+        };
+
+        // Fire-and-forget: send to server in background
+        fireAndForget(request, produto);
+
+        // Create local contagem for immediate UI feedback
+        const localContagem: Contagem = {
+          id: localContagemId--,
+          idInventarioSetor: activeSetor.id,
+          idProduto: produto.id,
+          data: new Date().toISOString(),
+          quantidade: extraData?.quantidade ?? 1,
+          lote: extraData?.lote,
+          validade: extraData?.validade,
+          divergente: produto.divergente,
+          reconferido: false,
+        };
 
         const newItem: ScannedProduct = {
           produto,
-          contagem,
+          contagem: localContagem,
           timestamp: Date.now(),
         };
 
@@ -172,6 +218,10 @@ export function useContagem(): UseContagemReturn {
       searchMode,
       isMultipleMode,
       scannedProducts,
+      productCacheReady,
+      lookupByBarcode,
+      lookupByCodigoInterno,
+      fireAndForget,
       playSuccess,
       playError,
       playAttention,
@@ -189,11 +239,16 @@ export function useContagem(): UseContagemReturn {
     totalContagens,
     searchMode,
     isMultipleMode,
+    productCacheReady,
+    productCacheLoading,
+    syncStatus,
     setActiveSetor,
     setSearchMode,
     setIsMultipleMode,
     submitBarcode,
     clearScanned,
     loadExistingContagens,
+    flushNow,
+    retryFailed,
   };
 }

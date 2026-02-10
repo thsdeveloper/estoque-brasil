@@ -40,7 +40,7 @@ export default function AdminLayout({
         <div className="min-h-screen bg-neutral">
           {/* Mobile sidebar */}
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetContent side="left" className="w-64 p-0">
+            <SheetContent side="left" className="w-72 p-0">
               <AdminSidebar onNavigate={() => setSidebarOpen(false)} />
             </SheetContent>
           </Sheet>
@@ -50,8 +50,8 @@ export default function AdminLayout({
             className={cn(
               "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col transition-all duration-300",
               isHydrated
-                ? sidebarCollapsed ? "lg:w-16" : "lg:w-64"
-                : "lg:w-64"
+                ? sidebarCollapsed ? "lg:w-16" : "lg:w-72"
+                : "lg:w-72"
             )}
           >
             <AdminSidebar
@@ -65,8 +65,8 @@ export default function AdminLayout({
             className={cn(
               "transition-all duration-300",
               isHydrated
-                ? sidebarCollapsed ? "lg:pl-16" : "lg:pl-64"
-                : "lg:pl-64"
+                ? sidebarCollapsed ? "lg:pl-16" : "lg:pl-72"
+                : "lg:pl-72"
             )}
           >
             <AdminHeader onMenuClick={() => setSidebarOpen(true)} />

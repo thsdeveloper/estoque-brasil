@@ -126,6 +126,62 @@ export default async function produtoRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get(
+    '/produtos/all',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Produtos'],
+        summary: 'Buscar todos os produtos de um inventario',
+        description: 'Retorna todos os produtos de um inventario sem paginacao (para cache mobile)',
+        security: [{ bearerAuth: [] }],
+        querystring: {
+          type: 'object',
+          required: ['idInventario'],
+          properties: {
+            idInventario: { type: 'integer', description: 'ID do inventario (obrigatorio)' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              data: { type: 'array', items: produtoResponseSchema },
+              total: { type: 'number' },
+            },
+          },
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const { idInventario } = request.query as { idInventario: number };
+        const produtos = await produtoRepository.findByInventario(idInventario);
+        const data = produtos.map((p) => ({
+          id: p.id,
+          idInventario: p.idInventario,
+          codigoBarras: p.codigoBarras,
+          codigoInterno: p.codigoInterno,
+          descricao: p.descricao,
+          lote: p.lote,
+          validade: p.validade,
+          saldo: p.saldo,
+          custo: p.custo,
+          divergente: p.divergente,
+        }));
+        reply.send({ data, total: data.length });
+      } catch (error) {
+        if (error instanceof Error) {
+          reply.status(500).send({ code: 'INTERNAL_ERROR', message: error.message });
+          return;
+        }
+        reply.status(500).send({ code: 'INTERNAL_ERROR', message: 'Erro interno do servidor' });
+      }
+    }
+  );
+
+  fastify.get(
     '/produtos/:id',
     {
       preHandler: [requireAuth],

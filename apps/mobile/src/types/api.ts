@@ -103,6 +103,22 @@ export interface CreateContagemRequest {
   reconferencia?: boolean;
 }
 
+// Contagem Queue
+export interface QueuedContagem {
+  localId: string;
+  request: CreateContagemRequest;
+  produto: Produto;
+  timestamp: number;
+  retryCount: number;
+  status: 'pending' | 'syncing' | 'failed';
+  errorMessage?: string;
+}
+
+export interface SyncStatus {
+  inflight: number;
+  failed: number;
+}
+
 // Paginated response
 export interface PaginatedResponse<T> {
   data: T[];

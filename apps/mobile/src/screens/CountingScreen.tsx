@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Pressable,
@@ -37,12 +38,17 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
     totalContagens,
     searchMode,
     isMultipleMode,
+    productCacheReady,
+    productCacheLoading,
+    syncStatus,
     setActiveSetor,
     setSearchMode,
     setIsMultipleMode,
     submitBarcode,
     clearScanned,
     loadExistingContagens,
+    flushNow,
+    retryFailed,
   } = useContagem();
   const { playClick, playAttention } = useSound();
   const [loading, setLoading] = useState(false);
@@ -201,6 +207,12 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
     try {
       if (activeSetor) {
         setLoading(true);
+
+        // Flush pending retries before closing
+        if (syncStatus.failed > 0 || syncStatus.inflight > 0) {
+          await flushNow();
+        }
+
         await inventarioService.finalizarSetor(activeSetor.id);
       }
     } catch (err: unknown) {
@@ -240,6 +252,14 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
     return (
       <SafeAreaView style={styles.container}>
         <LoadingOverlay visible={loading} />
+
+        {/* Product cache loading indicator */}
+        {productCacheLoading && (
+          <View style={styles.cacheLoadingBanner}>
+            <ActivityIndicator size="small" color={colors.primary} />
+            <Text style={styles.cacheLoadingText}>Carregando produtos...</Text>
+          </View>
+        )}
 
         <View style={styles.section}>
           <ScannerInput
@@ -327,6 +347,15 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
             <Text style={styles.counterLabel}>itens</Text>
           </View>
         </View>
+
+        {/* Sync Status Bar - only shows when there are problems */}
+        {syncStatus.failed > 0 && (
+          <Pressable style={styles.syncErrorBanner} onPress={retryFailed}>
+            <Text style={styles.syncErrorText}>
+              {syncStatus.failed} erro{syncStatus.failed > 1 ? 's' : ''} - Tocar para retentar
+            </Text>
+          </Pressable>
+        )}
 
         {/* Search Mode Toggle */}
         <View style={styles.toggleRow}>
@@ -458,6 +487,34 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
   },
   errorText: {
+    color: colors.text,
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  cacheLoadingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+    gap: spacing.sm,
+  },
+  cacheLoadingText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.sm,
+  },
+  syncErrorBanner: {
+    backgroundColor: '#B71C1C',
+    marginHorizontal: spacing.lg,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.xs,
+  },
+  syncErrorText: {
     color: colors.text,
     fontSize: fontSize.sm,
     fontWeight: '600',
