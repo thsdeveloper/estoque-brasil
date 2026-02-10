@@ -6,6 +6,12 @@ export interface LojaProps {
   idCliente: string; // UUID reference to clients table
   nome: string;
   cnpj?: string | null;
+  cep?: string | null;
+  endereco?: string | null;
+  numero?: string | null;
+  bairro?: string | null;
+  uf?: string | null;
+  municipio?: string | null;
 }
 
 export class Loja {
@@ -13,12 +19,24 @@ export class Loja {
   private _idCliente: string;
   private _nome: string;
   private _cnpj: CNPJ | null;
+  private _cep: string | null;
+  private _endereco: string | null;
+  private _numero: string | null;
+  private _bairro: string | null;
+  private _uf: string | null;
+  private _municipio: string | null;
 
   private constructor(props: LojaProps) {
     this._id = props.id;
     this._idCliente = props.idCliente;
     this._nome = props.nome;
     this._cnpj = CNPJ.create(props.cnpj);
+    this._cep = props.cep ?? null;
+    this._endereco = props.endereco ?? null;
+    this._numero = props.numero ?? null;
+    this._bairro = props.bairro ?? null;
+    this._uf = props.uf ?? null;
+    this._municipio = props.municipio ?? null;
   }
 
   static create(props: LojaProps): Loja {
@@ -61,6 +79,13 @@ export class Loja {
     if (props.cnpj !== undefined) {
       this._cnpj = CNPJ.create(props.cnpj);
     }
+
+    if (props.cep !== undefined) this._cep = props.cep ?? null;
+    if (props.endereco !== undefined) this._endereco = props.endereco ?? null;
+    if (props.numero !== undefined) this._numero = props.numero ?? null;
+    if (props.bairro !== undefined) this._bairro = props.bairro ?? null;
+    if (props.uf !== undefined) this._uf = props.uf ?? null;
+    if (props.municipio !== undefined) this._municipio = props.municipio ?? null;
   }
 
   get id(): number | undefined {
@@ -77,5 +102,29 @@ export class Loja {
 
   get cnpj(): string | null {
     return this._cnpj?.getValue() ?? null;
+  }
+
+  get cep(): string | null {
+    return this._cep;
+  }
+
+  get endereco(): string | null {
+    return this._endereco;
+  }
+
+  get numero(): string | null {
+    return this._numero;
+  }
+
+  get bairro(): string | null {
+    return this._bairro;
+  }
+
+  get uf(): string | null {
+    return this._uf;
+  }
+
+  get municipio(): string | null {
+    return this._municipio;
   }
 }

@@ -6,6 +6,7 @@ export interface ListLojasInput {
   limit?: number;
   search?: string;
   idCliente?: string; // UUID reference to clients
+  idEmpresa?: number;
 }
 
 export class ListLojasUseCase {
@@ -21,6 +22,7 @@ export class ListLojasUseCase {
       limit,
       search,
       idCliente: input.idCliente,
+      idEmpresa: input.idEmpresa,
     };
 
     const result = await this.lojaRepository.findAll(params);

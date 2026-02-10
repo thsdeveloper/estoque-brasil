@@ -3,7 +3,13 @@ import { Client } from '../../domain/entities/Client.js';
 export interface ClientDbRow {
   id: string;
   nome: string;
-  link_bi: string | null;
+  cnpj: string | null;
+  fantasia: string | null;
+  email: string | null;
+  telefone: string | null;
+  situacao: string | null;
+  id_empresa: number | null;
+
   qtde_divergente_plus: number | null;
   qtde_divergente_minus: number | null;
   valor_divergente_plus: number | null;
@@ -21,7 +27,13 @@ export interface ClientDbRow {
 
 export interface ClientInsertRow {
   nome: string;
-  link_bi?: string | null;
+  cnpj?: string | null;
+  fantasia?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  situacao?: string | null;
+  id_empresa?: number | null;
+
   qtde_divergente_plus?: number | null;
   qtde_divergente_minus?: number | null;
   valor_divergente_plus?: number | null;
@@ -40,7 +52,13 @@ export class ClientMapper {
     return Client.create({
       id: row.id,
       nome: row.nome,
-      linkBi: row.link_bi,
+      cnpj: row.cnpj,
+      fantasia: row.fantasia,
+      email: row.email,
+      telefone: row.telefone,
+      situacao: row.situacao,
+      idEmpresa: row.id_empresa,
+
       qtdeDivergentePlus: row.qtde_divergente_plus,
       qtdeDivergenteMinus: row.qtde_divergente_minus,
       valorDivergentePlus: row.valor_divergente_plus,
@@ -60,7 +78,13 @@ export class ClientMapper {
   static toInsertRow(client: Client): ClientInsertRow {
     return {
       nome: client.nome,
-      link_bi: client.linkBi,
+      cnpj: client.cnpj,
+      fantasia: client.fantasia,
+      email: client.email,
+      telefone: client.telefone,
+      situacao: client.situacao,
+      id_empresa: client.idEmpresa,
+
       qtde_divergente_plus: client.qtdeDivergentePlus,
       qtde_divergente_minus: client.qtdeDivergenteMinus,
       valor_divergente_plus: client.valorDivergentePlus,
@@ -78,7 +102,13 @@ export class ClientMapper {
   static toUpdateRow(client: Client): Partial<ClientInsertRow> & { updated_at: string } {
     return {
       nome: client.nome,
-      link_bi: client.linkBi,
+      cnpj: client.cnpj,
+      fantasia: client.fantasia,
+      email: client.email,
+      telefone: client.telefone,
+      situacao: client.situacao,
+      id_empresa: client.idEmpresa,
+
       qtde_divergente_plus: client.qtdeDivergentePlus,
       qtde_divergente_minus: client.qtdeDivergenteMinus,
       valor_divergente_plus: client.valorDivergentePlus,

@@ -4,6 +4,12 @@ export interface Loja {
   idCliente: string; // UUID reference to clients table
   nome: string;
   cnpj: string | null;
+  cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  bairro: string | null;
+  uf: string | null;
+  municipio: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -16,4 +22,5 @@ export interface LojaQueryParams {
   limit?: number;
   search?: string;
   idCliente?: string;
+  idEmpresa?: number;
 }

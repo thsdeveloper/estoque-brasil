@@ -2,9 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import Link from "next/link"
-import { Eye, Pencil, Trash2, ExternalLink } from "lucide-react"
+import { Eye, Pencil, Trash2, Store } from "lucide-react"
 import type { Client } from "@estoque-brasil/types"
-import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/shared/components/ui/dropdown-menu"
 import { DataTableColumnHeader } from "@/shared/components/ui/data-table-column-header"
@@ -19,88 +18,60 @@ interface ColumnsProps {
 export function getColumns({ onDelete, canEdit = true, canDelete = true }: ColumnsProps): ColumnDef<Client>[] {
   return [
     {
+      accessorKey: "cnpj",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="CNPJ" />
+      ),
+      cell: ({ row }) => {
+        const cnpj = row.getValue("cnpj") as string | null
+        if (!cnpj) return <span className="text-gray-light">-</span>
+        const formatted = cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")
+        return <span className="font-mono text-sm">{formatted}</span>
+      },
+    },
+    {
       accessorKey: "nome",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Nome" />
+        <DataTableColumnHeader column={column} title="Razão Social" />
       ),
       cell: ({ row }) => {
         return (
-          <div className="flex items-center">
-            <span className="max-w-[300px] truncate font-medium">
-              {row.getValue("nome")}
-            </span>
-          </div>
+          <span className="max-w-[300px] truncate font-medium">
+            {row.getValue("nome")}
+          </span>
         )
       },
     },
     {
-      accessorKey: "uf",
+      accessorKey: "email",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="UF" />
+        <DataTableColumnHeader column={column} title="Email" />
       ),
       cell: ({ row }) => {
-        const uf = row.getValue("uf") as string | null
-        return uf ? (
-          <Badge variant="secondary">{uf}</Badge>
+        const email = row.getValue("email") as string | null
+        return email ? (
+          <span className="max-w-[250px] truncate">{email}</span>
         ) : (
           <span className="text-gray-light">-</span>
         )
       },
-      filterFn: (row, id, value) => {
-        return value.includes(row.getValue(id))
-      },
     },
     {
-      accessorKey: "municipio",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Municipio" />
-      ),
+      id: "lojas",
+      header: () => <span className="text-sm">Lojas</span>,
       cell: ({ row }) => {
-        const municipio = row.getValue("municipio") as string | null
-        return municipio || <span className="text-gray-light">-</span>
-      },
-    },
-    {
-      accessorKey: "percentualDivergencia",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="% Divergencia" className="justify-end" />
-      ),
-      cell: ({ row }) => {
-        const value = row.getValue("percentualDivergencia") as number | null
-        if (value === null || value === undefined) {
-          return <div className="text-right">-</div>
-        }
-        const formatted = `${value.toFixed(2)}%`
-        const variant = value > 5 ? "destructive" : value > 2 ? "warning" : "success"
+        const client = row.original
         return (
-          <div className="text-right">
-            <Badge variant={variant}>{formatted}</Badge>
-          </div>
-        )
-      },
-    },
-    {
-      accessorKey: "linkBi",
-      header: () => <div className="text-right">Link BI</div>,
-      cell: ({ row }) => {
-        const linkBi = row.getValue("linkBi") as string | null
-        return (
-          <div className="text-right">
-            {linkBi ? (
-              <Button variant="ghost" size="sm" asChild className="h-8 w-8 p-0">
-                <a href={linkBi} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">Abrir BI</span>
-                </a>
-              </Button>
-            ) : (
-              <span className="text-gray-light">-</span>
-            )}
-          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/admin/clients/${client.id}/lojas`}>
+              <Store className="mr-1.5 h-3.5 w-3.5" />
+              Lojas
+            </Link>
+          </Button>
         )
       },
       enableSorting: false,
-      enableHiding: true,
+      enableHiding: false,
     },
     {
       id: "actions",

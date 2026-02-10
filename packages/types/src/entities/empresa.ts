@@ -2,8 +2,8 @@
 export interface Empresa {
   id: number;
   descricao: string | null;
-  cnpj: string | null;
-  razaoSocial: string | null;
+  cnpj: string;
+  razaoSocial: string;
   nomeFantasia: string | null;
   cep: string | null;
   endereco: string | null;

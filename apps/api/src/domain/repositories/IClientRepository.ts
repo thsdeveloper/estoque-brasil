@@ -5,6 +5,7 @@ export interface PaginationParams {
   limit: number;
   search?: string;
   uf?: string;
+  idEmpresa?: number;
 }
 
 export interface PaginatedResult<T> {

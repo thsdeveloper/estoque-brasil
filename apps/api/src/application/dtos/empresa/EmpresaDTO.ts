@@ -1,17 +1,11 @@
 import { z } from 'zod';
 import { Empresa } from '../../../domain/entities/Empresa.js';
 
-// Schema de validação para CNPJ
-const cnpjSchema = z
-  .string()
-  .regex(/^\d{14}$/, 'CNPJ deve conter exatamente 14 dígitos')
-  .nullish();
-
 // Schema de validação para criação de empresa
 export const createEmpresaSchema = z.object({
+  cnpj: z.string().regex(/^\d{14}$/, 'CNPJ deve conter exatamente 14 dígitos'),
+  razaoSocial: z.string().min(1, 'Razão social é obrigatória').max(255, 'Razão social deve ter no máximo 255 caracteres'),
   descricao: z.string().max(255, 'Descrição deve ter no máximo 255 caracteres').nullish(),
-  cnpj: cnpjSchema,
-  razaoSocial: z.string().max(255, 'Razão social deve ter no máximo 255 caracteres').nullish(),
   nomeFantasia: z.string().max(255, 'Nome fantasia deve ter no máximo 255 caracteres').nullish(),
   cep: z
     .string()
@@ -27,16 +21,13 @@ export const createEmpresaSchema = z.object({
     .nullish(),
   codigoMunicipio: z.string().max(10, 'Código do município deve ter no máximo 10 caracteres').nullish(),
   ativo: z.boolean().default(true),
-}).refine(
-  (data) => data.razaoSocial || data.nomeFantasia || data.descricao,
-  { message: 'Empresa deve ter pelo menos razão social, nome fantasia ou descrição' }
-);
+});
 
 // Schema de validação para atualização de empresa
 export const updateEmpresaSchema = z.object({
+  cnpj: z.string().regex(/^\d{14}$/, 'CNPJ deve conter exatamente 14 dígitos').optional(),
+  razaoSocial: z.string().min(1, 'Razão social é obrigatória').max(255, 'Razão social deve ter no máximo 255 caracteres').optional(),
   descricao: z.string().max(255, 'Descrição deve ter no máximo 255 caracteres').nullish(),
-  cnpj: cnpjSchema,
-  razaoSocial: z.string().max(255, 'Razão social deve ter no máximo 255 caracteres').nullish(),
   nomeFantasia: z.string().max(255, 'Nome fantasia deve ter no máximo 255 caracteres').nullish(),
   cep: z
     .string()
@@ -60,8 +51,8 @@ export type UpdateEmpresaDTO = z.infer<typeof updateEmpresaSchema>;
 export interface EmpresaResponseDTO {
   id: number;
   descricao: string | null;
-  cnpj: string | null;
-  razaoSocial: string | null;
+  cnpj: string;
+  razaoSocial: string;
   nomeFantasia: string | null;
   cep: string | null;
   endereco: string | null;

@@ -3,9 +3,7 @@ import Link from "next/link"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { PermissionGate } from "@/shared/components/PermissionGate"
-// Direct imports instead of barrel file (bundle-barrel-imports)
 import { InventariosTable } from "@/features/inventarios/components/InventariosTable"
-import { InventarioSearchFilters } from "@/features/inventarios/components/InventarioSearchFilters"
 import { InventariosTableSkeleton } from "@/features/inventarios/components/InventariosTableSkeleton"
 
 interface PageProps {
@@ -44,19 +42,14 @@ export default async function InventariosPage({ searchParams }: PageProps) {
         </PermissionGate>
       </div>
 
-      {/* Filters + Table Container */}
-      <div className="space-y-4">
-        <InventarioSearchFilters currentFilter={params.ativo} currentSearch={params.search} />
-
-        {/* Suspense boundary for streaming (async-suspense-boundaries) */}
-        <Suspense fallback={<InventariosTableSkeleton />}>
-          <InventariosTable
-            page={page}
-            ativo={ativo}
-            search={search}
-          />
-        </Suspense>
-      </div>
+      {/* Table Container */}
+      <Suspense fallback={<InventariosTableSkeleton />}>
+        <InventariosTable
+          page={page}
+          ativo={ativo}
+          search={search}
+        />
+      </Suspense>
     </div>
   )
 }

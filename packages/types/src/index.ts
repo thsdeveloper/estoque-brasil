@@ -70,7 +70,13 @@ export interface Testimonial {
 export interface Client {
   id: string;
   nome: string;
-  linkBi: string | null;
+  cnpj: string | null;
+  fantasia: string | null;
+  email: string | null;
+  telefone: string | null;
+  situacao: string | null;
+  idEmpresa: number | null;
+
   qtdeDivergentePlus: number | null;
   qtdeDivergenteMinus: number | null;
   valorDivergentePlus: number | null;
@@ -95,6 +101,7 @@ export interface ClientsQueryParams {
   limit?: number;
   search?: string;
   uf?: string;
+  idEmpresa?: number;
 }
 
 // Auth Types

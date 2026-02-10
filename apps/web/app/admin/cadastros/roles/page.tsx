@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { Card, CardContent } from "@/shared/components/ui/card"
 import { RolesTable, CreateRoleButton } from "@/features/roles"
 
 export default function RolesPage() {
@@ -15,10 +15,7 @@ export default function RolesPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Perfis de Acesso</CardTitle>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <RolesTable />
         </CardContent>
       </Card>

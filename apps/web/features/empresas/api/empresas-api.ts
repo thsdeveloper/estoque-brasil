@@ -161,6 +161,22 @@ export const empresasApi = {
   delete: (id: number | string): Promise<void> => {
     return apiClient.delete<void>(`/api/empresas/${id}`)
   },
+
+  getMyEmpresas: (): Promise<Empresa[]> => {
+    return apiClient.get<Empresa[]>("/api/users/me/empresas")
+  },
+
+  getSelectedEmpresa: (): Promise<{ idEmpresa: number } | null> => {
+    return apiClient.get<{ idEmpresa: number } | null>(
+      "/api/users/me/empresa-selecionada"
+    )
+  },
+
+  setSelectedEmpresa: (idEmpresa: number): Promise<void> => {
+    return apiClient.put<void>("/api/users/me/empresa-selecionada", {
+      idEmpresa,
+    })
+  },
 }
 
 // Helper function to clean empresa data before sending to API

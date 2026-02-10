@@ -74,6 +74,7 @@ export default async function lojaRoutes(fastify: FastifyInstance) {
             limit: { type: 'integer', minimum: 1, maximum: 100, default: 10 },
             search: { type: 'string', description: 'Busca por nome da loja' },
             idCliente: { type: 'string', format: 'uuid', description: 'Filtrar por cliente' },
+            idEmpresa: { type: 'integer', description: 'Filtrar por empresa' },
           },
         },
         response: {

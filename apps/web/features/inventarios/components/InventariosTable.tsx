@@ -1,16 +1,23 @@
 "use client"
 
 import { useState, useMemo, useCallback } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
-import { Package, Plus, RefreshCw, AlertCircle } from "lucide-react"
+import { Package, RefreshCw, AlertCircle, CheckCircle2, Archive } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { DataTableToolbar } from "@/shared/components/ui/data-table-toolbar"
+import { cn } from "@/shared/lib/utils"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { useInventarios } from "../hooks/useInventarios"
 import { DeleteInventarioDialog } from "./DeleteInventarioDialog"
 import { getColumns } from "./columns"
+
+const statusFilters = [
+  { value: "", label: "Todos", icon: Package },
+  { value: "true", label: "Ativos", icon: CheckCircle2 },
+  { value: "false", label: "Finalizados", icon: Archive },
+]
 
 interface InventariosTableProps {
   page: number
@@ -39,7 +46,7 @@ export function InventariosTable({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [inventarioToDelete, setInventarioToDelete] = useState<Inventario | null>(null)
 
-  // SWR hook for data fetching (client-swr-dedup)
+  // SWR hook for data fetching
   const {
     data,
     totalPages,
@@ -56,7 +63,6 @@ export function InventariosTable({
     search,
   })
 
-  // Stable callback using useCallback (rerender-functional-setstate)
   const handleDeleteClick = useCallback((inventario: Inventario) => {
     setInventarioToDelete(inventario)
     setDeleteDialogOpen(true)
@@ -65,7 +71,7 @@ export function InventariosTable({
   const handleDeleteSuccess = useCallback(() => {
     setDeleteDialogOpen(false)
     setInventarioToDelete(null)
-    mutate() // Revalidate SWR cache
+    mutate()
   }, [mutate])
 
   const handleRowClick = useCallback(
@@ -88,13 +94,27 @@ export function InventariosTable({
     [searchParams, router, pathname, pageSize]
   )
 
-  // Memoize columns with proper dependencies (rerender-memo)
+  const handleStatusFilterChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete("page")
+      if (value) {
+        params.set("ativo", value)
+      } else {
+        params.delete("ativo")
+      }
+      router.push(`${pathname}?${params.toString()}`)
+    },
+    [searchParams, router, pathname]
+  )
+
   const columns = useMemo(
     () => getColumns({ onDelete: handleDeleteClick, isLiderColeta, canEdit: canEditInventario, canDelete: canDeleteInventario }),
     [handleDeleteClick, isLiderColeta, canEditInventario, canDeleteInventario]
   )
 
   const hasFilters = idLoja || idEmpresa || ativo !== undefined
+  const currentAtivoFilter = ativo === true ? "true" : ativo === false ? "false" : ""
 
   // Error state
   if (isError) {
@@ -122,33 +142,6 @@ export function InventariosTable({
     )
   }
 
-  // Empty state (only show when not loading)
-  if (!isLoading && data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 rounded-lg border border-dashed border-border bg-muted/20">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-          <Package className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <h3 className="text-sm font-medium text-foreground mb-1">
-          {hasFilters ? "Nenhum resultado" : "Nenhum inventario"}
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
-          {hasFilters
-            ? "Nenhum inventario encontrado com os filtros aplicados. Tente ajustar os filtros."
-            : "Comece criando seu primeiro inventario para gerenciar o estoque."}
-        </p>
-        {!hasFilters && (
-          <Button asChild size="sm" className="gap-2">
-            <Link href="/admin/inventarios/new">
-              <Plus className="h-4 w-4" />
-              Criar inventario
-            </Link>
-          </Button>
-        )}
-      </div>
-    )
-  }
-
   return (
     <>
       <DataTable
@@ -165,6 +158,35 @@ export function InventariosTable({
           hasFilters
             ? "Nenhum inventario encontrado com os filtros aplicados"
             : "Nenhum inventario cadastrado"
+        }
+        toolbar={
+          <DataTableToolbar searchPlaceholder="Buscar por cliente...">
+            <div className="inline-flex items-center gap-1 p-1 bg-muted/50 rounded-lg border border-border/50">
+              {statusFilters.map((filter) => {
+                const isActive = currentAtivoFilter === filter.value
+                const Icon = filter.icon
+                return (
+                  <button
+                    key={filter.value}
+                    onClick={() => handleStatusFilterChange(filter.value)}
+                    className={cn(
+                      "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-150",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange focus-visible:ring-offset-1",
+                      isActive
+                        ? "bg-background text-foreground shadow-sm border border-border/80"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "h-4 w-4 transition-colors",
+                      isActive ? "text-brand-orange" : "text-muted-foreground"
+                    )} />
+                    <span>{filter.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </DataTableToolbar>
         }
       />
 

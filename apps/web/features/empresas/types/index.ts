@@ -10,18 +10,15 @@ export type {
 
 // Empresa Form Validation Schema
 export const empresaFormSchema = z.object({
-  descricao: z.string().max(255, "Descrição muito longa").optional().nullable(),
   cnpj: z
     .string()
-    .regex(/^\d{14}$/, "CNPJ deve ter 14 dígitos numéricos")
-    .optional()
-    .nullable()
-    .or(z.literal("")),
+    .min(14, "CNPJ é obrigatório")
+    .regex(/^\d{14}$/, "CNPJ deve ter 14 dígitos numéricos"),
   razaoSocial: z
     .string()
-    .max(255, "Razão social muito longa")
-    .optional()
-    .nullable(),
+    .min(1, "Razão social é obrigatória")
+    .max(255, "Razão social muito longa"),
+  descricao: z.string().max(255, "Descrição muito longa").optional().nullable(),
   nomeFantasia: z
     .string()
     .max(255, "Nome fantasia muito longo")
@@ -48,12 +45,6 @@ export const empresaFormSchema = z.object({
     .optional()
     .nullable(),
   ativo: z.boolean(),
-}).refine(
-  (data) => data.razaoSocial || data.nomeFantasia || data.descricao,
-  {
-    message: "Empresa deve ter pelo menos razão social, nome fantasia ou descrição",
-    path: ["razaoSocial"],
-  }
-)
+})
 
 export type EmpresaFormData = z.infer<typeof empresaFormSchema>

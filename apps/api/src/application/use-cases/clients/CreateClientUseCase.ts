@@ -16,7 +16,12 @@ export class CreateClientUseCase {
 
     const client = Client.create({
       nome: data.nome,
-      linkBi: data.linkBi,
+      cnpj: data.cnpj,
+      fantasia: data.fantasia,
+      email: data.email,
+      telefone: data.telefone,
+      situacao: data.situacao,
+
       qtdeDivergentePlus: data.qtdeDivergentePlus,
       qtdeDivergenteMinus: data.qtdeDivergenteMinus,
       valorDivergentePlus: data.valorDivergentePlus,

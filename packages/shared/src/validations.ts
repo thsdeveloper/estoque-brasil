@@ -31,18 +31,23 @@ export type PaginationParams = z.infer<typeof paginationSchema>;
 // Client Form Validation
 export const clientFormSchema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(255, 'Nome muito longo'),
-  linkBi: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
-  qtdeDivergentePlus: z.coerce.number().optional().nullable(),
-  qtdeDivergenteMinus: z.coerce.number().optional().nullable(),
-  valorDivergentePlus: z.coerce.number().optional().nullable(),
-  valorDivergenteMinus: z.coerce.number().optional().nullable(),
-  percentualDivergencia: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').optional().nullable(),
-  cep: z.string().length(8, 'CEP deve ter 8 dígitos').optional().nullable().or(z.literal('')),
-  endereco: z.string().max(255, 'Endereço muito longo').optional().nullable(),
-  numero: z.string().max(20, 'Número muito longo').optional().nullable(),
-  bairro: z.string().max(100, 'Bairro muito longo').optional().nullable(),
-  uf: z.string().length(2, 'UF deve ter 2 letras').optional().nullable().or(z.literal('')),
-  municipio: z.string().max(100, 'Município muito longo').optional().nullable(),
+  cnpj: z.string({ required_error: 'CNPJ é obrigatório' }).min(1, 'CNPJ é obrigatório').regex(/^\d{14}$/, 'CNPJ deve ter 14 dígitos numéricos'),
+  fantasia: z.string().max(255, 'Nome fantasia muito longo').optional().nullable().or(z.literal('')),
+  email: z.string().max(255, 'Email muito longo').optional().nullable().or(z.literal('')),
+  telefone: z.string().max(30, 'Telefone muito longo').optional().nullable().or(z.literal('')),
+  situacao: z.string().max(50, 'Situação muito longa').optional().nullable().or(z.literal('')),
+
+  qtdeDivergentePlus: z.coerce.number({ required_error: 'Qtde divergente (+) é obrigatório' }),
+  qtdeDivergenteMinus: z.coerce.number({ required_error: 'Qtde divergente (-) é obrigatório' }),
+  valorDivergentePlus: z.coerce.number({ required_error: 'Valor divergente (+) é obrigatório' }),
+  valorDivergenteMinus: z.coerce.number({ required_error: 'Valor divergente (-) é obrigatório' }),
+  percentualDivergencia: z.coerce.number({ required_error: '% divergência é obrigatório' }).min(0, 'Mínimo 0%').max(100, 'Máximo 100%'),
+  cep: z.string({ required_error: 'CEP é obrigatório' }).min(1, 'CEP é obrigatório').length(8, 'CEP deve ter 8 dígitos'),
+  endereco: z.string({ required_error: 'Endereço é obrigatório' }).min(1, 'Endereço é obrigatório').max(255, 'Endereço muito longo'),
+  numero: z.string({ required_error: 'Número é obrigatório' }).min(1, 'Número é obrigatório').max(20, 'Número muito longo'),
+  bairro: z.string({ required_error: 'Bairro é obrigatório' }).min(1, 'Bairro é obrigatório').max(100, 'Bairro muito longo'),
+  uf: z.string({ required_error: 'UF é obrigatório' }).min(1, 'UF é obrigatório').length(2, 'UF deve ter 2 letras'),
+  municipio: z.string({ required_error: 'Município é obrigatório' }).min(1, 'Município é obrigatório').max(100, 'Município muito longo'),
 });
 
 export type ClientFormData = z.infer<typeof clientFormSchema>;

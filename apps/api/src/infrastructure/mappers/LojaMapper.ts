@@ -5,6 +5,12 @@ export interface LojaDbRow {
   id_cliente: string; // UUID reference to clients
   nome: string;
   cnpj: string | null;
+  cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  bairro: string | null;
+  uf: string | null;
+  municipio: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -13,6 +19,12 @@ export interface LojaInsertRow {
   id_cliente: string;
   nome: string;
   cnpj?: string | null;
+  cep?: string | null;
+  endereco?: string | null;
+  numero?: string | null;
+  bairro?: string | null;
+  uf?: string | null;
+  municipio?: string | null;
 }
 
 export class LojaMapper {
@@ -22,6 +34,12 @@ export class LojaMapper {
       idCliente: row.id_cliente,
       nome: row.nome,
       cnpj: row.cnpj,
+      cep: row.cep,
+      endereco: row.endereco,
+      numero: row.numero,
+      bairro: row.bairro,
+      uf: row.uf,
+      municipio: row.municipio,
     });
   }
 
@@ -30,6 +48,12 @@ export class LojaMapper {
       id_cliente: loja.idCliente,
       nome: loja.nome,
       cnpj: loja.cnpj,
+      cep: loja.cep,
+      endereco: loja.endereco,
+      numero: loja.numero,
+      bairro: loja.bairro,
+      uf: loja.uf,
+      municipio: loja.municipio,
     };
   }
 

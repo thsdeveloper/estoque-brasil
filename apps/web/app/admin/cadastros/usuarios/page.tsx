@@ -1,6 +1,5 @@
 import { Suspense } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { SearchFilters } from "@/features/admin-layout"
+import { Card, CardContent } from "@/shared/components/ui/card"
 import { UsersTable, UsersTableSkeleton, CreateUserButton } from "@/features/usuarios"
 
 interface PageProps {
@@ -26,15 +25,6 @@ export default async function UsuariosPage({ searchParams }: PageProps) {
         </div>
         <CreateUserButton />
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SearchFilters placeholder="Buscar por nome ou email..." />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent className="pt-6">

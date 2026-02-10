@@ -77,8 +77,22 @@ export class SupabaseLojaRepository implements ILojaRepository {
   }
 
   async findAll(params: LojaPaginationParams): Promise<PaginatedResult<Loja>> {
-    const { page, limit, search, idCliente } = params;
+    const { page, limit, search, idCliente, idEmpresa } = params;
     const offset = (page - 1) * limit;
+
+    // If filtering by empresa, get client IDs for that empresa first
+    let clientIdsForEmpresa: string[] | null = null;
+    if (idEmpresa) {
+      const { data: clientRows, error: clientError } = await this.supabase
+        .from('clients')
+        .select('id')
+        .eq('id_empresa', idEmpresa);
+
+      if (clientError) {
+        throw new Error(`Failed to fetch clients for empresa: ${clientError.message}`);
+      }
+      clientIdsForEmpresa = (clientRows ?? []).map((r: { id: string }) => r.id);
+    }
 
     let countQuery = this.supabase
       .from(TABLE_NAME)
@@ -89,6 +103,9 @@ export class SupabaseLojaRepository implements ILojaRepository {
     }
     if (idCliente) {
       countQuery = countQuery.eq('id_cliente', idCliente);
+    }
+    if (clientIdsForEmpresa !== null) {
+      countQuery = countQuery.in('id_cliente', clientIdsForEmpresa);
     }
 
     const { count, error: countError } = await countQuery;
@@ -106,6 +123,9 @@ export class SupabaseLojaRepository implements ILojaRepository {
     }
     if (idCliente) {
       dataQuery = dataQuery.eq('id_cliente', idCliente);
+    }
+    if (clientIdsForEmpresa !== null) {
+      dataQuery = dataQuery.in('id_cliente', clientIdsForEmpresa);
     }
 
     const { data, error } = await dataQuery

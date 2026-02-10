@@ -159,6 +159,107 @@ export default async function userRoutes(fastify: FastifyInstance) {
     (request, reply) => controller.getMyPermissions(request, reply)
   );
 
+  // Get empresas accessible by current user
+  fastify.get(
+    '/users/me/empresas',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Users'],
+        summary: 'Obter empresas do usuário atual',
+        description: 'Retorna as empresas acessíveis pelo usuário autenticado. Admins veem todas as empresas ativas, outros veem apenas as vinculadas.',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer' },
+                descricao: { type: ['string', 'null'] },
+                cnpj: { type: ['string', 'null'] },
+                razaoSocial: { type: ['string', 'null'] },
+                nomeFantasia: { type: ['string', 'null'] },
+                cep: { type: ['string', 'null'] },
+                endereco: { type: ['string', 'null'] },
+                numero: { type: ['string', 'null'] },
+                bairro: { type: ['string', 'null'] },
+                codigoUf: { type: ['string', 'null'] },
+                codigoMunicipio: { type: ['string', 'null'] },
+                ativo: { type: 'boolean' },
+              },
+            },
+          },
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.getMyEmpresas(request, reply)
+  );
+
+  // Get selected empresa for current user
+  fastify.get(
+    '/users/me/empresa-selecionada',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Users'],
+        summary: 'Obter empresa selecionada do usuário',
+        description: 'Retorna a empresa selecionada atualmente pelo usuário',
+        security: [{ bearerAuth: [] }],
+        response: {
+          200: {
+            oneOf: [
+              {
+                type: 'object',
+                properties: {
+                  idEmpresa: { type: 'integer' },
+                },
+              },
+              { type: 'null' },
+            ],
+          },
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.getSelectedEmpresa(request, reply)
+  );
+
+  // Set selected empresa for current user
+  fastify.put(
+    '/users/me/empresa-selecionada',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Users'],
+        summary: 'Definir empresa selecionada do usuário',
+        description: 'Define qual empresa o usuário está atuando',
+        security: [{ bearerAuth: [] }],
+        body: {
+          type: 'object',
+          required: ['idEmpresa'],
+          properties: {
+            idEmpresa: { type: 'integer' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              idEmpresa: { type: 'integer' },
+            },
+          },
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.setSelectedEmpresa(request as any, reply)
+  );
+
   // Get current user profile (any authenticated user)
   fastify.get(
     '/users/me',

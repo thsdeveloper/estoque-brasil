@@ -126,6 +126,7 @@ export const clientsApi = {
       limit: params.limit,
       search: params.search,
       uf: params.uf,
+      idEmpresa: params.idEmpresa,
     })
     return apiClient.get<PaginatedResponse<Client>>(`/api/clients${query}`)
   },

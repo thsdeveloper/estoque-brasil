@@ -3,7 +3,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { LojaForm } from "@/features/lojas"
-import { clientsApi } from "@/features/clients"
+import { clientsServerApi } from "@/features/clients/api/clients-api.server"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -14,7 +14,7 @@ export default async function NewLojaPage({ params }: PageProps) {
 
   let client
   try {
-    client = await clientsApi.get(clientId)
+    client = await clientsServerApi.get(clientId)
   } catch {
     notFound()
   }

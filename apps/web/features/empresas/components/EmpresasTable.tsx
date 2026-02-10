@@ -1,11 +1,18 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Empresa } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { DataTableToolbar } from "@/shared/components/ui/data-table-toolbar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { empresasApi, type PaginatedResponse } from "../api/empresas-api"
 import { DeleteEmpresaDialog } from "./DeleteEmpresaDialog"
@@ -69,6 +76,17 @@ export function EmpresasTable({ page, search, ativo }: EmpresasTableProps) {
     }
   }
 
+  const handleAtivoChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("page")
+    if (value === "all") {
+      params.delete("ativo")
+    } else {
+      params.set("ativo", value)
+    }
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
   const handleDeleteClick = (empresa: Empresa) => {
     setEmpresaToDelete(empresa)
     setDeleteDialogOpen(true)
@@ -85,6 +103,9 @@ export function EmpresasTable({ page, search, ativo }: EmpresasTableProps) {
     [canEditEmpresa, canDeleteEmpresa]
   )
 
+  // Derive ativo string for the Select value
+  const ativoValue = ativo === true ? "true" : ativo === false ? "false" : "all"
+
   if (error) {
     return (
       <div className="text-center py-10">
@@ -92,23 +113,6 @@ export function EmpresasTable({ page, search, ativo }: EmpresasTableProps) {
         <Button onClick={fetchEmpresas} variant="outline">
           Tentar novamente
         </Button>
-      </div>
-    )
-  }
-
-  if (!loading && (!data || data.data.length === 0)) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-gray-light mb-4">
-          {search || ativo !== undefined
-            ? "Nenhuma empresa encontrada com os filtros aplicados"
-            : "Nenhuma empresa cadastrada"}
-        </p>
-        {!search && ativo === undefined && (
-          <Button asChild>
-            <Link href="/admin/empresas/new">Cadastrar primeira empresa</Link>
-          </Button>
-        )}
       </div>
     )
   }
@@ -128,6 +132,20 @@ export function EmpresasTable({ page, search, ativo }: EmpresasTableProps) {
           search || ativo !== undefined
             ? "Nenhuma empresa encontrada com os filtros aplicados"
             : "Nenhuma empresa cadastrada"
+        }
+        toolbar={
+          <DataTableToolbar searchPlaceholder="Buscar por razao social, nome fantasia ou CNPJ...">
+            <Select value={ativoValue} onValueChange={handleAtivoChange}>
+              <SelectTrigger className="w-full sm:w-[180px] h-9">
+                <SelectValue placeholder="Filtrar por status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os status</SelectItem>
+                <SelectItem value="true">Ativas</SelectItem>
+                <SelectItem value="false">Inativas</SelectItem>
+              </SelectContent>
+            </Select>
+          </DataTableToolbar>
         }
       />
 

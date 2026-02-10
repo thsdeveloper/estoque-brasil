@@ -6,7 +6,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { PermissionGate } from "@/shared/components/PermissionGate"
 import { LojasTable, LojasTableSkeleton } from "@/features/lojas"
-import { clientsApi } from "@/features/clients"
+import { clientsServerApi } from "@/features/clients/api/clients-api.server"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -22,7 +22,7 @@ export default async function ClientLojasPage({ params, searchParams }: PageProp
 
   let client
   try {
-    client = await clientsApi.get(clientId)
+    client = await clientsServerApi.get(clientId)
   } catch {
     notFound()
   }

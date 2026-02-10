@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { User, PaginatedUsers } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { DataTableToolbar } from "@/shared/components/ui/data-table-toolbar"
 import { usuariosApi } from "../api/usuarios-api"
 import { DeleteUserDialog } from "./DeleteUserDialog"
 import { getColumns } from "./columns"
@@ -22,7 +22,7 @@ export function UsersTable({ page, search, isActive, roleId }: UsersTableProps) 
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { canCreate, canUpdate, canDelete } = usePermissions()
+  const { canUpdate, canDelete } = usePermissions()
 
   const [data, setData] = useState<PaginatedUsers | null>(null)
   const [loading, setLoading] = useState(true)
@@ -103,25 +103,6 @@ export function UsersTable({ page, search, isActive, roleId }: UsersTableProps) 
     )
   }
 
-  if (!loading && (!data || data.data.length === 0)) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-gray-light mb-4">
-          {search
-            ? "Nenhum usuário encontrado com os filtros aplicados"
-            : "Nenhum usuário cadastrado"}
-        </p>
-        {!search && canCreate("usuarios") && (
-          <Button asChild>
-            <Link href="/admin/cadastros/usuarios/create">
-              Cadastrar primeiro usuário
-            </Link>
-          </Button>
-        )}
-      </div>
-    )
-  }
-
   return (
     <>
       <DataTable
@@ -137,6 +118,9 @@ export function UsersTable({ page, search, isActive, roleId }: UsersTableProps) 
           search
             ? "Nenhum usuário encontrado com os filtros aplicados"
             : "Nenhum usuário cadastrado"
+        }
+        toolbar={
+          <DataTableToolbar searchPlaceholder="Buscar por nome ou email..." />
         }
       />
 

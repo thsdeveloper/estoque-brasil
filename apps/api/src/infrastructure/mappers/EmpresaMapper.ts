@@ -3,8 +3,8 @@ import { Empresa } from '../../domain/entities/Empresa.js';
 export interface EmpresaDbRow {
   id: number;
   descricao: string | null;
-  cnpj: string | null;
-  razao_social: string | null;
+  cnpj: string;
+  razao_social: string;
   nome_fantasia: string | null;
   cep: string | null;
   endereco: string | null;
@@ -19,8 +19,8 @@ export interface EmpresaDbRow {
 
 export interface EmpresaInsertRow {
   descricao?: string | null;
-  cnpj?: string | null;
-  razao_social?: string | null;
+  cnpj: string;
+  razao_social: string;
   nome_fantasia?: string | null;
   cep?: string | null;
   endereco?: string | null;

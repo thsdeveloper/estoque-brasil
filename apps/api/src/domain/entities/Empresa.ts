@@ -6,8 +6,8 @@ import { InvalidEmpresaError } from '../errors/InventarioErrors.js';
 export interface EmpresaProps {
   id?: number;
   descricao?: string | null;
-  cnpj?: string | null;
-  razaoSocial?: string | null;
+  cnpj: string;
+  razaoSocial: string;
   nomeFantasia?: string | null;
   cep?: string | null;
   endereco?: string | null;
@@ -21,8 +21,8 @@ export interface EmpresaProps {
 export class Empresa {
   private readonly _id?: number;
   private _descricao: string | null;
-  private _cnpj: CNPJ | null;
-  private _razaoSocial: string | null;
+  private _cnpj: CNPJ;
+  private _razaoSocial: string;
   private _nomeFantasia: string | null;
   private _cep: CEP | null;
   private _endereco: string | null;
@@ -35,8 +35,10 @@ export class Empresa {
   private constructor(props: EmpresaProps) {
     this._id = props.id;
     this._descricao = props.descricao ?? null;
-    this._cnpj = CNPJ.create(props.cnpj);
-    this._razaoSocial = props.razaoSocial ?? null;
+    const cnpj = CNPJ.create(props.cnpj);
+    if (!cnpj) throw new InvalidEmpresaError('CNPJ é obrigatório');
+    this._cnpj = cnpj;
+    this._razaoSocial = props.razaoSocial;
     this._nomeFantasia = props.nomeFantasia ?? null;
     this._cep = CEP.create(props.cep);
     this._endereco = props.endereco ?? null;
@@ -53,11 +55,15 @@ export class Empresa {
   }
 
   private static validate(props: EmpresaProps): void {
-    if (!props.razaoSocial && !props.nomeFantasia && !props.descricao) {
-      throw new InvalidEmpresaError('Empresa deve ter pelo menos razão social, nome fantasia ou descrição');
+    if (!props.cnpj || props.cnpj.trim().length === 0) {
+      throw new InvalidEmpresaError('CNPJ é obrigatório');
     }
 
-    if (props.razaoSocial && props.razaoSocial.trim().length > 255) {
+    if (!props.razaoSocial || props.razaoSocial.trim().length === 0) {
+      throw new InvalidEmpresaError('Razão social é obrigatória');
+    }
+
+    if (props.razaoSocial.trim().length > 255) {
       throw new InvalidEmpresaError('Razão social deve ter no máximo 255 caracteres');
     }
 
@@ -72,14 +78,19 @@ export class Empresa {
     }
 
     if (props.cnpj !== undefined) {
-      this._cnpj = CNPJ.create(props.cnpj);
+      const cnpj = CNPJ.create(props.cnpj);
+      if (!cnpj) throw new InvalidEmpresaError('CNPJ é obrigatório');
+      this._cnpj = cnpj;
     }
 
     if (props.razaoSocial !== undefined) {
-      if (props.razaoSocial && props.razaoSocial.trim().length > 255) {
+      if (!props.razaoSocial || props.razaoSocial.trim().length === 0) {
+        throw new InvalidEmpresaError('Razão social é obrigatória');
+      }
+      if (props.razaoSocial.trim().length > 255) {
         throw new InvalidEmpresaError('Razão social deve ter no máximo 255 caracteres');
       }
-      this._razaoSocial = props.razaoSocial ?? null;
+      this._razaoSocial = props.razaoSocial;
     }
 
     if (props.nomeFantasia !== undefined) {
@@ -126,11 +137,11 @@ export class Empresa {
     return this._descricao;
   }
 
-  get cnpj(): string | null {
-    return this._cnpj?.getValue() ?? null;
+  get cnpj(): string {
+    return this._cnpj.getValue();
   }
 
-  get razaoSocial(): string | null {
+  get razaoSocial(): string {
     return this._razaoSocial;
   }
 

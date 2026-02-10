@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { DataTableToolbar } from "@/shared/components/ui/data-table-toolbar"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { rolesApi } from "../api/roles-api"
 import { DeleteRoleDialog } from "./DeleteRoleDialog"
@@ -12,6 +13,7 @@ export function RolesTable() {
   const [data, setData] = useState<Role[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null)
 
@@ -55,15 +57,15 @@ export function RolesTable() {
     [handleDeleteClick, canUpdate, canDelete]
   )
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="h-10 bg-muted animate-pulse rounded" />
-        <div className="h-10 bg-muted animate-pulse rounded" />
-        <div className="h-10 bg-muted animate-pulse rounded" />
-      </div>
+  const filteredData = useMemo(() => {
+    if (!search) return data
+    const term = search.toLowerCase()
+    return data.filter(
+      (role) =>
+        role.displayName.toLowerCase().includes(term) ||
+        role.name.toLowerCase().includes(term)
     )
-  }
+  }, [data, search])
 
   if (error) {
     return (
@@ -77,8 +79,16 @@ export function RolesTable() {
     <>
       <DataTable
         columns={columns}
-        data={data}
+        data={filteredData}
+        loading={loading}
         showColumnVisibility={false}
+        emptyMessage="Nenhum perfil cadastrado"
+        toolbar={
+          <DataTableToolbar
+            searchPlaceholder="Buscar por nome do perfil..."
+            onSearchChange={setSearch}
+          />
+        }
       />
 
       <DeleteRoleDialog

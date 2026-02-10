@@ -1,3 +1,4 @@
+import { CNPJ } from '../value-objects/CNPJ.js';
 import { CEP } from '../value-objects/CEP.js';
 import { UF } from '../value-objects/UF.js';
 import { Percentage } from '../value-objects/Percentage.js';
@@ -6,7 +7,13 @@ import { InvalidClientError } from '../errors/DomainError.js';
 export interface ClientProps {
   id?: string;
   nome: string;
-  linkBi?: string | null;
+  cnpj?: string | null;
+  fantasia?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  situacao?: string | null;
+  idEmpresa?: number | null;
+
   qtdeDivergentePlus?: number | null;
   qtdeDivergenteMinus?: number | null;
   valorDivergentePlus?: number | null;
@@ -25,7 +32,13 @@ export interface ClientProps {
 export class Client {
   private readonly _id?: string;
   private _nome: string;
-  private _linkBi: string | null;
+  private _cnpj: CNPJ | null;
+  private _fantasia: string | null;
+  private _email: string | null;
+  private _telefone: string | null;
+  private _situacao: string | null;
+  private _idEmpresa: number | null;
+
   private _qtdeDivergentePlus: number | null;
   private _qtdeDivergenteMinus: number | null;
   private _valorDivergentePlus: number | null;
@@ -43,7 +56,12 @@ export class Client {
   private constructor(props: ClientProps) {
     this._id = props.id;
     this._nome = props.nome;
-    this._linkBi = props.linkBi ?? null;
+    this._cnpj = CNPJ.create(props.cnpj);
+    this._fantasia = props.fantasia ?? null;
+    this._email = props.email ?? null;
+    this._telefone = props.telefone ?? null;
+    this._situacao = props.situacao ?? null;
+    this._idEmpresa = props.idEmpresa ?? null;
     this._qtdeDivergentePlus = props.qtdeDivergentePlus ?? null;
     this._qtdeDivergenteMinus = props.qtdeDivergenteMinus ?? null;
     this._valorDivergentePlus = props.valorDivergentePlus ?? null;
@@ -73,18 +91,6 @@ export class Client {
       throw new InvalidClientError('Nome deve ter no máximo 255 caracteres');
     }
 
-    if (props.linkBi && !Client.isValidUrl(props.linkBi)) {
-      throw new InvalidClientError('Link BI deve ser uma URL válida');
-    }
-  }
-
-  private static isValidUrl(url: string): boolean {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
   }
 
   update(props: Partial<Omit<ClientProps, 'id' | 'createdAt'>>): void {
@@ -98,11 +104,28 @@ export class Client {
       this._nome = props.nome;
     }
 
-    if (props.linkBi !== undefined) {
-      if (props.linkBi && !Client.isValidUrl(props.linkBi)) {
-        throw new InvalidClientError('Link BI deve ser uma URL válida');
-      }
-      this._linkBi = props.linkBi ?? null;
+    if (props.cnpj !== undefined) {
+      this._cnpj = CNPJ.create(props.cnpj);
+    }
+
+    if (props.fantasia !== undefined) {
+      this._fantasia = props.fantasia ?? null;
+    }
+
+    if (props.email !== undefined) {
+      this._email = props.email ?? null;
+    }
+
+    if (props.telefone !== undefined) {
+      this._telefone = props.telefone ?? null;
+    }
+
+    if (props.situacao !== undefined) {
+      this._situacao = props.situacao ?? null;
+    }
+
+    if (props.idEmpresa !== undefined) {
+      this._idEmpresa = props.idEmpresa ?? null;
     }
 
     if (props.qtdeDivergentePlus !== undefined) {
@@ -160,8 +183,28 @@ export class Client {
     return this._nome;
   }
 
-  get linkBi(): string | null {
-    return this._linkBi;
+  get cnpj(): string | null {
+    return this._cnpj?.getValue() ?? null;
+  }
+
+  get fantasia(): string | null {
+    return this._fantasia;
+  }
+
+  get email(): string | null {
+    return this._email;
+  }
+
+  get telefone(): string | null {
+    return this._telefone;
+  }
+
+  get situacao(): string | null {
+    return this._situacao;
+  }
+
+  get idEmpresa(): number | null {
+    return this._idEmpresa;
   }
 
   get qtdeDivergentePlus(): number | null {

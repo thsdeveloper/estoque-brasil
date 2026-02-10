@@ -3,6 +3,7 @@
 import useSWR from "swr"
 import type { Loja, LojaQueryParams } from "@estoque-brasil/types"
 import { lojasApi } from "../api/lojas-api"
+import { useEmpresa } from "@/features/empresas"
 
 interface PaginatedResponse<T> {
   data: T[]
@@ -17,16 +18,20 @@ interface PaginatedResponse<T> {
  * Follows: client-swr-dedup - Use SWR for automatic request deduplication
  */
 export function useLojas(params: LojaQueryParams = {}) {
-  const { page = 1, limit = 100 } = params
+  const { page = 1, limit = 100, idCliente } = params
+  const { selectedEmpresaId } = useEmpresa()
 
-  const key = ["lojas", page, limit]
+  // Don't fetch if no empresa selected
+  const key = selectedEmpresaId
+    ? ["lojas", page, limit, idCliente, selectedEmpresaId]
+    : null
 
   const { data, error, isLoading, mutate } = useSWR<PaginatedResponse<Loja>>(
     key,
-    () => lojasApi.list({ page, limit }),
+    () => lojasApi.list({ page, limit, idCliente, idEmpresa: selectedEmpresaId! }),
     {
-      revalidateOnFocus: false, // Lojas don't change frequently
-      dedupingInterval: 60000, // Cache for 1 minute
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
       keepPreviousData: true,
     }
   )

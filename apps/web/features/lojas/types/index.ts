@@ -23,6 +23,12 @@ export const lojaFormSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
+  cep: z.string().max(8).optional().nullable().or(z.literal("")),
+  endereco: z.string().max(255).optional().nullable().or(z.literal("")),
+  numero: z.string().max(20).optional().nullable().or(z.literal("")),
+  bairro: z.string().max(100).optional().nullable().or(z.literal("")),
+  uf: z.string().max(2).optional().nullable().or(z.literal("")),
+  municipio: z.string().max(100).optional().nullable().or(z.literal("")),
 })
 
 export type LojaFormData = z.infer<typeof lojaFormSchema>

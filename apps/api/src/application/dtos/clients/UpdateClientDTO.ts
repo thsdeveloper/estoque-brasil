@@ -6,29 +6,38 @@ export const updateClientSchema = z.object({
     .min(1, 'Nome é obrigatório')
     .max(255, 'Nome deve ter no máximo 255 caracteres')
     .optional(),
-  linkBi: z.string().url('Link BI deve ser uma URL válida').nullish(),
-  qtdeDivergentePlus: z.number().nullish(),
-  qtdeDivergenteMinus: z.number().nullish(),
-  valorDivergentePlus: z.number().nullish(),
-  valorDivergenteMinus: z.number().nullish(),
+  cnpj: z
+    .string({ required_error: 'CNPJ é obrigatório' })
+    .regex(/^\d{14}$/, 'CNPJ deve conter exatamente 14 dígitos')
+    .optional(),
+  fantasia: z.string().max(255, 'Nome fantasia deve ter no máximo 255 caracteres').nullish(),
+  email: z.string().max(255, 'Email deve ter no máximo 255 caracteres').nullish(),
+  telefone: z.string().max(30, 'Telefone deve ter no máximo 30 caracteres').nullish(),
+  situacao: z.string().max(50, 'Situação deve ter no máximo 50 caracteres').nullish(),
+  idEmpresa: z.number().int().nullish(),
+
+  qtdeDivergentePlus: z.number({ required_error: 'Qtde divergente (+) é obrigatório' }).optional(),
+  qtdeDivergenteMinus: z.number({ required_error: 'Qtde divergente (-) é obrigatório' }).optional(),
+  valorDivergentePlus: z.number({ required_error: 'Valor divergente (+) é obrigatório' }).optional(),
+  valorDivergenteMinus: z.number({ required_error: 'Valor divergente (-) é obrigatório' }).optional(),
   percentualDivergencia: z
-    .number()
+    .number({ required_error: 'Percentual de divergência é obrigatório' })
     .min(0, 'Percentual deve ser maior ou igual a 0')
     .max(100, 'Percentual deve ser menor ou igual a 100')
-    .nullish(),
+    .optional(),
   cep: z
-    .string()
+    .string({ required_error: 'CEP é obrigatório' })
     .regex(/^\d{8}$/, 'CEP deve conter exatamente 8 dígitos')
-    .nullish(),
-  endereco: z.string().max(255, 'Endereço deve ter no máximo 255 caracteres').nullish(),
-  numero: z.string().max(20, 'Número deve ter no máximo 20 caracteres').nullish(),
-  bairro: z.string().max(100, 'Bairro deve ter no máximo 100 caracteres').nullish(),
+    .optional(),
+  endereco: z.string({ required_error: 'Endereço é obrigatório' }).min(1, 'Endereço é obrigatório').max(255, 'Endereço deve ter no máximo 255 caracteres').optional(),
+  numero: z.string({ required_error: 'Número é obrigatório' }).min(1, 'Número é obrigatório').max(20, 'Número deve ter no máximo 20 caracteres').optional(),
+  bairro: z.string({ required_error: 'Bairro é obrigatório' }).min(1, 'Bairro é obrigatório').max(100, 'Bairro deve ter no máximo 100 caracteres').optional(),
   uf: z
-    .string()
+    .string({ required_error: 'UF é obrigatório' })
     .length(2, 'UF deve ter exatamente 2 caracteres')
     .toUpperCase()
-    .nullish(),
-  municipio: z.string().max(100, 'Município deve ter no máximo 100 caracteres').nullish(),
+    .optional(),
+  municipio: z.string({ required_error: 'Município é obrigatório' }).min(1, 'Município é obrigatório').max(100, 'Município deve ter no máximo 100 caracteres').optional(),
 });
 
 export type UpdateClientDTO = z.infer<typeof updateClientSchema>;

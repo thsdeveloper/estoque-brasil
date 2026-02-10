@@ -76,7 +76,7 @@ export class ClientController {
   }
 
   async list(
-    request: FastifyRequest<{ Querystring: { page?: string; limit?: string; search?: string; uf?: string } }>,
+    request: FastifyRequest<{ Querystring: { page?: string; limit?: string; search?: string; uf?: string; idEmpresa?: string } }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
@@ -84,7 +84,8 @@ export class ClientController {
       const limit = request.query.limit ? parseInt(request.query.limit, 10) : undefined;
       const search = request.query.search || undefined;
       const uf = request.query.uf || undefined;
-      const result = await this.listClientsUseCase.execute({ page, limit, search, uf });
+      const idEmpresa = request.query.idEmpresa ? parseInt(request.query.idEmpresa, 10) : undefined;
+      const result = await this.listClientsUseCase.execute({ page, limit, search, uf, idEmpresa });
       reply.send(result);
     } catch (error) {
       this.handleError(error, reply);

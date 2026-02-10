@@ -14,6 +14,7 @@ import { DomainError } from '../../domain/errors/DomainError.js';
 import { IUserRepository } from '../../domain/repositories/IUserRepository.js';
 import { IRoleRepository } from '../../domain/repositories/IRoleRepository.js';
 import { SupabaseAuthService } from '../../infrastructure/auth/SupabaseAuthService.js';
+import { getSupabaseAdminClient } from '../../infrastructure/database/supabase/client.js';
 
 export class UserController {
   private readonly createUserUseCase: CreateUserUseCase;
@@ -167,6 +168,134 @@ export class UserController {
     try {
       const roles = await this.listRolesUseCase.execute();
       reply.send(roles.map((role) => toRoleResponseDTO(role)));
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async getMyEmpresas(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const userId = request.user?.sub;
+      if (!userId) {
+        reply.status(401).send({ code: 'UNAUTHORIZED', message: 'Não autenticado' });
+        return;
+      }
+
+      const supabase = getSupabaseAdminClient();
+
+      // Check if user is admin
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('roles!inner(name)')
+        .eq('user_id', userId);
+
+      const isAdmin = userRoles?.some((ur: any) => (ur.roles as any)?.name === 'admin') ?? false;
+
+      let empresas;
+      if (isAdmin) {
+        // Admin sees all active empresas
+        const { data, error } = await supabase
+          .from('empresas')
+          .select('*')
+          .eq('ativo', true)
+          .order('nome_fantasia', { ascending: true });
+
+        if (error) throw new Error(`Failed to fetch empresas: ${error.message}`);
+        empresas = data;
+      } else {
+        // Non-admin: only empresas linked via empresas_usuarios
+        const { data, error } = await supabase
+          .from('empresas_usuarios')
+          .select('empresas!inner(*)')
+          .eq('user_id', userId);
+
+        if (error) throw new Error(`Failed to fetch user empresas: ${error.message}`);
+        empresas = data?.map((row: any) => row.empresas).filter((e: any) => e.ativo) ?? [];
+      }
+
+      // Map snake_case to camelCase
+      const mapped = empresas.map((e: any) => ({
+        id: e.id,
+        descricao: e.descricao,
+        cnpj: e.cnpj,
+        razaoSocial: e.razao_social,
+        nomeFantasia: e.nome_fantasia,
+        cep: e.cep,
+        endereco: e.endereco,
+        numero: e.numero,
+        bairro: e.bairro,
+        codigoUf: e.codigo_uf,
+        codigoMunicipio: e.codigo_municipio,
+        ativo: e.ativo,
+      }));
+
+      reply.send(mapped);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async getSelectedEmpresa(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const userId = request.user?.sub;
+      if (!userId) {
+        reply.status(401).send({ code: 'UNAUTHORIZED', message: 'Não autenticado' });
+        return;
+      }
+
+      const supabase = getSupabaseAdminClient();
+      const { data, error } = await supabase
+        .from('preferencias_usuarios')
+        .select('id_empresa')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          reply.send(null);
+          return;
+        }
+        throw new Error(`Failed to fetch selected empresa: ${error.message}`);
+      }
+
+      reply.send({ idEmpresa: data.id_empresa });
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async setSelectedEmpresa(
+    request: FastifyRequest<{ Body: { idEmpresa: number } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      const userId = request.user?.sub;
+      if (!userId) {
+        reply.status(401).send({ code: 'UNAUTHORIZED', message: 'Não autenticado' });
+        return;
+      }
+
+      const { idEmpresa } = request.body as { idEmpresa: number };
+
+      const supabase = getSupabaseAdminClient();
+
+      // Upsert preference
+      const { error } = await supabase
+        .from('preferencias_usuarios')
+        .upsert(
+          {
+            user_id: userId,
+            id_empresa: idEmpresa,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
+
+      if (error) {
+        throw new Error(`Failed to save selected empresa: ${error.message}`);
+      }
+
+      reply.send({ idEmpresa });
     } catch (error) {
       this.handleError(error, reply);
     }

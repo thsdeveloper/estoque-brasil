@@ -22,7 +22,7 @@ export type {
 // Inventário Form Validation Schema
 export const inventarioFormSchema = z.object({
   idLoja: z.number().min(1, "Selecione uma loja"),
-  idEmpresa: z.number().min(1, "Selecione uma empresa"),
+  idEmpresa: z.number(),
   dataInicio: z.string().min(1, "Data de inicio e obrigatoria"),
   dataTermino: z.string().nullable().optional(),
   minimoContagem: z.number().min(1, "Minimo de contagem deve ser pelo menos 1"),

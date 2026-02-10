@@ -136,6 +136,7 @@ export const lojasApi = {
       limit: params.limit,
       search: params.search,
       idCliente: params.idCliente,
+      idEmpresa: params.idEmpresa,
     })
     return apiClient.get<PaginatedResponse<Loja>>(`/api/lojas${query}`)
   },

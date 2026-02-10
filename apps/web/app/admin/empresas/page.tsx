@@ -2,12 +2,11 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { Card, CardContent } from "@/shared/components/ui/card"
 import { PermissionGate } from "@/shared/components/PermissionGate"
 import {
   EmpresasTable,
   EmpresasTableSkeleton,
-  EmpresaSearchFilters,
 } from "@/features/empresas"
 
 interface PageProps {
@@ -47,15 +46,6 @@ export default async function EmpresasPage({ searchParams }: PageProps) {
           </Button>
         </PermissionGate>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <EmpresaSearchFilters placeholder="Buscar por razão social, nome fantasia ou CNPJ..." />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent className="pt-6">

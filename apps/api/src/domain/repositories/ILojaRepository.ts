@@ -6,6 +6,7 @@ export interface LojaPaginationParams {
   limit: number;
   search?: string;
   idCliente?: string; // UUID reference to clients
+  idEmpresa?: number;
 }
 
 export interface ILojaRepository {

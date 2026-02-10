@@ -4,7 +4,6 @@ export { InventarioForm } from "./components/InventarioForm"
 export { InventariosTableSkeleton } from "./components/InventariosTableSkeleton"
 export { DeleteInventarioDialog } from "./components/DeleteInventarioDialog"
 export { DeleteInventarioButton } from "./components/DeleteInventarioButton"
-export { InventarioSearchFilters } from "./components/InventarioSearchFilters"
 export { InventarioTabs } from "./components/InventarioTabs"
 export { getColumns as getInventarioColumns } from "./components/columns"
 

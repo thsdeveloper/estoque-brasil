@@ -11,7 +11,7 @@ export interface Cliente {
   codigoUf: string | null;
   codigoMunicipio: string | null;
   idEmpresa: number;
-  linkBi: string | null;
+
 }
 
 export type CreateClienteInput = Omit<Cliente, 'id'>;

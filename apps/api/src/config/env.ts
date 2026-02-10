@@ -9,6 +9,7 @@ const envSchema = z.object({
   SUPABASE_ANON_KEY: z.string().min(1, 'SUPABASE_ANON_KEY is required'),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   SITE_URL: z.string().url('SITE_URL must be a valid URL').default('http://localhost:3000'),
+  RECEITA_WS_TOKEN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

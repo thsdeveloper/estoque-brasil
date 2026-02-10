@@ -17,6 +17,12 @@ export const createLojaSchema = z.object({
     .min(1, 'Nome é obrigatório')
     .max(255, 'Nome deve ter no máximo 255 caracteres'),
   cnpj: cnpjSchema,
+  cep: z.string().max(9).nullish(),
+  endereco: z.string().max(255).nullish(),
+  numero: z.string().max(20).nullish(),
+  bairro: z.string().max(100).nullish(),
+  uf: z.string().max(2).nullish(),
+  municipio: z.string().max(100).nullish(),
 });
 
 // Schema de validação para atualização de loja
@@ -31,6 +37,12 @@ export const updateLojaSchema = z.object({
     .max(255, 'Nome deve ter no máximo 255 caracteres')
     .optional(),
   cnpj: cnpjSchema,
+  cep: z.string().max(9).nullish(),
+  endereco: z.string().max(255).nullish(),
+  numero: z.string().max(20).nullish(),
+  bairro: z.string().max(100).nullish(),
+  uf: z.string().max(2).nullish(),
+  municipio: z.string().max(100).nullish(),
 });
 
 export type CreateLojaDTO = z.infer<typeof createLojaSchema>;
@@ -41,6 +53,12 @@ export interface LojaResponseDTO {
   idCliente: string; // UUID reference to clients
   nome: string;
   cnpj: string | null;
+  cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  bairro: string | null;
+  uf: string | null;
+  municipio: string | null;
 }
 
 export interface PaginatedLojaResponseDTO {
@@ -57,5 +75,11 @@ export function toLojaResponseDTO(loja: Loja): LojaResponseDTO {
     idCliente: loja.idCliente,
     nome: loja.nome,
     cnpj: loja.cnpj,
+    cep: loja.cep,
+    endereco: loja.endereco,
+    numero: loja.numero,
+    bairro: loja.bairro,
+    uf: loja.uf,
+    municipio: loja.municipio,
   };
 }

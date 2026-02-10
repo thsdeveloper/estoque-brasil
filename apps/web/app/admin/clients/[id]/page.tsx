@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Pencil, ExternalLink, Store, ChevronRight } from "lucide-react"
+import { ArrowLeft, Pencil, Store, ChevronRight } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Badge } from "@/shared/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
@@ -76,23 +76,42 @@ export default async function ViewClientPage({ params }: PageProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-gray-light">Nome</p>
+              <p className="text-sm text-gray-light">Razão Social</p>
               <p className="font-medium">{client.nome}</p>
             </div>
-            <div>
-              <p className="text-sm text-gray-light">Link do BI</p>
-              {client.linkBi ? (
-                <a
-                  href={client.linkBi}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-brand-orange hover:underline inline-flex items-center gap-1"
-                >
-                  Acessar Dashboard
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              ) : (
-                <p className="text-gray-light">-</p>
+            {client.fantasia && (
+              <div>
+                <p className="text-sm text-gray-light">Nome Fantasia</p>
+                <p className="font-medium">{client.fantasia}</p>
+              </div>
+            )}
+            {client.cnpj && (
+              <div>
+                <p className="text-sm text-gray-light">CNPJ</p>
+                <p className="font-medium">{client.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}</p>
+              </div>
+            )}
+            <Separator />
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {client.email && (
+                <div>
+                  <p className="text-gray-light">Email</p>
+                  <p>{client.email}</p>
+                </div>
+              )}
+              {client.telefone && (
+                <div>
+                  <p className="text-gray-light">Telefone</p>
+                  <p>{client.telefone}</p>
+                </div>
+              )}
+              {client.situacao && (
+                <div>
+                  <p className="text-gray-light">Situação</p>
+                  <Badge variant={client.situacao.toLowerCase() === "ativa" ? "success" : "secondary"}>
+                    {client.situacao}
+                  </Badge>
+                </div>
               )}
             </div>
             <Separator />

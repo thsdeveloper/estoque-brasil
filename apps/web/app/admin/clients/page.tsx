@@ -2,9 +2,8 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { Card, CardContent } from "@/shared/components/ui/card"
 import { PermissionGate } from "@/shared/components/PermissionGate"
-import { SearchFilters } from "@/features/admin-layout"
 import { ClientsTable, ClientsTableSkeleton } from "@/features/clients"
 
 interface PageProps {
@@ -34,15 +33,6 @@ export default async function ClientsPage({ searchParams }: PageProps) {
           </Button>
         </PermissionGate>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SearchFilters placeholder="Buscar por nome do cliente..." />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent className="pt-6">

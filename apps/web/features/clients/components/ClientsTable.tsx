@@ -1,11 +1,19 @@
 "use client"
 
 import { useEffect, useState, useCallback, useMemo } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import type { Client } from "@estoque-brasil/types"
+import { ESTADOS_BRASIL } from "@estoque-brasil/shared"
 import { Button } from "@/shared/components/ui/button"
 import { DataTable } from "@/shared/components/ui/data-table"
+import { DataTableToolbar } from "@/shared/components/ui/data-table-toolbar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select"
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { clientsApi, type PaginatedResponse } from "../api/clients-api"
 import { DeleteClientDialog } from "./DeleteClientDialog"
@@ -64,6 +72,17 @@ export function ClientsTable({ page, search, uf }: ClientsTableProps) {
     }
   }
 
+  const handleUfChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("page")
+    if (value === "all") {
+      params.delete("uf")
+    } else {
+      params.set("uf", value)
+    }
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
   const handleDeleteClick = (client: Client) => {
     setClientToDelete(client)
     setDeleteDialogOpen(true)
@@ -91,23 +110,6 @@ export function ClientsTable({ page, search, uf }: ClientsTableProps) {
     )
   }
 
-  if (!loading && (!data || data.data.length === 0)) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-gray-light mb-4">
-          {search || uf
-            ? "Nenhum cliente encontrado com os filtros aplicados"
-            : "Nenhum cliente cadastrado"}
-        </p>
-        {!search && !uf && (
-          <Button asChild>
-            <Link href="/admin/clients/create">Cadastrar primeiro cliente</Link>
-          </Button>
-        )}
-      </div>
-    )
-  }
-
   return (
     <>
       <DataTable
@@ -123,6 +125,23 @@ export function ClientsTable({ page, search, uf }: ClientsTableProps) {
           search || uf
             ? "Nenhum cliente encontrado com os filtros aplicados"
             : "Nenhum cliente cadastrado"
+        }
+        toolbar={
+          <DataTableToolbar searchPlaceholder="Buscar por nome do cliente...">
+            <Select value={uf || "all"} onValueChange={handleUfChange}>
+              <SelectTrigger className="w-full sm:w-[180px] h-9">
+                <SelectValue placeholder="Filtrar por UF" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os estados</SelectItem>
+                {ESTADOS_BRASIL.map((estado) => (
+                  <SelectItem key={estado.value} value={estado.value}>
+                    {estado.value} - {estado.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </DataTableToolbar>
         }
       />
 

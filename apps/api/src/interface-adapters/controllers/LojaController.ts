@@ -75,7 +75,7 @@ export class LojaController {
   }
 
   async list(
-    request: FastifyRequest<{ Querystring: { page?: string; limit?: string; search?: string; idCliente?: string } }>,
+    request: FastifyRequest<{ Querystring: { page?: string; limit?: string; search?: string; idCliente?: string; idEmpresa?: string } }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
@@ -83,7 +83,8 @@ export class LojaController {
       const limit = request.query.limit ? parseInt(request.query.limit, 10) : undefined;
       const search = request.query.search || undefined;
       const idCliente = request.query.idCliente || undefined; // UUID string
-      const result = await this.listLojasUseCase.execute({ page, limit, search, idCliente });
+      const idEmpresa = request.query.idEmpresa ? parseInt(request.query.idEmpresa, 10) : undefined;
+      const result = await this.listLojasUseCase.execute({ page, limit, search, idCliente, idEmpresa });
       reply.send(result);
     } catch (error) {
       this.handleError(error, reply);

@@ -3,6 +3,7 @@
 import { Menu } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Separator } from "@/shared/components/ui/separator"
+import { EmpresaSelector } from "@/features/empresas"
 import { NotificationsMenu } from "./NotificationsMenu"
 import { UserMenu } from "./UserMenu"
 
@@ -25,6 +26,7 @@ export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
         </Button>
 
         <Separator orientation="vertical" className="h-6 lg:hidden" />
+        <EmpresaSelector />
       </div>
 
       <div className="flex items-center gap-x-2">

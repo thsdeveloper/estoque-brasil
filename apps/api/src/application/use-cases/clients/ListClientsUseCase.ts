@@ -9,6 +9,7 @@ export interface ListClientsInput {
   limit?: number;
   search?: string;
   uf?: string;
+  idEmpresa?: number;
 }
 
 export class ListClientsUseCase {
@@ -20,7 +21,9 @@ export class ListClientsUseCase {
     const search = input.search?.trim() || undefined;
     const uf = input.uf?.toUpperCase().trim() || undefined;
 
-    const result = await this.clientRepository.findAll({ page, limit, search, uf });
+    const idEmpresa = input.idEmpresa;
+
+    const result = await this.clientRepository.findAll({ page, limit, search, uf, idEmpresa });
 
     return {
       data: result.data.map(toClientResponseDTO),

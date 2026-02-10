@@ -67,6 +67,8 @@ interface DataTableProps<TData, TValue> {
   loading?: boolean
   // Row selection callback
   onRowSelectionChange?: (rows: TData[]) => void
+  // Toolbar slot (e.g. DataTableToolbar with search + custom filters)
+  toolbar?: React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
@@ -84,6 +86,7 @@ export function DataTable<TData, TValue>({
   emptyMessage = "Nenhum resultado encontrado.",
   loading = false,
   onRowSelectionChange: onRowSelectionChangeProp,
+  toolbar,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -177,37 +180,40 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {showColumnVisibility && (
-        <div className="flex items-center justify-end">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <Columns3 className="h-4 w-4" />
-                <span>Colunas</span>
-                <ChevronDown className="h-3.5 w-3.5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {columnLabels[column.id] || column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      {(toolbar || showColumnVisibility) && (
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1">{toolbar}</div>
+          {showColumnVisibility && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-2 text-muted-foreground hover:text-foreground"
+                >
+                  <Columns3 className="h-4 w-4" />
+                  <span>Colunas</span>
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      >
+                        {columnLabels[column.id] || column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       )}
 

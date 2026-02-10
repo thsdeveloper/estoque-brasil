@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -29,10 +29,9 @@ import {
 } from "@/shared/components/ui/form"
 import { inventariosApi, type ApiError } from "../api/inventarios-api"
 import { inventarioFormSchema, type InventarioFormData } from "../types"
-// Direct imports instead of barrel files (bundle-barrel-imports)
-// SWR hooks for data fetching (client-swr-dedup)
 import { useLojas } from "@/features/lojas/hooks/useLojas"
 import { useEmpresas } from "@/features/empresas/hooks/useEmpresas"
+import { useClients } from "@/features/clients/hooks/useClients"
 import { useUsuarios } from "@/features/usuarios/hooks/useUsuarios"
 import { useRoles } from "@/features/roles/hooks/useRoles"
 
@@ -78,10 +77,16 @@ export function InventarioForm({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [selectedClienteId, setSelectedClienteId] = useState<string | null>(null)
 
-  // SWR hooks for lojas and empresas (client-swr-dedup)
-  const { lojas, isLoading: loadingLojas } = useLojas({ limit: 100 })
-  const { empresas, isLoading: loadingEmpresas } = useEmpresas({ limit: 100 })
+  // SWR hooks
+  const { clients, isLoading: loadingClients } = useClients({ limit: 100 })
+  const { lojas, isLoading: loadingLojas } = useLojas({
+    limit: 100,
+    idCliente: selectedClienteId || undefined,
+  })
+  // Auto-select empresa (hidden from user)
+  const { empresas } = useEmpresas({ limit: 1 })
 
   // Fetch roles to find lider_coleta role
   const { roles, isLoading: loadingRoles } = useRoles(false)
@@ -98,14 +103,14 @@ export function InventarioForm({
   })
 
   // Memoize options for comboboxes
-  const empresaOptions = useMemo(
+  const clienteOptions = useMemo(
     () =>
-      empresas.map((empresa) => ({
-        value: empresa.id,
-        label: empresa.nomeFantasia || empresa.razaoSocial || `Empresa #${empresa.id}`,
-        description: empresa.cnpj || undefined,
+      clients.map((client) => ({
+        value: client.id,
+        label: client.nome,
+        description: client.uf || undefined,
       })),
-    [empresas]
+    [clients]
   )
 
   const lojaOptions = useMemo(
@@ -129,7 +134,6 @@ export function InventarioForm({
   )
 
   // Memoize default values to prevent hydration mismatch (rendering-hydration-no-flicker)
-  // Empty string for dataInicio in create mode - user must select
   const defaultValues = useMemo(() => ({
     idLoja: inventario?.idLoja || preSelectedLojaId || 0,
     idEmpresa: inventario?.idEmpresa || preSelectedEmpresaId || 0,
@@ -143,10 +147,21 @@ export function InventarioForm({
     receberDadosOffline: (inventario as Inventario & { receberDadosOffline?: boolean })?.receberDadosOffline ?? false,
   }), [inventario, preSelectedLojaId, preSelectedEmpresaId])
 
+  // Auto-set idEmpresa when empresas load (use first/only empresa)
+  const autoEmpresaId = empresas.length > 0 ? empresas[0].id : 0
+
   const form = useForm<InventarioFormData>({
     resolver: zodResolver(inventarioFormSchema),
     defaultValues,
   })
+
+  // Reset loja selection when cliente changes
+  useEffect(() => {
+    if (selectedClienteId) {
+      form.setValue("idLoja", 0)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedClienteId])
 
   const onSubmit = async (data: InventarioFormData) => {
     setLoading(true)
@@ -155,7 +170,7 @@ export function InventarioForm({
     try {
       const submitData = {
         idLoja: data.idLoja,
-        idEmpresa: data.idEmpresa,
+        idEmpresa: data.idEmpresa || autoEmpresaId,
         dataInicio: new Date(data.dataInicio).toISOString(),
         dataTermino: data.dataTermino ? new Date(data.dataTermino).toISOString() : null,
         minimoContagem: data.minimoContagem,
@@ -206,27 +221,20 @@ export function InventarioForm({
             <CardDescription>Dados principais do inventario</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="idEmpresa"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Empresa</FormLabel>
-                  <FormControl>
-                    <Combobox
-                      options={empresaOptions}
-                      value={field.value || null}
-                      onChange={(value) => field.onChange(value as number ?? 0)}
-                      placeholder="Selecione a empresa"
-                      searchPlaceholder="Buscar empresa..."
-                      emptyMessage="Nenhuma empresa encontrada."
-                      loading={loadingEmpresas}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <FormItem>
+              <FormLabel>Cliente</FormLabel>
+              <FormControl>
+                <Combobox
+                  options={clienteOptions}
+                  value={selectedClienteId}
+                  onChange={(value) => setSelectedClienteId(value as string | null)}
+                  placeholder="Selecione o cliente"
+                  searchPlaceholder="Buscar cliente..."
+                  emptyMessage="Nenhum cliente encontrado."
+                  loading={loadingClients}
+                />
+              </FormControl>
+            </FormItem>
 
             <FormField
               control={form.control}
@@ -239,9 +247,9 @@ export function InventarioForm({
                       options={lojaOptions}
                       value={field.value || null}
                       onChange={(value) => field.onChange(value as number ?? 0)}
-                      placeholder="Selecione a loja"
+                      placeholder={selectedClienteId ? "Selecione a loja" : "Selecione um cliente primeiro"}
                       searchPlaceholder="Buscar loja..."
-                      emptyMessage="Nenhuma loja encontrada."
+                      emptyMessage={selectedClienteId ? "Nenhuma loja encontrada." : "Selecione um cliente primeiro."}
                       loading={loadingLojas}
                     />
                   </FormControl>

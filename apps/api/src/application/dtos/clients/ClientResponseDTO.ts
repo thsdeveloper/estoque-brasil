@@ -3,7 +3,13 @@ import { Client } from '../../../domain/entities/Client.js';
 export interface ClientResponseDTO {
   id: string;
   nome: string;
-  linkBi: string | null;
+  cnpj: string | null;
+  fantasia: string | null;
+  email: string | null;
+  telefone: string | null;
+  situacao: string | null;
+  idEmpresa: number | null;
+
   qtdeDivergentePlus: number | null;
   qtdeDivergenteMinus: number | null;
   valorDivergentePlus: number | null;
@@ -31,7 +37,13 @@ export function toClientResponseDTO(client: Client): ClientResponseDTO {
   return {
     id: client.id!,
     nome: client.nome,
-    linkBi: client.linkBi,
+    cnpj: client.cnpj,
+    fantasia: client.fantasia,
+    email: client.email,
+    telefone: client.telefone,
+    situacao: client.situacao,
+    idEmpresa: client.idEmpresa,
+
     qtdeDivergentePlus: client.qtdeDivergentePlus,
     qtdeDivergenteMinus: client.qtdeDivergenteMinus,
     valorDivergentePlus: client.valorDivergentePlus,

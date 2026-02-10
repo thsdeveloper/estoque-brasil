@@ -63,7 +63,7 @@ export class SupabaseClientRepository implements IClientRepository {
   }
 
   async findAll(params: PaginationParams): Promise<PaginatedResult<Client>> {
-    const { page, limit, search, uf } = params;
+    const { page, limit, search, uf, idEmpresa } = params;
     const offset = (page - 1) * limit;
 
     // Build count query with filters
@@ -76,6 +76,9 @@ export class SupabaseClientRepository implements IClientRepository {
     }
     if (uf) {
       countQuery = countQuery.eq('uf', uf);
+    }
+    if (idEmpresa) {
+      countQuery = countQuery.eq('id_empresa', idEmpresa);
     }
 
     const { count, error: countError } = await countQuery;
@@ -96,6 +99,9 @@ export class SupabaseClientRepository implements IClientRepository {
     }
     if (uf) {
       dataQuery = dataQuery.eq('uf', uf);
+    }
+    if (idEmpresa) {
+      dataQuery = dataQuery.eq('id_empresa', idEmpresa);
     }
 
     const { data, error } = await dataQuery

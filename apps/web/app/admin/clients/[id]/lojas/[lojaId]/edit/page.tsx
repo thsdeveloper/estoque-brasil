@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { LojaForm } from "@/features/lojas"
 import { lojasServerApi } from "@/features/lojas/api/lojas-api.server"
-import { clientsApi } from "@/features/clients"
+import { clientsServerApi } from "@/features/clients/api/clients-api.server"
 
 interface PageProps {
   params: Promise<{ id: string; lojaId: string }>
@@ -17,7 +17,7 @@ export default async function EditLojaPage({ params }: PageProps) {
   let loja
   try {
     ;[client, loja] = await Promise.all([
-      clientsApi.get(clientId),
+      clientsServerApi.get(clientId),
       lojasServerApi.get(lojaId),
     ])
   } catch {

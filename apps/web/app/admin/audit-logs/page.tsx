@@ -1,15 +1,21 @@
+import { Card, CardContent } from "@/shared/components/ui/card"
 import { AuditLogsTable } from "@/features/audit-logs/components/AuditLogsTable"
 
 export default function AuditLogsPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Log de Auditoria</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Registros de todas as acoes realizadas no sistema
+        <p className="text-gray-light">
+          Registros de todas as ações realizadas no sistema
         </p>
       </div>
-      <AuditLogsTable />
+
+      <Card>
+        <CardContent className="pt-6">
+          <AuditLogsTable />
+        </CardContent>
+      </Card>
     </div>
   )
 }
