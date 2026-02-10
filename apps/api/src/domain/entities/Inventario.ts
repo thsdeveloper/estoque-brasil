@@ -4,51 +4,51 @@ export interface InventarioProps {
   id?: number;
   idLoja: number;
   idEmpresa: number;
-  idTemplate?: number | null;
-  idTemplateExportacao?: number | null;
   minimoContagem?: number;
   dataInicio: Date;
   dataTermino?: Date | null;
   lote?: boolean;
   validade?: boolean;
   ativo?: boolean;
+  lider?: string | null;
   // Enriched fields (from joins)
   nomeLoja?: string | null;
   cnpjLoja?: string | null;
   nomeCliente?: string | null;
+  liderNome?: string | null;
 }
 
 export class Inventario {
   private readonly _id?: number;
   private _idLoja: number;
   private _idEmpresa: number;
-  private _idTemplate: number | null;
-  private _idTemplateExportacao: number | null;
   private _minimoContagem: number;
   private _dataInicio: Date;
   private _dataTermino: Date | null;
   private _lote: boolean;
   private _validade: boolean;
   private _ativo: boolean;
+  private _lider: string | null;
   private _nomeLoja: string | null;
   private _cnpjLoja: string | null;
   private _nomeCliente: string | null;
+  private _liderNome: string | null;
 
   private constructor(props: InventarioProps) {
     this._id = props.id;
     this._idLoja = props.idLoja;
     this._idEmpresa = props.idEmpresa;
-    this._idTemplate = props.idTemplate ?? null;
-    this._idTemplateExportacao = props.idTemplateExportacao ?? null;
     this._minimoContagem = props.minimoContagem ?? 1;
     this._dataInicio = props.dataInicio;
     this._dataTermino = props.dataTermino ?? null;
     this._lote = props.lote ?? false;
     this._validade = props.validade ?? false;
     this._ativo = props.ativo ?? true;
+    this._lider = props.lider ?? null;
     this._nomeLoja = props.nomeLoja ?? null;
     this._cnpjLoja = props.cnpjLoja ?? null;
     this._nomeCliente = props.nomeCliente ?? null;
+    this._liderNome = props.liderNome ?? null;
   }
 
   static create(props: InventarioProps): Inventario {
@@ -93,14 +93,6 @@ export class Inventario {
       this._idEmpresa = props.idEmpresa;
     }
 
-    if (props.idTemplate !== undefined) {
-      this._idTemplate = props.idTemplate;
-    }
-
-    if (props.idTemplateExportacao !== undefined) {
-      this._idTemplateExportacao = props.idTemplateExportacao;
-    }
-
     if (props.minimoContagem !== undefined) {
       if (props.minimoContagem < 1) {
         throw new InvalidInventarioError('Mínimo de contagem deve ser pelo menos 1');
@@ -130,6 +122,10 @@ export class Inventario {
     if (props.ativo !== undefined) {
       this._ativo = props.ativo;
     }
+
+    if (props.lider !== undefined) {
+      this._lider = props.lider;
+    }
   }
 
   finalizar(): void {
@@ -158,14 +154,6 @@ export class Inventario {
 
   get idEmpresa(): number {
     return this._idEmpresa;
-  }
-
-  get idTemplate(): number | null {
-    return this._idTemplate;
-  }
-
-  get idTemplateExportacao(): number | null {
-    return this._idTemplateExportacao;
   }
 
   get minimoContagem(): number {
@@ -202,5 +190,13 @@ export class Inventario {
 
   get nomeCliente(): string | null {
     return this._nomeCliente;
+  }
+
+  get lider(): string | null {
+    return this._lider;
+  }
+
+  get liderNome(): string | null {
+    return this._liderNome;
   }
 }

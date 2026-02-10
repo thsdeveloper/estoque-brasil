@@ -237,10 +237,11 @@ export default async function produtoRoutes(fastify: FastifyInstance) {
     '/produtos/import',
     {
       preHandler: [requireAuth],
+      bodyLimit: 5 * 1024 * 1024, // 5MB - sufficient for ~1000 products per chunk
       schema: {
         tags: ['Produtos'],
         summary: 'Importar produtos em massa',
-        description: 'Importa uma lista de produtos para um inventário',
+        description: 'Importa uma lista de produtos para um inventário (enviar em chunks de ~1000)',
         security: [{ bearerAuth: [] }],
         body: {
           type: 'object',
@@ -280,7 +281,6 @@ export default async function produtoRoutes(fastify: FastifyInstance) {
                   },
                 },
               },
-              produtos: { type: 'array', items: produtoResponseSchema },
             },
           },
           400: validationErrorResponseSchema,

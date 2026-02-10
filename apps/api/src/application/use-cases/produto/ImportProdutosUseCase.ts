@@ -1,6 +1,5 @@
 import { InventarioProduto } from '../../../domain/entities/InventarioProduto.js';
 import { IInventarioProdutoRepository } from '../../../domain/repositories/IInventarioProdutoRepository.js';
-import { ProdutoResponseDTO, toProdutoResponseDTO } from '../../dtos/inventario/ProdutoDTO.js';
 
 export interface ImportProdutoItem {
   codigoBarras?: string | null;
@@ -20,7 +19,6 @@ export interface ImportProdutosDTO {
 export interface ImportResultDTO {
   importados: number;
   erros: { linha: number; erro: string }[];
-  produtos: ProdutoResponseDTO[];
 }
 
 export class ImportProdutosUseCase {
@@ -57,22 +55,15 @@ export class ImportProdutosUseCase {
       }
     }
 
-    let savedProdutos: InventarioProduto[] = [];
+    let totalInserted = 0;
 
     if (produtosValidos.length > 0) {
-      // Insert in batches of 500 to avoid payload limits
-      const BATCH_SIZE = 500;
-      for (let i = 0; i < produtosValidos.length; i += BATCH_SIZE) {
-        const batch = produtosValidos.slice(i, i + BATCH_SIZE);
-        const saved = await this.produtoRepository.createMany(batch);
-        savedProdutos.push(...saved);
-      }
+      totalInserted = await this.produtoRepository.createManyBulk(produtosValidos);
     }
 
     return {
-      importados: savedProdutos.length,
+      importados: totalInserted,
       erros,
-      produtos: savedProdutos.map(toProdutoResponseDTO),
     };
   }
 }

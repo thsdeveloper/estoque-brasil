@@ -17,14 +17,13 @@ export class CreateInventarioUseCase {
     const inventario = Inventario.create({
       idLoja: data.idLoja,
       idEmpresa: data.idEmpresa,
-      idTemplate: data.idTemplate,
-      idTemplateExportacao: data.idTemplateExportacao,
       minimoContagem: data.minimoContagem,
       dataInicio: new Date(data.dataInicio),
       dataTermino: data.dataTermino ? new Date(data.dataTermino) : null,
       lote: data.lote,
       validade: data.validade,
       ativo: data.ativo ?? true,
+      lider: data.lider ?? null,
     });
 
     const savedInventario = await this.inventarioRepository.create(inventario);

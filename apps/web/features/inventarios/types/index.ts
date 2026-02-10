@@ -23,8 +23,6 @@ export type {
 export const inventarioFormSchema = z.object({
   idLoja: z.number().min(1, "Selecione uma loja"),
   idEmpresa: z.number().min(1, "Selecione uma empresa"),
-  idTemplate: z.number().nullable().optional(),
-  idTemplateExportacao: z.number().nullable().optional(),
   dataInicio: z.string().min(1, "Data de inicio e obrigatoria"),
   dataTermino: z.string().nullable().optional(),
   minimoContagem: z.number().min(1, "Minimo de contagem deve ser pelo menos 1"),
@@ -83,8 +81,6 @@ export interface InventarioWithRelations {
   id: number
   idLoja: number
   idEmpresa: number
-  idTemplate: number | null
-  idTemplateExportacao: number | null
   minimoContagem: number
   dataInicio: string
   dataTermino: string | null

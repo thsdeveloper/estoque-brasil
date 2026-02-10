@@ -10,6 +10,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Switch } from "@/shared/components/ui/switch"
 import { Combobox } from "@/shared/components/ui/combobox"
+import { DateTimePicker } from "@/shared/components/ui/date-time-picker"
 import {
   Card,
   CardContent,
@@ -26,13 +27,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select"
 import { inventariosApi, type ApiError } from "../api/inventarios-api"
 import { inventarioFormSchema, type InventarioFormData } from "../types"
 // Direct imports instead of barrel files (bundle-barrel-imports)
@@ -41,7 +35,6 @@ import { useLojas } from "@/features/lojas/hooks/useLojas"
 import { useEmpresas } from "@/features/empresas/hooks/useEmpresas"
 import { useUsuarios } from "@/features/usuarios/hooks/useUsuarios"
 import { useRoles } from "@/features/roles/hooks/useRoles"
-import { useTemplatesImportacao, useTemplatesExportacao } from "@/features/templates/hooks/useTemplates"
 
 // Helper to format date for datetime-local input
 function formatDateForInput(dateString: string | null | undefined): string {
@@ -104,11 +97,27 @@ export function InventarioForm({
     limit: 100,
   })
 
-  // Fetch templates
-  const { templates: templatesImportacao, isLoading: loadingTemplatesImportacao } = useTemplatesImportacao()
-  const { templates: templatesExportacao, isLoading: loadingTemplatesExportacao } = useTemplatesExportacao()
-
   // Memoize options for comboboxes
+  const empresaOptions = useMemo(
+    () =>
+      empresas.map((empresa) => ({
+        value: empresa.id,
+        label: empresa.nomeFantasia || empresa.razaoSocial || `Empresa #${empresa.id}`,
+        description: empresa.cnpj || undefined,
+      })),
+    [empresas]
+  )
+
+  const lojaOptions = useMemo(
+    () =>
+      lojas.map((loja) => ({
+        value: loja.id,
+        label: loja.nome,
+        description: loja.cnpj || undefined,
+      })),
+    [lojas]
+  )
+
   const liderOptions = useMemo(
     () =>
       lideres.map((user) => ({
@@ -119,40 +128,18 @@ export function InventarioForm({
     [lideres]
   )
 
-  const templateImportacaoOptions = useMemo(
-    () =>
-      templatesImportacao.map((template) => ({
-        value: template.id,
-        label: template.nome,
-        description: template.descricao || undefined,
-      })),
-    [templatesImportacao]
-  )
-
-  const templateExportacaoOptions = useMemo(
-    () =>
-      templatesExportacao.map((template) => ({
-        value: template.id,
-        label: template.nome,
-        description: template.descricao || undefined,
-      })),
-    [templatesExportacao]
-  )
-
   // Memoize default values to prevent hydration mismatch (rendering-hydration-no-flicker)
   // Empty string for dataInicio in create mode - user must select
   const defaultValues = useMemo(() => ({
     idLoja: inventario?.idLoja || preSelectedLojaId || 0,
     idEmpresa: inventario?.idEmpresa || preSelectedEmpresaId || 0,
-    idTemplate: inventario?.idTemplate || null,
-    idTemplateExportacao: inventario?.idTemplateExportacao || null,
     dataInicio: formatDateForInput(inventario?.dataInicio),
     dataTermino: formatDateForInput(inventario?.dataTermino) || null,
     minimoContagem: inventario?.minimoContagem || 1,
     lote: inventario?.lote ?? false,
     validade: inventario?.validade ?? false,
     ativo: inventario?.ativo ?? true,
-    lider: (inventario as Inventario & { lider?: string })?.lider || null,
+    lider: inventario?.lider || null,
     receberDadosOffline: (inventario as Inventario & { receberDadosOffline?: boolean })?.receberDadosOffline ?? false,
   }), [inventario, preSelectedLojaId, preSelectedEmpresaId])
 
@@ -169,8 +156,6 @@ export function InventarioForm({
       const submitData = {
         idLoja: data.idLoja,
         idEmpresa: data.idEmpresa,
-        idTemplate: data.idTemplate || null,
-        idTemplateExportacao: data.idTemplateExportacao || null,
         dataInicio: new Date(data.dataInicio).toISOString(),
         dataTermino: data.dataTermino ? new Date(data.dataTermino).toISOString() : null,
         minimoContagem: data.minimoContagem,
@@ -227,24 +212,17 @@ export function InventarioForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Empresa</FormLabel>
-                  <Select
-                    disabled={loadingEmpresas}
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value ? String(field.value) : undefined}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={loadingEmpresas ? "Carregando..." : "Selecione a empresa"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {empresas.map((empresa) => (
-                        <SelectItem key={empresa.id} value={String(empresa.id)}>
-                          {empresa.nomeFantasia || empresa.razaoSocial || `Empresa #${empresa.id}`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Combobox
+                      options={empresaOptions}
+                      value={field.value || null}
+                      onChange={(value) => field.onChange(value as number ?? 0)}
+                      placeholder="Selecione a empresa"
+                      searchPlaceholder="Buscar empresa..."
+                      emptyMessage="Nenhuma empresa encontrada."
+                      loading={loadingEmpresas}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -256,74 +234,17 @@ export function InventarioForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Loja</FormLabel>
-                  <Select
-                    disabled={loadingLojas}
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value ? String(field.value) : undefined}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={loadingLojas ? "Carregando..." : "Selecione a loja"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {lojas.map((loja) => (
-                        <SelectItem key={loja.id} value={String(loja.id)}>
-                          {loja.nome} {loja.cnpj ? `(${loja.cnpj})` : ""}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="idTemplate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Template de Importacao</FormLabel>
                   <FormControl>
                     <Combobox
-                      options={templateImportacaoOptions}
-                      value={field.value}
-                      onChange={(value) => field.onChange(value as number | null)}
-                      placeholder="Selecione o template"
-                      searchPlaceholder="Buscar template..."
-                      emptyMessage="Nenhum template encontrado."
-                      loading={loadingTemplatesImportacao}
+                      options={lojaOptions}
+                      value={field.value || null}
+                      onChange={(value) => field.onChange(value as number ?? 0)}
+                      placeholder="Selecione a loja"
+                      searchPlaceholder="Buscar loja..."
+                      emptyMessage="Nenhuma loja encontrada."
+                      loading={loadingLojas}
                     />
                   </FormControl>
-                  <FormDescription>
-                    Template para importacao de produtos
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="idTemplateExportacao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Template de Exportacao</FormLabel>
-                  <FormControl>
-                    <Combobox
-                      options={templateExportacaoOptions}
-                      value={field.value}
-                      onChange={(value) => field.onChange(value as number | null)}
-                      placeholder="Selecione o template"
-                      searchPlaceholder="Buscar template..."
-                      emptyMessage="Nenhum template encontrado."
-                      loading={loadingTemplatesExportacao}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Template para exportacao de resultados
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -336,10 +257,10 @@ export function InventarioForm({
                 <FormItem>
                   <FormLabel>Previsao Inicio</FormLabel>
                   <FormControl>
-                    <Input
-                      type="datetime-local"
-                      {...field}
-                      value={field.value || ""}
+                    <DateTimePicker
+                      value={field.value || null}
+                      onChange={(value) => field.onChange(value || "")}
+                      placeholder="Selecione data e hora"
                     />
                   </FormControl>
                   <FormMessage />
@@ -354,11 +275,11 @@ export function InventarioForm({
                 <FormItem>
                   <FormLabel>Previsao Termino</FormLabel>
                   <FormControl>
-                    <Input
-                      type="datetime-local"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value || null)}
+                    <DateTimePicker
+                      value={field.value || null}
+                      onChange={(value) => field.onChange(value)}
+                      placeholder="Selecione data e hora"
+                      clearable
                     />
                   </FormControl>
                   <FormDescription>

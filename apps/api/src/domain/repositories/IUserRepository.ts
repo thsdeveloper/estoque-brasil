@@ -13,10 +13,12 @@ export interface IUserRepository {
   create(user: User): Promise<User>;
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
+  findByCpf(cpf: string): Promise<User | null>;
   findAll(params: UserPaginationParams): Promise<PaginatedResult<User>>;
   update(user: User): Promise<User>;
   delete(id: string): Promise<void>;
   existsByEmail(email: string, excludeId?: string): Promise<boolean>;
+  existsByCpf(cpf: string, excludeId?: string): Promise<boolean>;
   assignRole(userId: string, roleId: string, assignedBy?: string): Promise<void>;
   removeRole(userId: string, roleId: string): Promise<void>;
   getUserRoleIds(userId: string): Promise<string[]>;

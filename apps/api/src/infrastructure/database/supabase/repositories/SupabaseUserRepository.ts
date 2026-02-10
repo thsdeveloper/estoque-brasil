@@ -74,6 +74,23 @@ export class SupabaseUserRepository implements IUserRepository {
     return data ? UserMapper.toDomainWithRoles(data as UserWithRolesDbRow) : null;
   }
 
+  async findByCpf(cpf: string): Promise<User | null> {
+    const { data, error } = await this.supabase
+      .from(USER_PROFILES_TABLE)
+      .select(USER_WITH_ROLES_SELECT)
+      .eq('cpf', cpf)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(`Failed to find user by CPF: ${error.message}`);
+    }
+
+    return data ? UserMapper.toDomainWithRoles(data as UserWithRolesDbRow) : null;
+  }
+
   async findAll(params: UserPaginationParams): Promise<PaginatedResult<User>> {
     const { page, limit, search, isActive, roleId } = params;
     const offset = (page - 1) * limit;
@@ -182,6 +199,25 @@ export class SupabaseUserRepository implements IUserRepository {
 
     if (error) {
       throw new Error(`Failed to check user existence: ${error.message}`);
+    }
+
+    return (count ?? 0) > 0;
+  }
+
+  async existsByCpf(cpf: string, excludeId?: string): Promise<boolean> {
+    let query = this.supabase
+      .from(USER_PROFILES_TABLE)
+      .select('id', { count: 'exact', head: true })
+      .eq('cpf', cpf);
+
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+
+    const { count, error } = await query;
+
+    if (error) {
+      throw new Error(`Failed to check user CPF existence: ${error.message}`);
     }
 
     return (count ?? 0) > 0;

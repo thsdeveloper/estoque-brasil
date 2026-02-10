@@ -29,6 +29,7 @@ export interface Role {
 export interface User {
   id: string;
   email: string;
+  cpf: string | null;
   fullName: string;
   phone: string | null;
   avatarUrl: string | null;
@@ -90,7 +91,7 @@ export interface AccessPolicy {
 
 // Input types for API
 export interface CreateUserInput {
-  email: string;
+  cpf: string;
   password: string;
   fullName: string;
   phone?: string | null;
@@ -101,6 +102,7 @@ export interface CreateUserInput {
 
 export interface UpdateUserInput {
   fullName?: string;
+  cpf?: string | null;
   phone?: string | null;
   avatarUrl?: string | null;
   isActive?: boolean;

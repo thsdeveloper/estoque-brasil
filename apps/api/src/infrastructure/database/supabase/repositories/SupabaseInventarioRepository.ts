@@ -31,7 +31,7 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
   async findById(id: number): Promise<Inventario | null> {
     const { data, error } = await this.supabase
       .from(TABLE_NAME)
-      .select('*')
+      .select('*, lojas(nome, cnpj, clients(nome)), user_profiles(full_name)')
       .eq('id', id)
       .single();
 
@@ -127,8 +127,8 @@ export class SupabaseInventarioRepository implements IInventarioRepository {
       }
     }
 
-    // Select with joined loja and client data
-    const selectStr = '*, lojas(nome, cnpj, clients(nome))';
+    // Select with joined loja, client, and leader data
+    const selectStr = '*, lojas(nome, cnpj, clients(nome)), user_profiles(full_name)';
 
     let countQuery = this.supabase
       .from(TABLE_NAME)

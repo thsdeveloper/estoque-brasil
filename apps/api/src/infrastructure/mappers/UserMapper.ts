@@ -7,6 +7,7 @@ export interface UserProfileDbRow {
   id: string;
   email: string;
   full_name: string;
+  cpf: string | null;
   phone: string | null;
   avatar_url: string | null;
   is_active: boolean;
@@ -46,6 +47,7 @@ export interface UserProfileInsertRow {
   id: string;
   email: string;
   full_name: string;
+  cpf?: string | null;
   phone?: string | null;
   avatar_url?: string | null;
   is_active?: boolean;
@@ -53,6 +55,7 @@ export interface UserProfileInsertRow {
 
 export interface UserProfileUpdateRow {
   full_name?: string;
+  cpf?: string | null;
   phone?: string | null;
   avatar_url?: string | null;
   is_active?: boolean;
@@ -94,6 +97,7 @@ export class UserMapper {
       id: row.id,
       email: row.email,
       fullName: row.full_name,
+      cpf: row.cpf,
       phone: row.phone,
       avatarUrl: row.avatar_url,
       isActive: row.is_active,
@@ -117,6 +121,7 @@ export class UserMapper {
       id: user.id!,
       email: user.email,
       full_name: user.fullName,
+      cpf: user.cpf,
       phone: user.phone,
       avatar_url: user.avatarUrl,
       is_active: user.isActive,
@@ -126,6 +131,7 @@ export class UserMapper {
   static toUpdateRow(user: User): UserProfileUpdateRow {
     return {
       full_name: user.fullName,
+      cpf: user.cpf,
       phone: user.phone,
       avatar_url: user.avatarUrl,
       is_active: user.isActive,

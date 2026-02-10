@@ -3,18 +3,18 @@ export interface Inventario {
   id: number;
   idLoja: number;
   idEmpresa: number;
-  idTemplate: number | null;
-  idTemplateExportacao: number | null;
   minimoContagem: number;
   dataInicio: string; // datetime
   dataTermino: string | null; // datetime
   lote: boolean;
   validade: boolean;
   ativo: boolean;
+  lider: string | null; // UUID of team leader
   // Enriched fields (populated in list queries)
   nomeLoja?: string | null;
   cnpjLoja?: string | null;
   nomeCliente?: string | null;
+  liderNome?: string | null;
   temContagens?: boolean;
 }
 

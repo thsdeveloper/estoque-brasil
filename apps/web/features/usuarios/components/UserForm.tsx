@@ -62,12 +62,20 @@ export function UserForm({ user, mode }: UserFormProps) {
 
   const schema = mode === "create" ? createUserFormSchema : updateUserFormSchema
 
+  const formatCpf = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 11)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+  }
+
   const form = useForm<CreateUserFormData | UpdateUserFormData>({
     resolver: zodResolver(schema),
     defaultValues:
       mode === "create"
         ? {
-            email: "",
+            cpf: "",
             password: "",
             confirmPassword: "",
             fullName: "",
@@ -91,7 +99,7 @@ export function UserForm({ user, mode }: UserFormProps) {
       if (mode === "create") {
         const createData = data as CreateUserFormData
         const input: CreateUserInput = {
-          email: createData.email,
+          cpf: createData.cpf.replace(/\D/g, ""),
           password: createData.password,
           fullName: createData.fullName,
           phone: createData.phone || null,
@@ -155,16 +163,19 @@ export function UserForm({ user, mode }: UserFormProps) {
             {mode === "create" && (
               <FormField
                 control={form.control}
-                name="email"
+                name="cpf"
                 render={({ field }) => (
                   <FormItem className="sm:col-span-2">
-                    <FormLabel>Email *</FormLabel>
+                    <FormLabel>CPF *</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
-                        placeholder="email@exemplo.com"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="000.000.000-00"
+                        maxLength={14}
                         {...field}
                         value={field.value || ""}
+                        onChange={(e) => field.onChange(formatCpf(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -175,9 +186,11 @@ export function UserForm({ user, mode }: UserFormProps) {
 
             {mode === "edit" && user && (
               <div className="sm:col-span-2">
-                <FormLabel>Email</FormLabel>
-                <p className="text-sm text-muted-foreground mt-1">{user.email}</p>
-                <FormDescription>O email não pode ser alterado</FormDescription>
+                <FormLabel>CPF</FormLabel>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {user.cpf ? formatCpf(user.cpf) : "-"}
+                </p>
+                <FormDescription>O CPF não pode ser alterado</FormDescription>
               </div>
             )}
 

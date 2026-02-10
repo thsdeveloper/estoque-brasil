@@ -33,7 +33,8 @@ const userResponseSchema = {
   type: 'object',
   properties: {
     id: { type: 'string', format: 'uuid' },
-    email: { type: 'string', format: 'email' },
+    email: { type: 'string' },
+    cpf: { type: ['string', 'null'] },
     fullName: { type: 'string' },
     phone: { type: ['string', 'null'] },
     avatarUrl: { type: ['string', 'null'] },
@@ -101,9 +102,9 @@ const validationErrorResponseSchema = {
 
 const createUserBodySchema = {
   type: 'object',
-  required: ['email', 'password', 'fullName', 'roleIds'],
+  required: ['cpf', 'password', 'fullName', 'roleIds'],
   properties: {
-    email: { type: 'string', format: 'email', maxLength: 255 },
+    cpf: { type: 'string', minLength: 11, maxLength: 14 },
     password: { type: 'string', minLength: 6, maxLength: 72 },
     fullName: { type: 'string', minLength: 1, maxLength: 255 },
     phone: { type: ['string', 'null'], maxLength: 20 },

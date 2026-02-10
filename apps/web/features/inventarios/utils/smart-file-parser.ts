@@ -55,6 +55,8 @@ export interface FileAnalysis {
   previewRows: string[][]
   /** Linhas raw (todas) */
   allRows: string[][]
+  /** Se os valores de custo estão em centavos (inteiros sem decimal) */
+  custoInCentavos: boolean
 }
 
 // Aliases conhecidos para cada campo (português e inglês, abreviações comuns)
@@ -471,6 +473,11 @@ export async function analyzeFile(file: File): Promise<FileAnalysis> {
   // Resolve conflitos de mapeamento (dois campos mapeados para o mesmo campo)
   resolveConflicts(columns)
 
+  // Detecta se custo está em centavos
+  const custoCol = columns.find((c) => c.mappedField === "custo")
+  const custoInCentavos =
+    custoCol ? detectCentavosFormat(dataRows, custoCol.index) : false
+
   return {
     fileName: file.name,
     fileType,
@@ -483,6 +490,7 @@ export async function analyzeFile(file: File): Promise<FileAnalysis> {
     columns,
     previewRows: dataRows.slice(0, 5),
     allRows: dataRows,
+    custoInCentavos,
   }
 }
 
@@ -512,6 +520,24 @@ function resolveConflicts(columns: ColumnMapping[]): void {
 }
 
 /**
+ * Detecta se os valores de uma coluna numérica estão em centavos
+ * (inteiros sem separador decimal, ex: 3796 = R$ 37,96)
+ */
+export function detectCentavosFormat(
+  rows: string[][],
+  colIndex: number
+): boolean {
+  const rawValues = rows
+    .map((r) => (r[colIndex] || "").trim())
+    .filter((v) => v.length > 0 && v !== "0")
+
+  if (rawValues.length === 0) return false
+
+  // Se TODOS os valores são inteiros puros (sem , ou .), provavelmente estão em centavos
+  return rawValues.every((v) => /^\d+$/.test(v))
+}
+
+/**
  * Converte as linhas do arquivo em objetos de produto usando o mapeamento
  */
 export function convertRowsToProducts(
@@ -526,6 +552,11 @@ export function convertRowsToProducts(
   saldo?: number
   custo?: number
 }> {
+  // Detecta se custo está em centavos (inteiros sem decimal)
+  const custoCol = columns.find((c) => c.mappedField === "custo")
+  const custoInCentavos =
+    custoCol ? detectCentavosFormat(rows, custoCol.index) : false
+
   const products = []
 
   for (const row of rows) {
@@ -549,9 +580,14 @@ export function convertRowsToProducts(
           product[col.mappedField] = parseDateValue(rawValue)
           break
         case "saldo":
-        case "custo":
           product[col.mappedField] = parseNumberValue(rawValue)
           break
+        case "custo": {
+          let value = parseNumberValue(rawValue)
+          if (custoInCentavos) value = value / 100
+          product[col.mappedField] = value
+          break
+        }
       }
     }
 

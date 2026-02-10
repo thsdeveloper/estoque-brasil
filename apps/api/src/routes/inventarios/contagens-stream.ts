@@ -30,6 +30,7 @@ interface OperatorStats {
   ultima_contagem: string;
   setor_atual_id: number | null;
   setor_atual_descricao: string;
+  avg_bip_seconds: number;
 }
 
 export default async function contagensStreamRoutes(fastify: FastifyInstance) {

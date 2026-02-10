@@ -14,6 +14,7 @@ export interface InventarioProdutoPaginationParams {
 export interface IInventarioProdutoRepository {
   create(produto: InventarioProduto): Promise<InventarioProduto>;
   createMany(produtos: InventarioProduto[]): Promise<InventarioProduto[]>;
+  createManyBulk(produtos: InventarioProduto[]): Promise<number>;
   findById(id: number): Promise<InventarioProduto | null>;
   findByCodigoBarras(idInventario: number, codigoBarras: string): Promise<InventarioProduto | null>;
   findByCodigoInterno(idInventario: number, codigoInterno: string): Promise<InventarioProduto | null>;

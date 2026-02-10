@@ -32,35 +32,35 @@ export function AuditLogsFilters({ onFilter, onClear }: AuditLogsFiltersProps) {
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-4 p-4 bg-zinc-900 rounded-lg border border-zinc-800">
+    <div className="flex flex-wrap items-end gap-4 p-4 bg-muted/30 rounded-lg border border-border">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="acao" className="text-sm text-zinc-400">Acao</Label>
+        <Label htmlFor="acao" className="text-sm text-muted-foreground">Acao</Label>
         <Input
           id="acao"
           value={acao}
           onChange={(e) => setAcao(e.target.value)}
           placeholder="Ex: ABERTURA_SETOR"
-          className="w-48 bg-zinc-800 border-zinc-700"
+          className="w-48 bg-background border-border"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="dataInicio" className="text-sm text-zinc-400">Data Inicio</Label>
+        <Label htmlFor="dataInicio" className="text-sm text-muted-foreground">Data Inicio</Label>
         <Input
           id="dataInicio"
           type="datetime-local"
           value={dataInicio}
           onChange={(e) => setDataInicio(e.target.value)}
-          className="w-52 bg-zinc-800 border-zinc-700"
+          className="w-52 bg-background border-border"
         />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="dataFim" className="text-sm text-zinc-400">Data Fim</Label>
+        <Label htmlFor="dataFim" className="text-sm text-muted-foreground">Data Fim</Label>
         <Input
           id="dataFim"
           type="datetime-local"
           value={dataFim}
           onChange={(e) => setDataFim(e.target.value)}
-          className="w-52 bg-zinc-800 border-zinc-700"
+          className="w-52 bg-background border-border"
         />
       </div>
       <div className="flex gap-2">

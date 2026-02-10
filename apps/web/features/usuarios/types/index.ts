@@ -19,10 +19,10 @@ export { SYSTEM_ROLES, PERMISSION_RESOURCES } from "@estoque-brasil/types"
 
 // Zod schema for user creation form
 export const createUserFormSchema = z.object({
-  email: z
-    .string({ required_error: "Email é obrigatório" })
-    .email("Email inválido")
-    .max(255, "Email deve ter no máximo 255 caracteres"),
+  cpf: z
+    .string({ required_error: "CPF é obrigatório" })
+    .min(11, "CPF inválido")
+    .max(14, "CPF inválido"),
   password: z
     .string({ required_error: "Senha é obrigatória" })
     .min(6, "Senha deve ter no mínimo 6 caracteres")

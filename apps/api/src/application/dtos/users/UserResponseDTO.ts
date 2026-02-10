@@ -18,6 +18,7 @@ export interface RoleResponseDTO {
 export interface UserResponseDTO {
   id: string;
   email: string;
+  cpf: string | null;
   fullName: string;
   phone: string | null;
   avatarUrl: string | null;
@@ -68,6 +69,7 @@ export function toUserResponseDTO(user: User): UserResponseDTO {
   return {
     id: user.id!,
     email: user.email,
+    cpf: user.cpf,
     fullName: user.fullName,
     phone: user.phone,
     avatarUrl: user.avatarUrl,

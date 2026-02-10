@@ -296,7 +296,7 @@ export const inventariosApi = {
       saldo?: number
       custo?: number
     }>
-  ): Promise<{ importados: number; erros: { linha: number; erro: string }[]; produtos: any[] }> => {
+  ): Promise<{ importados: number; erros: { linha: number; erro: string }[] }> => {
     return apiClient.post(`/api/produtos/import`, { idInventario, produtos })
   },
 

@@ -5,12 +5,13 @@ import { registerSchema } from '../types';
 
 interface RegisterResponse {
   message: string;
-  email: string;
+  cpf: string;
 }
 
 export async function register(formData: FormData) {
   const validatedFields = registerSchema.safeParse({
-    email: formData.get('email'),
+    cpf: formData.get('cpf'),
+    fullName: formData.get('fullName'),
     password: formData.get('password'),
     confirmPassword: formData.get('confirmPassword'),
   });
@@ -19,10 +20,11 @@ export async function register(formData: FormData) {
     return { error: validatedFields.error.flatten().fieldErrors };
   }
 
-  const { email, password } = validatedFields.data;
+  const { cpf, fullName, password } = validatedFields.data;
 
   const { data, error } = await serverApiPost<RegisterResponse>('/auth/register', {
-    email,
+    cpf,
+    fullName,
     password,
   });
 
@@ -30,5 +32,5 @@ export async function register(formData: FormData) {
     return { error: error.message };
   }
 
-  return { success: true, email: data?.email };
+  return { success: true, cpf: data?.cpf };
 }

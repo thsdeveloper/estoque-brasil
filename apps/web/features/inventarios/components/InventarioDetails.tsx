@@ -11,8 +11,7 @@ import {
   CheckCircle2,
   XCircle,
   Pencil,
-  FileText,
-  FileOutput,
+  UserCheck,
 } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
@@ -199,6 +198,15 @@ export function InventarioDetails({ inventario }: InventarioDetailsProps) {
               value={`${inventario.minimoContagem} contagem${inventario.minimoContagem > 1 ? "s" : ""} por produto`}
               mono
             />
+            <DataRow
+              icon={UserCheck}
+              label="Líder de Equipe"
+              value={
+                inventario.liderNome
+                  ? inventario.liderNome
+                  : "Nenhum líder atribuído"
+              }
+            />
           </div>
         </div>
 
@@ -240,34 +248,6 @@ export function InventarioDetails({ inventario }: InventarioDetailsProps) {
             </div>
           </div>
 
-          {/* Templates card */}
-          <div className="rounded-xl border border-border bg-card">
-            <div className="border-b border-border px-5 py-3">
-              <h3 className="text-sm font-medium text-foreground">Templates</h3>
-            </div>
-            <div className="divide-y divide-border px-5">
-              <DataRow
-                icon={FileText}
-                label="Template de Importação"
-                value={
-                  inventario.idTemplate
-                    ? `Template #${inventario.idTemplate}`
-                    : "Nenhum template configurado"
-                }
-                mono={!!inventario.idTemplate}
-              />
-              <DataRow
-                icon={FileOutput}
-                label="Template de Exportação"
-                value={
-                  inventario.idTemplateExportacao
-                    ? `Template #${inventario.idTemplateExportacao}`
-                    : "Nenhum template configurado"
-                }
-                mono={!!inventario.idTemplateExportacao}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </div>

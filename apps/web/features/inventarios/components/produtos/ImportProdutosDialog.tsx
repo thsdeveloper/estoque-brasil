@@ -39,6 +39,7 @@ import {
   type ColumnMapping,
   analyzeFile,
   convertRowsToProducts,
+  detectCentavosFormat,
   FIELD_LABELS,
 } from "../../utils/smart-file-parser"
 import { inventariosApi } from "../../api/inventarios-api"
@@ -126,13 +127,20 @@ export function ImportProdutosDialog({
   const handleColumnChange = useCallback(
     (columnIndex: number, field: ProductField) => {
       if (!analysis) return
+      const newColumns = analysis.columns.map((col) =>
+        col.index === columnIndex
+          ? { ...col, mappedField: field, confidence: 100 }
+          : col
+      )
+      const custoCol = newColumns.find((c) => c.mappedField === "custo")
+      const custoInCentavos =
+        custoCol
+          ? detectCentavosFormat(analysis.allRows, custoCol.index)
+          : false
       setAnalysis({
         ...analysis,
-        columns: analysis.columns.map((col) =>
-          col.index === columnIndex
-            ? { ...col, mappedField: field, confidence: 100 }
-            : col
-        ),
+        columns: newColumns,
+        custoInCentavos,
       })
     },
     [analysis]
@@ -146,11 +154,10 @@ export function ImportProdutosDialog({
     if (!analysis) return
 
     setStep("importing")
-    setImportProgress(10)
+    setImportProgress(0)
 
     try {
       const products = convertRowsToProducts(analysis.allRows, analysis.columns)
-      setImportProgress(30)
 
       if (products.length === 0) {
         setImportResult({ importados: 0, erros: [{ linha: 0, erro: "Nenhum produto válido encontrado no arquivo" }] })
@@ -158,14 +165,33 @@ export function ImportProdutosDialog({
         return
       }
 
-      setImportProgress(50)
+      const CHUNK_SIZE = 1000
+      const totalChunks = Math.ceil(products.length / CHUNK_SIZE)
+      let totalImportados = 0
+      const todosErros: { linha: number; erro: string }[] = []
 
-      const result = await inventariosApi.importProdutos(inventarioId, products)
-      setImportProgress(100)
-      setImportResult(result)
+      for (let i = 0; i < totalChunks; i++) {
+        const chunk = products.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE)
+        const offsetLinha = i * CHUNK_SIZE
+
+        try {
+          const result = await inventariosApi.importProdutos(inventarioId, chunk)
+          totalImportados += result.importados
+          for (const erro of result.erros) {
+            todosErros.push({ linha: erro.linha + offsetLinha, erro: erro.erro })
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : (err as any)?.message || "Erro ao importar chunk"
+          todosErros.push({ linha: offsetLinha + 1, erro: `Falha no lote ${i + 1}: ${msg}` })
+        }
+
+        setImportProgress(Math.round(((i + 1) / totalChunks) * 100))
+      }
+
+      setImportResult({ importados: totalImportados, erros: todosErros })
       setStep("result")
 
-      if (result.importados > 0) {
+      if (totalImportados > 0) {
         onSuccess()
       }
     } catch (err) {
@@ -435,16 +461,34 @@ export function ImportProdutosDialog({
                         </td>
                         {analysis.columns
                           .filter((c) => c.mappedField !== "ignorar")
-                          .map((col) => (
-                            <td key={col.index} className="p-2 max-w-48 truncate">
-                              {row[col.index] || "-"}
-                            </td>
-                          ))}
+                          .map((col) => {
+                            let displayValue = row[col.index] || "-"
+                            if (
+                              col.mappedField === "custo" &&
+                              analysis.custoInCentavos &&
+                              displayValue !== "-"
+                            ) {
+                              const num = Number(displayValue) / 100
+                              displayValue = num.toFixed(2).replace(".", ",")
+                            }
+                            return (
+                              <td key={col.index} className="p-2 max-w-48 truncate">
+                                {displayValue}
+                              </td>
+                            )
+                          })}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {analysis.custoInCentavos && (
+                <div className="flex items-start gap-2 p-3 rounded-md bg-amber-50 text-amber-700 text-sm">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                  Valores de custo detectados em centavos (ex: 3796 = R$ 37,96). Os valores serão divididos por 100 automaticamente.
+                </div>
+              )}
 
               <div className="flex items-center gap-2 p-3 rounded-md bg-blue-50 text-blue-700 text-sm">
                 <FileSpreadsheet className="h-4 w-4 shrink-0" />
@@ -460,7 +504,7 @@ export function ImportProdutosDialog({
               <div className="text-center">
                 <p className="text-sm font-medium">Importando produtos...</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Isso pode demorar alguns segundos
+                  {importProgress}% concluído
                 </p>
               </div>
               <div className="w-64">
