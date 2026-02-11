@@ -160,8 +160,8 @@ export function useContagem(): UseContagemReturn {
           return { success: false, produto, needsExtra: 'lot' as const };
         }
 
-        // Check if already scanned and not in multiple mode
-        if (!isMultipleMode) {
+        // Check if already scanned and in multiple mode (ask quantity)
+        if (isMultipleMode) {
           const alreadyScanned = scannedProducts.find(
             (sp) => sp.produto.id === produto!.id,
           );
