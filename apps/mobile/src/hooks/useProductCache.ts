@@ -68,6 +68,10 @@ export function useProductCache(idInventario: number | null) {
     return codigoInternoIndex.get(code) ?? null;
   }, []);
 
+  const lookupByCodigo = useCallback((code: string): Produto | null => {
+    return barcodeIndex.get(code) ?? codigoInternoIndex.get(code) ?? null;
+  }, []);
+
   const reloadCache = useCallback(() => {
     if (idInventario) {
       cachedInventarioId = null;
@@ -82,6 +86,7 @@ export function useProductCache(idInventario: number | null) {
     error,
     lookupByBarcode,
     lookupByCodigoInterno,
+    lookupByCodigo,
     reloadCache,
   };
 }

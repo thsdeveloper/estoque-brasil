@@ -9,6 +9,7 @@ export interface InventarioProdutoPaginationParams {
   divergente?: boolean;
   codigoBarras?: string;
   codigoInterno?: string;
+  codigo?: string;
 }
 
 export interface IInventarioProdutoRepository {

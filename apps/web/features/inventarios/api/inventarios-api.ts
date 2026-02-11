@@ -359,6 +359,24 @@ export const inventariosApi = {
   },
 
   // ====== ACOES DE INVENTARIO ======
+  fecharInventario: async (id: number | string, data?: { justificativa?: string }) => {
+    return apiClient.patch<{ id: number; status: string; fechadoEm: string; fechadoPor: string; justificativaFechamento: string | null }>(
+      `/api/inventarios/${id}/fechar`,
+      data || {}
+    )
+  },
+
+  getStatusFechamento: async (id: number | string) => {
+    return apiClient.get<{
+      podeFechar: boolean
+      bloqueios: {
+        setoresNaoAbertos: string[]
+        setoresNaoFechados: string[]
+        divergenciasPendentes: number
+      }
+    }>(`/api/inventarios/${id}/status-fechamento`)
+  },
+
   reabrirInventario: async (id: number) => {
     return apiClient.post(`/api/inventarios/${id}/reabrir`, {})
   },

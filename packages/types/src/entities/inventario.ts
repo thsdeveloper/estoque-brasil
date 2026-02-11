@@ -10,6 +10,9 @@ export interface Inventario {
   validade: boolean;
   ativo: boolean;
   lider: string | null; // UUID of team leader
+  fechadoEm?: string | null;
+  fechadoPor?: string | null;
+  justificativaFechamento?: string | null;
   // Enriched fields (populated in list queries)
   nomeLoja?: string | null;
   cnpjLoja?: string | null;

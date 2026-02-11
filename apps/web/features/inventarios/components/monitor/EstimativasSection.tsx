@@ -35,7 +35,7 @@ export function EstimativasSection({ metrics, loading }: EstimativasSectionProps
         value={metrics.estimativa}
         icon={Boxes}
         variant="blue"
-        subtitle="Saldo total no sistema"
+        subtitle="Saldo por código de barras"
         loading={loading}
       />
       <MetricCard

@@ -148,7 +148,7 @@ export class SupabaseInventarioProdutoRepository implements IInventarioProdutoRe
   }
 
   async findAll(params: InventarioProdutoPaginationParams): Promise<PaginatedResult<InventarioProduto>> {
-    const { page, limit, idInventario, search, divergente, codigoBarras, codigoInterno } = params;
+    const { page, limit, idInventario, search, divergente, codigoBarras, codigoInterno, codigo } = params;
     const offset = (page - 1) * limit;
 
     let countQuery = this.supabase
@@ -167,6 +167,9 @@ export class SupabaseInventarioProdutoRepository implements IInventarioProdutoRe
     }
     if (codigoInterno) {
       countQuery = countQuery.eq('codigo_interno', codigoInterno);
+    }
+    if (codigo) {
+      countQuery = countQuery.or(`codigo_barras.eq.${codigo},codigo_interno.eq.${codigo}`);
     }
 
     const { count, error: countError } = await countQuery;
@@ -193,6 +196,9 @@ export class SupabaseInventarioProdutoRepository implements IInventarioProdutoRe
     }
     if (codigoInterno) {
       dataQuery = dataQuery.eq('codigo_interno', codigoInterno);
+    }
+    if (codigo) {
+      dataQuery = dataQuery.or(`codigo_barras.eq.${codigo},codigo_interno.eq.${codigo}`);
     }
 
     const { data, error } = await dataQuery

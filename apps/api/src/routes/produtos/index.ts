@@ -113,6 +113,7 @@ export default async function produtoRoutes(fastify: FastifyInstance) {
             divergente: { type: 'boolean', description: 'Filtrar por divergentes' },
             codigoBarras: { type: 'string', description: 'Filtrar por código de barras' },
             codigoInterno: { type: 'string', description: 'Filtrar por código interno' },
+            codigo: { type: 'string', description: 'Busca por EAN ou código interno' },
           },
         },
         response: {

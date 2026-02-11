@@ -23,7 +23,7 @@ export function SkuSection({ metrics, loading }: SkuSectionProps) {
         value={metrics.quantidadeSkus}
         icon={Package}
         variant="green"
-        subtitle="Produtos com saldo ≥ 1"
+        subtitle="Códigos de barras com saldo positivo"
         loading={loading}
       />
       <MetricCard
@@ -31,7 +31,7 @@ export function SkuSection({ metrics, loading }: SkuSectionProps) {
         value={metrics.skusPendentes}
         icon={Clock}
         variant="green"
-        subtitle="Aguardando contagem"
+        subtitle="Barcodes sem contagem"
         loading={loading}
       />
       <MetricCard
@@ -39,7 +39,7 @@ export function SkuSection({ metrics, loading }: SkuSectionProps) {
         value={metrics.skusSemDivergencia}
         icon={CheckCircle}
         variant="green"
-        subtitle="Contado = Saldo"
+        subtitle="Barcodes: contado = saldo"
         loading={loading}
       />
     </MetricSection>

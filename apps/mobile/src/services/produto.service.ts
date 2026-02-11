@@ -25,6 +25,16 @@ export const produtoService = {
     return data.data.length > 0 ? data.data[0] : null;
   },
 
+  async buscarPorCodigo(
+    idInventario: number,
+    codigo: string,
+  ): Promise<Produto | null> {
+    const { data } = await api.get<PaginatedResponse<Produto>>('/produtos', {
+      params: { idInventario, codigo, limit: 1 },
+    });
+    return data.data.length > 0 ? data.data[0] : null;
+  },
+
   async buscarPorCodigoInterno(
     idInventario: number,
     codigoInterno: string,

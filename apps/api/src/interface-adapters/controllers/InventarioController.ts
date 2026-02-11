@@ -7,12 +7,14 @@ import { DeleteInventarioUseCase } from '../../application/use-cases/inventario/
 import { ListInventariosUseCase } from '../../application/use-cases/inventario/ListInventariosUseCase.js';
 import { FinalizarInventarioUseCase } from '../../application/use-cases/inventario/FinalizarInventarioUseCase.js';
 import { ReabrirInventarioUseCase } from '../../application/use-cases/inventario/ReabrirInventarioUseCase.js';
+import { FecharInventarioUseCase } from '../../application/use-cases/inventario/FecharInventarioUseCase.js';
+import { GetStatusFechamentoUseCase } from '../../application/use-cases/inventario/GetStatusFechamentoUseCase.js';
 import { DomainError } from '../../domain/errors/DomainError.js';
 import { IInventarioRepository } from '../../domain/repositories/IInventarioRepository.js';
 import { ISetorRepository } from '../../domain/repositories/ISetorRepository.js';
 import { IAuditLogRepository } from '../../domain/repositories/IAuditLogRepository.js';
 import { AuditService } from '../../application/services/AuditService.js';
-import { createInventarioSchema, updateInventarioSchema } from '../../application/dtos/inventario/InventarioDTO.js';
+import { createInventarioSchema, updateInventarioSchema, fecharInventarioBodySchema } from '../../application/dtos/inventario/InventarioDTO.js';
 import { ListDivergenciasUseCase } from '../../application/use-cases/inventario/ListDivergenciasUseCase.js';
 import { listDivergenciasQuerySchema } from '../../application/dtos/inventario/DivergenciaDTO.js';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -25,6 +27,8 @@ export class InventarioController {
   private readonly listInventariosUseCase: ListInventariosUseCase;
   private readonly finalizarInventarioUseCase: FinalizarInventarioUseCase;
   private readonly reabrirInventarioUseCase: ReabrirInventarioUseCase;
+  private readonly fecharInventarioUseCase: FecharInventarioUseCase | null;
+  private readonly getStatusFechamentoUseCase: GetStatusFechamentoUseCase | null;
   private readonly listDivergenciasUseCase: ListDivergenciasUseCase | null;
   private readonly supabase: SupabaseClient | undefined;
 
@@ -45,6 +49,12 @@ export class InventarioController {
       ? new FinalizarInventarioUseCase(inventarioRepository, setorRepository, auditService)
       : new FinalizarInventarioUseCase(inventarioRepository, { findByInventarioWithStatus: async () => [] } as any, auditService);
     this.reabrirInventarioUseCase = new ReabrirInventarioUseCase(inventarioRepository, auditService);
+    this.fecharInventarioUseCase = (supabase && setorRepository)
+      ? new FecharInventarioUseCase(inventarioRepository, setorRepository, supabase, auditService)
+      : null;
+    this.getStatusFechamentoUseCase = this.fecharInventarioUseCase
+      ? new GetStatusFechamentoUseCase(inventarioRepository, this.fecharInventarioUseCase)
+      : null;
     this.listDivergenciasUseCase = supabase ? new ListDivergenciasUseCase(supabase) : null;
   }
 
@@ -166,6 +176,53 @@ export class InventarioController {
       const idInventario = parseInt(request.params.id, 10);
       const query = listDivergenciasQuerySchema.parse(request.query);
       const result = await this.listDivergenciasUseCase.execute(idInventario, query);
+      reply.send(result);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async fechar(
+    request: FastifyRequest<{ Params: { id: string }; Body: { justificativa?: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      if (!this.fecharInventarioUseCase) {
+        reply.status(500).send({ code: 'INTERNAL_ERROR', message: 'Fechamento não configurado' });
+        return;
+      }
+      const id = parseInt(request.params.id, 10);
+      const userId = (request as any).user?.sub;
+      const body = fecharInventarioBodySchema.parse(request.body || {});
+      const isAdmin = await this.isUserAdmin(userId);
+      const ipAddress = request.ip;
+      const userAgent = request.headers['user-agent'];
+
+      const result = await this.fecharInventarioUseCase.execute({
+        inventarioId: id,
+        userId,
+        isAdmin,
+        justificativa: body.justificativa,
+        ipAddress,
+        userAgent,
+      });
+      reply.send(result);
+    } catch (error) {
+      this.handleError(error, reply);
+    }
+  }
+
+  async getStatusFechamento(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    try {
+      if (!this.getStatusFechamentoUseCase) {
+        reply.status(500).send({ code: 'INTERNAL_ERROR', message: 'Status fechamento não configurado' });
+        return;
+      }
+      const id = parseInt(request.params.id, 10);
+      const result = await this.getStatusFechamentoUseCase.execute(id);
       reply.send(result);
     } catch (error) {
       this.handleError(error, reply);

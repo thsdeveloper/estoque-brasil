@@ -263,6 +263,46 @@ export class InventarioNaoFinalizadoError extends DomainError {
   }
 }
 
+// Fechamento Errors
+export interface FechamentoBloqueios {
+  setoresNaoAbertos?: string[];
+  setoresNaoFechados?: string[];
+  divergenciasPendentes?: number;
+}
+
+export class InventarioNaoPodeFecharError extends DomainError {
+  readonly code = 'INVENTARIO_NAO_PODE_FECHAR';
+  readonly statusCode = 422;
+
+  readonly detalhes: FechamentoBloqueios;
+
+  constructor(detalhes: FechamentoBloqueios) {
+    const msgs: string[] = [];
+    if (detalhes.setoresNaoAbertos?.length) msgs.push(`${detalhes.setoresNaoAbertos.length} setor(es) nunca aberto(s)`);
+    if (detalhes.setoresNaoFechados?.length) msgs.push(`${detalhes.setoresNaoFechados.length} setor(es) não fechado(s)`);
+    if (detalhes.divergenciasPendentes) msgs.push(`${detalhes.divergenciasPendentes} divergência(s) pendente(s)`);
+    super(`Inventário não pode ser fechado: ${msgs.join(', ')}`);
+    this.detalhes = detalhes;
+  }
+
+  toJSON() {
+    return {
+      code: this.code,
+      message: this.message,
+      detalhes: this.detalhes,
+    };
+  }
+}
+
+export class JustificativaObrigatoriaError extends DomainError {
+  readonly code = 'JUSTIFICATIVA_OBRIGATORIA';
+  readonly statusCode = 400;
+
+  constructor() {
+    super('Justificativa é obrigatória para fechar inventário com pendências (mínimo 10 caracteres)');
+  }
+}
+
 // CNPJ Errors
 export class InvalidCNPJError extends DomainError {
   readonly code = 'INVALID_CNPJ';

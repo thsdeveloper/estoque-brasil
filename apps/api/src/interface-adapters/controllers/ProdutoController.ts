@@ -75,7 +75,7 @@ export class ProdutoController {
   }
 
   async list(
-    request: FastifyRequest<{ Querystring: { page?: string; limit?: string; idInventario: string; search?: string; divergente?: string; codigoBarras?: string; codigoInterno?: string } }>,
+    request: FastifyRequest<{ Querystring: { page?: string; limit?: string; idInventario: string; search?: string; divergente?: string; codigoBarras?: string; codigoInterno?: string; codigo?: string } }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
@@ -88,6 +88,7 @@ export class ProdutoController {
         : undefined;
       const codigoBarras = request.query.codigoBarras || undefined;
       const codigoInterno = request.query.codigoInterno || undefined;
+      const codigo = request.query.codigo || undefined;
 
       const result = await this.listProdutosUseCase.execute({
         page,
@@ -97,6 +98,7 @@ export class ProdutoController {
         divergente,
         codigoBarras,
         codigoInterno,
+        codigo,
       });
       reply.send(result);
     } catch (error) {

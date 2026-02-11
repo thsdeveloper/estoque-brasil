@@ -20,13 +20,11 @@ interface UseContagemReturn {
   activeSetor: Setor | null;
   scannedProducts: ScannedProduct[];
   totalContagens: number;
-  searchMode: 'ean' | 'interno';
   isMultipleMode: boolean;
   productCacheReady: boolean;
   productCacheLoading: boolean;
   syncStatus: SyncStatus;
   setActiveSetor: (setor: Setor | null) => void;
-  setSearchMode: (mode: 'ean' | 'interno') => void;
   setIsMultipleMode: (v: boolean) => void;
   submitBarcode: (
     code: string,
@@ -52,14 +50,12 @@ export function useContagem(): UseContagemReturn {
   const [activeSetor, setActiveSectorState] = useState<Setor | null>(null);
   const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
   const [totalContagens, setTotalContagens] = useState(0);
-  const [searchMode, setSearchMode] = useState<'ean' | 'interno'>('ean');
   const [isMultipleMode, setIsMultipleMode] = useState(false);
 
   const {
     isLoading: productCacheLoading,
     isReady: productCacheReady,
-    lookupByBarcode,
-    lookupByCodigoInterno,
+    lookupByCodigo,
   } = useProductCache(inventario?.id ?? null);
 
   const { fireAndForget, syncStatus, flushNow, retryFailed } = useContagemQueue();
@@ -124,22 +120,16 @@ export function useContagem(): UseContagemReturn {
       }
 
       try {
-        // Try cache first, fallback to API
+        // Try cache first (EAN then codigo interno), fallback to API
         let produto: Produto | null = null;
 
         if (productCacheReady) {
-          produto =
-            searchMode === 'ean'
-              ? lookupByBarcode(code)
-              : lookupByCodigoInterno(code);
+          produto = lookupByCodigo(code);
         }
 
         // Fallback to API if not in cache (product added after cache load)
         if (!produto) {
-          produto =
-            searchMode === 'ean'
-              ? await produtoService.buscarPorBarcode(inventario.id, code)
-              : await produtoService.buscarPorCodigoInterno(inventario.id, code);
+          produto = await produtoService.buscarPorCodigo(inventario.id, code);
         }
 
         if (!produto) {
@@ -218,12 +208,10 @@ export function useContagem(): UseContagemReturn {
     [
       inventario,
       activeSetor,
-      searchMode,
       isMultipleMode,
       scannedProducts,
       productCacheReady,
-      lookupByBarcode,
-      lookupByCodigoInterno,
+      lookupByCodigo,
       fireAndForget,
       playSuccess,
       playError,
@@ -240,13 +228,11 @@ export function useContagem(): UseContagemReturn {
     activeSetor,
     scannedProducts,
     totalContagens,
-    searchMode,
     isMultipleMode,
     productCacheReady,
     productCacheLoading,
     syncStatus,
     setActiveSetor,
-    setSearchMode,
     setIsMultipleMode,
     submitBarcode,
     clearScanned,

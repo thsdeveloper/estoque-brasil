@@ -9,6 +9,7 @@ export interface ListProdutosInput {
   divergente?: boolean;
   codigoBarras?: string;
   codigoInterno?: string;
+  codigo?: string;
 }
 
 export class ListProdutosUseCase {
@@ -26,6 +27,7 @@ export class ListProdutosUseCase {
       divergente: input.divergente,
       codigoBarras: input.codigoBarras,
       codigoInterno: input.codigoInterno,
+      codigo: input.codigo,
     };
 
     const result = await this.produtoRepository.findAll(params);

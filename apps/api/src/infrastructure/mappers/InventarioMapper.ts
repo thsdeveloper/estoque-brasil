@@ -11,6 +11,9 @@ export interface InventarioDbRow {
   validade: boolean;
   ativo: boolean;
   lider: string | null;
+  fechado_em: string | null;
+  fechado_por: string | null;
+  justificativa_fechamento: string | null;
   created_at: string;
   updated_at: string;
   // Enriched nested data from joins
@@ -36,6 +39,9 @@ export interface InventarioInsertRow {
   validade?: boolean;
   ativo?: boolean;
   lider?: string | null;
+  fechado_em?: string | null;
+  fechado_por?: string | null;
+  justificativa_fechamento?: string | null;
 }
 
 export class InventarioMapper {
@@ -51,6 +57,9 @@ export class InventarioMapper {
       validade: row.validade,
       ativo: row.ativo,
       lider: row.lider,
+      fechadoEm: row.fechado_em ? new Date(row.fechado_em) : null,
+      fechadoPor: row.fechado_por,
+      justificativaFechamento: row.justificativa_fechamento,
       nomeLoja: row.lojas?.nome ?? null,
       cnpjLoja: row.lojas?.cnpj ?? null,
       nomeCliente: row.lojas?.clients?.nome ?? null,
@@ -69,6 +78,9 @@ export class InventarioMapper {
       validade: inventario.validade,
       ativo: inventario.ativo,
       lider: inventario.lider,
+      fechado_em: inventario.fechadoEm?.toISOString() ?? null,
+      fechado_por: inventario.fechadoPor,
+      justificativa_fechamento: inventario.justificativaFechamento,
     };
   }
 

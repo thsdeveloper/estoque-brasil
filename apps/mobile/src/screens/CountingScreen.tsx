@@ -36,13 +36,11 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
     activeSetor,
     scannedProducts,
     totalContagens,
-    searchMode,
     isMultipleMode,
     productCacheReady,
     productCacheLoading,
     syncStatus,
     setActiveSetor,
-    setSearchMode,
     setIsMultipleMode,
     submitBarcode,
     clearScanned,
@@ -349,41 +347,8 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
           </Pressable>
         )}
 
-        {/* Search Mode Toggle */}
+        {/* Multi mode toggle */}
         <View style={styles.toggleRow}>
-          <Pressable
-            style={[
-              styles.toggleBtn,
-              searchMode === 'ean' && styles.toggleBtnActive,
-            ]}
-            onPress={() => setSearchMode('ean')}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                searchMode === 'ean' && styles.toggleTextActive,
-              ]}
-            >
-              EAN
-            </Text>
-          </Pressable>
-          <Pressable
-            style={[
-              styles.toggleBtn,
-              searchMode === 'interno' && styles.toggleBtnActive,
-            ]}
-            onPress={() => setSearchMode('interno')}
-          >
-            <Text
-              style={[
-                styles.toggleText,
-                searchMode === 'interno' && styles.toggleTextActive,
-              ]}
-            >
-              Cod. Interno
-            </Text>
-          </Pressable>
-
           <View style={styles.switchRow}>
             <Text style={styles.switchLabel}>Multi</Text>
             <Switch
@@ -400,11 +365,7 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
           <ScannerInput
             inputRef={productScanner.inputRef}
             value={productScanner.value}
-            placeholder={
-              searchMode === 'ean'
-                ? 'Escanear codigo de barras'
-                : 'Escanear codigo interno'
-            }
+            placeholder="Escanear ou digitar codigo"
             onChangeText={productScanner.onChangeText}
             onSubmitEditing={productScanner.onSubmitEditing}
             showSoftInputOnFocus={productScanner.showSoftInputOnFocus}
@@ -556,31 +517,13 @@ const styles = StyleSheet.create({
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     paddingHorizontal: spacing.lg,
     gap: spacing.sm,
   },
-  toggleBtn: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surfaceLight,
-  },
-  toggleBtnActive: {
-    backgroundColor: colors.primary,
-  },
-  toggleText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  toggleTextActive: {
-    color: colors.text,
-  },
   switchRow: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
     gap: spacing.xs,
   },
   switchLabel: {

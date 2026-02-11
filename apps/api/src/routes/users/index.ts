@@ -71,6 +71,10 @@ const permissionsResponseSchema = {
         },
       },
     },
+    roles: {
+      type: 'array',
+      items: { type: 'string' },
+    },
   },
 };
 
