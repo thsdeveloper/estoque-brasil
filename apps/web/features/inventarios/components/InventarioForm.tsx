@@ -139,7 +139,7 @@ export function InventarioForm({
     idEmpresa: inventario?.idEmpresa || preSelectedEmpresaId || 0,
     dataInicio: formatDateForInput(inventario?.dataInicio),
     dataTermino: formatDateForInput(inventario?.dataTermino) || null,
-    minimoContagem: inventario?.minimoContagem || 1,
+    minimoContagem: inventario?.minimoContagem ?? 0,
     lote: inventario?.lote ?? false,
     validade: inventario?.validade ?? false,
     ativo: inventario?.ativo ?? true,
@@ -330,7 +330,7 @@ export function InventarioForm({
                   <FormControl>
                     <Input
                       type="number"
-                      min={1}
+                      min={0}
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />

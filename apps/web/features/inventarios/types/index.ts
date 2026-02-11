@@ -25,7 +25,7 @@ export const inventarioFormSchema = z.object({
   idEmpresa: z.number(),
   dataInicio: z.string().min(1, "Data de inicio e obrigatoria"),
   dataTermino: z.string().nullable().optional(),
-  minimoContagem: z.number().min(1, "Minimo de contagem deve ser pelo menos 1"),
+  minimoContagem: z.number().min(0, "Minimo de contagem nao pode ser negativo"),
   lote: z.boolean(),
   validade: z.boolean(),
   ativo: z.boolean(),

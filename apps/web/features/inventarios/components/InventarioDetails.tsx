@@ -1,17 +1,18 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Building2,
   Store,
   Calendar,
   Hash,
-  Package,
   Clock,
   CheckCircle2,
   XCircle,
   Pencil,
   UserCheck,
+  ShieldX,
 } from "lucide-react"
 import type { Inventario } from "@estoque-brasil/types"
 import { Button } from "@/shared/components/ui/button"
@@ -24,6 +25,7 @@ import {
 import { usePermissions } from "@/features/usuarios/hooks/usePermissions"
 import { useLojas } from "@/features/lojas/hooks/useLojas"
 import { useEmpresas } from "@/features/empresas/hooks/useEmpresas"
+import { FecharInventarioButton } from "./FecharInventarioButton"
 
 interface InventarioDetailsProps {
   inventario: Inventario
@@ -102,11 +104,13 @@ const RESTRICTION_MESSAGE =
   "Líder de coleta não pode editar/excluir inventários que já possuem contagens."
 
 export function InventarioDetails({ inventario }: InventarioDetailsProps) {
+  const router = useRouter()
+
   // Permissions
   const { hasRole, canUpdate } = usePermissions()
   const isLiderColeta = hasRole("lider_coleta")
-  const canEditInventario = canUpdate("inventarios")
-  const editDisabled = !canEditInventario || (isLiderColeta && !!inventario.temContagens)
+  const canUpdateInventario = canUpdate("inventarios")
+  const editDisabled = !canUpdateInventario || (isLiderColeta && !!inventario.temContagens)
 
   // Fetch related data
   const { lojas } = useLojas({ limit: 100 })
@@ -195,7 +199,7 @@ export function InventarioDetails({ inventario }: InventarioDetailsProps) {
             <DataRow
               icon={Hash}
               label="Mínimo de Contagens"
-              value={`${inventario.minimoContagem} contagem${inventario.minimoContagem > 1 ? "s" : ""} por produto`}
+              value={inventario.minimoContagem > 0 ? `${inventario.minimoContagem} contagem${inventario.minimoContagem > 1 ? "s" : ""} por produto` : "Desativado"}
               mono
             />
             <DataRow
@@ -217,7 +221,7 @@ export function InventarioDetails({ inventario }: InventarioDetailsProps) {
             <div className="border-b border-border px-5 py-3">
               <h3 className="text-sm font-medium text-foreground">Status</h3>
             </div>
-            <div className="p-5">
+            <div className="p-5 space-y-4">
               <div className="flex items-center gap-3">
                 <StatusBadge active={inventario.ativo} />
                 <span className="text-sm text-muted-foreground">
@@ -226,6 +230,38 @@ export function InventarioDetails({ inventario }: InventarioDetailsProps) {
                     : "Este inventário foi finalizado"}
                 </span>
               </div>
+
+              {/* Fechamento info (when closed) */}
+              {!inventario.ativo && inventario.fechadoEm && (
+                <div className="rounded-lg border border-neutral-200 bg-neutral-50/50 p-3 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <ShieldX className="h-4 w-4 text-neutral-500" />
+                    <span className="text-sm font-medium text-neutral-700">
+                      Inventario Fechado
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Fechado em {formatDate(inventario.fechadoEm)}
+                  </p>
+                  {inventario.justificativaFechamento && (
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium">Justificativa:</span>{" "}
+                      {inventario.justificativaFechamento}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Fechar button (when active and user has permission) */}
+              {inventario.ativo && canUpdateInventario && (
+                <div className="pt-2 border-t border-border">
+                  <FecharInventarioButton
+                    inventarioId={inventario.id}
+                    ativo={inventario.ativo}
+                    onSuccess={() => router.refresh()}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

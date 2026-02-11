@@ -191,14 +191,6 @@ export function CountingScreen({ navigation, route }: CountingScreenProps) {
   };
 
   const handleCloseSetor = () => {
-    if (totalContagens < (inventario?.minimoContagem ?? 0)) {
-      playAttention();
-      Alert.alert(
-        'Atencao',
-        `Minimo de ${inventario?.minimoContagem} contagens necessarias. Atual: ${totalContagens}.`,
-      );
-      return;
-    }
     setShowCloseConfirm(true);
   };
 

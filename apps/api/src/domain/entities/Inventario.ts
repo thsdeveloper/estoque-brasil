@@ -11,6 +11,9 @@ export interface InventarioProps {
   validade?: boolean;
   ativo?: boolean;
   lider?: string | null;
+  fechadoEm?: Date | null;
+  fechadoPor?: string | null;
+  justificativaFechamento?: string | null;
   // Enriched fields (from joins)
   nomeLoja?: string | null;
   cnpjLoja?: string | null;
@@ -29,6 +32,9 @@ export class Inventario {
   private _validade: boolean;
   private _ativo: boolean;
   private _lider: string | null;
+  private _fechadoEm: Date | null;
+  private _fechadoPor: string | null;
+  private _justificativaFechamento: string | null;
   private _nomeLoja: string | null;
   private _cnpjLoja: string | null;
   private _nomeCliente: string | null;
@@ -38,13 +44,16 @@ export class Inventario {
     this._id = props.id;
     this._idLoja = props.idLoja;
     this._idEmpresa = props.idEmpresa;
-    this._minimoContagem = props.minimoContagem ?? 1;
+    this._minimoContagem = props.minimoContagem ?? 0;
     this._dataInicio = props.dataInicio;
     this._dataTermino = props.dataTermino ?? null;
     this._lote = props.lote ?? false;
     this._validade = props.validade ?? false;
     this._ativo = props.ativo ?? true;
     this._lider = props.lider ?? null;
+    this._fechadoEm = props.fechadoEm ?? null;
+    this._fechadoPor = props.fechadoPor ?? null;
+    this._justificativaFechamento = props.justificativaFechamento ?? null;
     this._nomeLoja = props.nomeLoja ?? null;
     this._cnpjLoja = props.cnpjLoja ?? null;
     this._nomeCliente = props.nomeCliente ?? null;
@@ -73,8 +82,8 @@ export class Inventario {
       throw new InvalidInventarioError('Data de término não pode ser anterior à data de início');
     }
 
-    if (props.minimoContagem !== undefined && props.minimoContagem < 1) {
-      throw new InvalidInventarioError('Mínimo de contagem deve ser pelo menos 1');
+    if (props.minimoContagem !== undefined && props.minimoContagem < 0) {
+      throw new InvalidInventarioError('Mínimo de contagem não pode ser negativo');
     }
   }
 
@@ -94,8 +103,8 @@ export class Inventario {
     }
 
     if (props.minimoContagem !== undefined) {
-      if (props.minimoContagem < 1) {
-        throw new InvalidInventarioError('Mínimo de contagem deve ser pelo menos 1');
+      if (props.minimoContagem < 0) {
+        throw new InvalidInventarioError('Mínimo de contagem não pode ser negativo');
       }
       this._minimoContagem = props.minimoContagem;
     }
@@ -142,6 +151,20 @@ export class Inventario {
     }
     this._dataTermino = null;
     this._ativo = true;
+    this._fechadoEm = null;
+    this._fechadoPor = null;
+    this._justificativaFechamento = null;
+  }
+
+  fechar(userId: string, justificativa?: string): void {
+    if (!this._ativo) {
+      throw new InvalidInventarioError('Inventário já está fechado/finalizado');
+    }
+    this._fechadoEm = new Date();
+    this._fechadoPor = userId;
+    this._justificativaFechamento = justificativa ?? null;
+    this._ativo = false;
+    this._dataTermino ??= new Date();
   }
 
   get id(): number | undefined {
@@ -194,6 +217,18 @@ export class Inventario {
 
   get lider(): string | null {
     return this._lider;
+  }
+
+  get fechadoEm(): Date | null {
+    return this._fechadoEm;
+  }
+
+  get fechadoPor(): string | null {
+    return this._fechadoPor;
+  }
+
+  get justificativaFechamento(): string | null {
+    return this._justificativaFechamento;
   }
 
   get liderNome(): string | null {

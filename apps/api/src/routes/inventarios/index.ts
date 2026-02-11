@@ -23,6 +23,9 @@ const inventarioResponseSchema = {
     cnpjLoja: { type: ['string', 'null'] },
     nomeCliente: { type: ['string', 'null'] },
     lider: { type: ['string', 'null'] },
+    fechadoEm: { type: ['string', 'null'], format: 'date-time' },
+    fechadoPor: { type: ['string', 'null'] },
+    justificativaFechamento: { type: ['string', 'null'] },
     liderNome: { type: ['string', 'null'] },
     temContagens: { type: 'boolean' },
   },
@@ -53,7 +56,7 @@ const createInventarioBodySchema = {
   properties: {
     idLoja: { type: 'integer' },
     idEmpresa: { type: 'integer' },
-    minimoContagem: { type: 'integer', minimum: 1, default: 1 },
+    minimoContagem: { type: 'integer', minimum: 0, default: 0 },
     dataInicio: { type: 'string', format: 'date-time' },
     dataTermino: { type: ['string', 'null'], format: 'date-time' },
     lote: { type: 'boolean', default: false },
@@ -68,7 +71,7 @@ const updateInventarioBodySchema = {
   properties: {
     idLoja: { type: 'integer' },
     idEmpresa: { type: 'integer' },
-    minimoContagem: { type: 'integer', minimum: 1 },
+    minimoContagem: { type: 'integer', minimum: 0 },
     dataInicio: { type: 'string', format: 'date-time' },
     dataTermino: { type: ['string', 'null'], format: 'date-time' },
     lote: { type: 'boolean' },
@@ -333,6 +336,105 @@ export default async function inventarioRoutes(fastify: FastifyInstance) {
       },
     },
     (request, reply) => controller.listDivergencias(request as any, reply)
+  );
+
+  fastify.patch(
+    '/inventarios/:id/fechar',
+    {
+      preHandler: [requireAuth, requirePermission('inventarios', 'update')],
+      schema: {
+        tags: ['Inventários'],
+        summary: 'Fechar inventário definitivamente',
+        description: 'Fecha um inventário com validação rigorosa de setores e divergências. Admins podem fazer bypass com justificativa obrigatória.',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        body: {
+          type: 'object',
+          properties: {
+            justificativa: { type: 'string', minLength: 10, description: 'Justificativa obrigatória para admin com bypass' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer' },
+              status: { type: 'string' },
+              fechadoEm: { type: 'string', format: 'date-time' },
+              fechadoPor: { type: 'string' },
+              justificativaFechamento: { type: ['string', 'null'] },
+            },
+          },
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          409: errorResponseSchema,
+          422: {
+            type: 'object',
+            properties: {
+              code: { type: 'string' },
+              message: { type: 'string' },
+              detalhes: {
+                type: 'object',
+                properties: {
+                  setoresNaoAbertos: { type: 'array', items: { type: 'string' } },
+                  setoresNaoFechados: { type: 'array', items: { type: 'string' } },
+                  divergenciasPendentes: { type: 'integer' },
+                },
+              },
+            },
+          },
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.fechar(request as any, reply)
+  );
+
+  fastify.get(
+    '/inventarios/:id/status-fechamento',
+    {
+      preHandler: [requireAuth],
+      schema: {
+        tags: ['Inventários'],
+        summary: 'Consultar status de fechamento do inventário',
+        description: 'Retorna se o inventário pode ser fechado e quais são os bloqueios pendentes',
+        security: [{ bearerAuth: [] }],
+        params: {
+          type: 'object',
+          required: ['id'],
+          properties: {
+            id: { type: 'integer' },
+          },
+        },
+        response: {
+          200: {
+            type: 'object',
+            properties: {
+              podeFechar: { type: 'boolean' },
+              bloqueios: {
+                type: 'object',
+                properties: {
+                  setoresNaoAbertos: { type: 'array', items: { type: 'string' } },
+                  setoresNaoFechados: { type: 'array', items: { type: 'string' } },
+                  divergenciasPendentes: { type: 'integer' },
+                },
+              },
+            },
+          },
+          401: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+      },
+    },
+    (request, reply) => controller.getStatusFechamento(request as any, reply)
   );
 
   fastify.post(

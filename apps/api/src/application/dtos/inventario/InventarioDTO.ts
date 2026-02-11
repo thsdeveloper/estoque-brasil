@@ -14,8 +14,8 @@ export const createInventarioSchema = z.object({
   minimoContagem: z
     .number()
     .int('Mínimo de contagem deve ser um número inteiro')
-    .min(1, 'Mínimo de contagem deve ser pelo menos 1')
-    .default(1),
+    .min(0, 'Mínimo de contagem não pode ser negativo')
+    .default(0),
   dataInicio: z
     .string({ required_error: 'Data de início é obrigatória' })
     .datetime('Data de início deve ser uma data válida'),
@@ -52,7 +52,7 @@ export const updateInventarioSchema = z.object({
   minimoContagem: z
     .number()
     .int('Mínimo de contagem deve ser um número inteiro')
-    .min(1, 'Mínimo de contagem deve ser pelo menos 1')
+    .min(0, 'Mínimo de contagem não pode ser negativo')
     .optional(),
   dataInicio: z
     .string()
@@ -68,8 +68,17 @@ export const updateInventarioSchema = z.object({
   lider: z.string().uuid('Líder deve ser um UUID válido').nullish(),
 });
 
+// Schema de validação para fechamento de inventário
+export const fecharInventarioBodySchema = z.object({
+  justificativa: z
+    .string()
+    .min(10, 'Justificativa deve ter no mínimo 10 caracteres')
+    .optional(),
+});
+
 export type CreateInventarioDTO = z.infer<typeof createInventarioSchema>;
 export type UpdateInventarioDTO = z.infer<typeof updateInventarioSchema>;
+export type FecharInventarioDTO = z.infer<typeof fecharInventarioBodySchema>;
 
 export interface InventarioResponseDTO {
   id: number;
@@ -82,6 +91,9 @@ export interface InventarioResponseDTO {
   validade: boolean;
   ativo: boolean;
   lider: string | null;
+  fechadoEm: string | null;
+  fechadoPor: string | null;
+  justificativaFechamento: string | null;
   nomeLoja: string | null;
   cnpjLoja: string | null;
   nomeCliente: string | null;
@@ -109,10 +121,40 @@ export function toInventarioResponseDTO(inventario: Inventario, temContagens = f
     validade: inventario.validade,
     ativo: inventario.ativo,
     lider: inventario.lider,
+    fechadoEm: inventario.fechadoEm?.toISOString() ?? null,
+    fechadoPor: inventario.fechadoPor,
+    justificativaFechamento: inventario.justificativaFechamento,
     nomeLoja: inventario.nomeLoja,
     cnpjLoja: inventario.cnpjLoja,
     nomeCliente: inventario.nomeCliente,
     liderNome: inventario.liderNome,
     temContagens,
+  };
+}
+
+export interface FecharInventarioResponseDTO {
+  id: number;
+  status: 'fechado';
+  fechadoEm: string;
+  fechadoPor: string;
+  justificativaFechamento: string | null;
+}
+
+export function toFecharInventarioResponseDTO(inventario: Inventario): FecharInventarioResponseDTO {
+  return {
+    id: inventario.id!,
+    status: 'fechado',
+    fechadoEm: inventario.fechadoEm!.toISOString(),
+    fechadoPor: inventario.fechadoPor!,
+    justificativaFechamento: inventario.justificativaFechamento,
+  };
+}
+
+export interface StatusFechamentoResponseDTO {
+  podeFechar: boolean;
+  bloqueios: {
+    setoresNaoAbertos: string[];
+    setoresNaoFechados: string[];
+    divergenciasPendentes: number;
   };
 }
